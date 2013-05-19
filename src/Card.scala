@@ -8,8 +8,8 @@
 class Card(n:Int) {
   def valeur:String = (n%4) match {
     case 0 => "Pique"
-    case 1 => "Trefle"
-    case 2 => "Carreau"
+    case 1 => "Carreau"
+    case 2 => "Trefle"
     case 3 => "Coeur"
   }
 
