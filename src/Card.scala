@@ -28,4 +28,6 @@ class Card(n:Int) {
     case 11 => "Dame"
     case 12 => "Roi"
   }
+
+  override def toString:String = famille+" de "+valeur
 }
