@@ -10,7 +10,7 @@ import scala.util.Random
 object Deck {
   var deck:List[Card]=List()
 
-  val sortedDeck:List[Card] = List.tabulate(52){new Card(_)}
+  val sortedDeck:List[Card] = List.tabulate(32){new Card(_)}
 
   def shuffle(deck:List[Card]):List[Card] = {
     Random.shuffle(deck)

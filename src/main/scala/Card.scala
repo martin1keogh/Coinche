@@ -6,28 +6,28 @@
  * To change this template use File | Settings | File Templates.
  */
 class Card(n:Int) {
-  def valeur:String = (n%4) match {
+  def famille:String = (n/8) match {
     case 0 => "Pique"
     case 1 => "Carreau"
     case 2 => "Trefle"
     case 3 => "Coeur"
   }
 
-  def famille:String = (n%13) match {
+  def valeur:String = (n%8) match {
     case 0 => "As"
-    case 1 => "Deux"
-    case 2 => "Trois"
-    case 3 => "Quatre"
-    case 4 => "Cinq"
-    case 5 => "Six"
-    case 6 => "Sept"
-    case 7 => "Huit"
-    case 8 => "Neuf"
-    case 9 => "Dix"
-    case 10 => "Valet"
-    case 11 => "Dame"
-    case 12 => "Roi"
+    case 1 => "Sept"
+    case 2 => "Huit"
+    case 3 => "Neuf"
+    case 4 => "Dix"
+    case 5 => "Valet"
+    case 6 => "Dame"
+    case 7 => "Roi"
   }
 
-  override def toString:String = famille+" de "+valeur
+
+  def equals(c: Card): Boolean = {
+    c.valeur == valeur && c.famille == famille
+  }
+
+  override def toString:String = valeur+" de "+famille
 }
