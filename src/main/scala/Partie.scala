@@ -33,33 +33,35 @@ object Partie {
     0
   }
 
+  case class Enchere(couleur:Int,contrat:Int,equipe:Symbol,coinche:Int)
+
   //TODO gerer les coinches
   /**
    *
-   * @return (couleur,score,equipe,coinche)
+   * @return (couleur,contrat,equipe,coinche)
    *         equipe : symbol 'NS ou 'EO
    *         coinche : 1 = pas de coinche, 2 = coinche, 4 = contre
    */
-  def enchere():Option[(Int,Int,Symbol,Int)] = {
+  def enchere():Option[Enchere] = {
 
-    var ret:Option[(Int,Int,Symbol,Int)] = None
+    var ret:Option[Enchere] = None
     var nbPasse = 0
 
     def annonceLegal(a:Int):Boolean = {
-      val annonceCourante = ret.getOrElse({(0,0,'FU,0)})._2
+      val annonceCourante = ret.getOrElse(new Enchere(0,0,'FU,0)).contrat
       //TODO gerer les capots/generales
       (a%10 == 0 && a > annonceCourante && a < 170)
     }
 
     def annonceImpossible():Boolean = {
       if (ret.isEmpty) true
-      else ret.get._2 >= 160
+      else ret.get.contrat >= 160
     }
 
     //TODO
     //TODO doit regarder que l'enchere est legale
     // renvoie : (couleur,score)
-    def effectuerEnchere():Option[(Int,Int)] = None
+    def effectuerEnchere():Option[Enchere] = None
 
 
     while ( (ret == None && nbPasse < 4) || // tant qu'il n'y pas eu d'enchere, on attend les 4 passes
@@ -71,7 +73,7 @@ object Partie {
       else {
         //une enchere a etait faite, on remet le nombre de passe a zero
         nbPasse=0
-        ret = Some(enchere.get._1,enchere.get._2,currentPlayer.Equipe,1)
+        ret = enchere
       }
       currentPlayer = nextPlayer(currentPlayer)
     }
@@ -83,11 +85,11 @@ object Partie {
    *
    * @param contrat Le contrat a realise
    * @param score Le score fait par Nord/Sud
-   * @param prisParNS true si le contrat appartient a Nord/Sud
+   * @param equipe true si le contrat appartient a Nord/Sud
    * @return
    */
-  def pointsPourNS(contrat: Int,score: Int, prisParNS: Symbol): Boolean = {
-    if (prisParNS == 'NS) score>contrat
+  def pointsPourNS(contrat: Int,score: Int, equipe: Symbol): Boolean = {
+    if (equipe == 'NS) score>contrat
     else score<contrat
   }
 
@@ -99,15 +101,20 @@ object Partie {
 
     while (scoreTotalEO < 1000 || scoreTotalNS < 1000){
 
-      // Penser a boucler tant qu'il n'y a pas d'enchere
-      // todo actually test it
-      val (couleur:Int,contrat:Int,prisParNS:Symbol,coinche:Int) = enchere().getOrElse({enchere()})
+      // boucle sur les encheres tant qu'il n'y en a pas
+      def boucleEnchere():Enchere = {
+        val e = enchere()
+        if (e.isEmpty) {deck=Deck.shuffle(deck);boucleEnchere()}
+        else e.get
+      }
+      val e = boucleEnchere()
+      val (couleur,contrat,equipe,coinche) = (e.couleur,e.contrat,e.equipe,e.coinche)
 
       val scoreFaitParNS = jouerLaMain(couleur)
 
       // scores update
 
-      if (pointsPourNS(contrat,scoreFaitParNS,prisParNS)) {
+      if (pointsPourNS(contrat,scoreFaitParNS,equipe)) {
         scoreTotalNS=scoreTotalNS+(contrat*coinche)
       }
       else scoreTotalEO=scoreTotalEO+(contrat*coinche)
