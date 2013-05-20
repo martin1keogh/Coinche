@@ -8,18 +8,5 @@
 object Main {
 
   def main(args: Array[String]) {
-    Deck.init()
-
-    for (card <- Deck.deck){
-      println(card.toString)
-    }
-
-    println("----main 1er joueur-----")
-
-    for (card <- Deck.distribution()._1){
-      println(card.toString)
-    }
-
   }
-
 }
