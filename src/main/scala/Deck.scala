@@ -20,6 +20,10 @@ object Deck {
     deck = shuffle(sortedDeck)
   }
 
+  def empty() {
+    deck = List()
+  }
+
   def distribution() = {
     val ret =
       (deck.slice(0,3)++deck.slice(12,14)++deck.slice(20,23),
