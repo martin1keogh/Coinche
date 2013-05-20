@@ -13,6 +13,16 @@ object Partie {
 
   var deck = Deck.newShuffledDeck
 
+  var dealer = j1
+  var currentPlayer = j2
+
+  def nextPlayer(j:Joueur):Joueur = j match {
+    case `j1` => j2
+    case `j2` => j3
+    case `j3` => j4
+    case `j4` => j1
+  }
+
   //TODO
   /**
    *
@@ -23,19 +33,45 @@ object Partie {
     0
   }
 
-  //TODO
+  //TODO gerer les coinches
   /**
    *
    * @return (couleur,score,equipe,coinche)
-   *         equipe : true pour NS, false pour EO
+   *         equipe : symbol 'NS ou 'EO
    *         coinche : 1 = pas de coinche, 2 = coinche, 4 = contre
    */
-  def enchere():(Int,Int,Boolean,Int) = {
+  def enchere():Option[(Int,Int,Symbol,Int)] = {
+    var ret:Option[(Int,Int,Symbol,Int)] = None
+    var annonce = 70
+    var couleur = -1
+    var nbPasse = 0
+
+    def annonceLegal(a:Int):Boolean = {
+      //TODO gerer les capots/generales
+      (a%10 == 0 && a > annonce && a < 170)
+    }
+    def annonceImpossible():Boolean = annonce >= 160
+
     //TODO
-    // Penser a boucler tant qu'il n'y a pas d'enchere
-    // Penser a melanger le jeu
-    // Penser a changer le dealer
-    (80,0,true,0)
+    //TODO doit regarder que l'enchere est legale
+    // renvoie : (couleur,score)
+    def effectuerEnchere():Option[(Int,Int)] = None
+
+    while ( (ret == None && nbPasse < 4) || // tant qu'il n'y pas eu d'enchere, on attend les 4 passes
+            (nbPasse < 3) ||                // apres, 3 passes finissent les encheres
+            (!annonceImpossible())          // ou l'impossibilite de monter
+          ){
+      val enchere = effectuerEnchere()
+      if (enchere.isEmpty) nbPasse=nbPasse+1
+      else {
+        //une enchere a etait faite, on remet le nombre de passe a zero
+        nbPasse=0
+        ret = Some(enchere.get._1,enchere.get._2,currentPlayer.Equipe,1)
+      }
+      currentPlayer = nextPlayer(currentPlayer)
+    }
+
+    ret
   }
 
   /**
@@ -45,8 +81,8 @@ object Partie {
    * @param prisParNS true si le contrat appartient a Nord/Sud
    * @return
    */
-  def pointsPourNS(contrat: Int,score: Int, prisParNS: Boolean): Boolean = {
-    if (prisParNS) score>contrat
+  def pointsPourNS(contrat: Int,score: Int, prisParNS: Symbol): Boolean = {
+    if (prisParNS == 'NS) score>contrat
     else score<contrat
   }
 
@@ -57,6 +93,7 @@ object Partie {
 
     while (scoreTotalEO < 1000 || scoreTotalNS < 1000){
 
+      // Penser a boucler tant qu'il n'y a pas d'enchere
       val (couleur,contrat,prisParNS,coinche) = enchere()
 
       val scoreFaitParNS = jouerLaMain(couleur)
