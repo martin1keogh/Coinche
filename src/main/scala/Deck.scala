@@ -10,13 +10,7 @@ import scala.util.Random
 object Deck {
   var deck:List[Card]=List()
 
-  def sortedDeck:List[Card] = {
-    var tmpDeck:List[Card] = List()
-    for (i <- 0 to 51) {
-      tmpDeck = (new Card(i))::tmpDeck
-    }
-    tmpDeck
-  }
+  val sortedDeck:List[Card] = List.tabulate(52){new Card(_)}
 
   def shuffle(deck:List[Card]):List[Card] = {
     Random.shuffle(deck)
@@ -33,7 +27,7 @@ object Deck {
        deck.slice(6,9)++deck.slice(16,18)++deck.slice(26,29),
        deck.slice(9,12)++deck.slice(18,20)++deck.slice(29,32)
       )
-//  Deck is now empty
+//  deck is now empty
 //  It'll be filled as the game goes on
     deck = List()
     ret

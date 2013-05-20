@@ -14,6 +14,12 @@ object Main {
       println(card.toString)
     }
 
+    println("----main 1er joueur-----")
+
+    for (card <- Deck.distribution()._1){
+      println(card.toString)
+    }
+
   }
 
 }
