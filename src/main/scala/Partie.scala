@@ -94,7 +94,8 @@ object Partie {
     while (scoreTotalEO < 1000 || scoreTotalNS < 1000){
 
       // Penser a boucler tant qu'il n'y a pas d'enchere
-      val (couleur,contrat,prisParNS,coinche) = enchere()
+      // todo actually test it
+      val (couleur:Int,contrat:Int,prisParNS:Symbol,coinche:Int) = enchere().getOrElse({enchere()})
 
       val scoreFaitParNS = jouerLaMain(couleur)
 
