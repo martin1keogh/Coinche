@@ -48,7 +48,7 @@ object Partie {
     var nbPasse = 0
 
     def annonceLegal(a:Int):Boolean = {
-      val annonceCourante = ret.getOrElse(new Enchere(0,0,'FU,0)).contrat
+      val annonceCourante = ret.getOrElse(new Enchere(0,70,'FU,0)).contrat
       //TODO gerer les capots/generales
       (a%10 == 0 && a > annonceCourante && a < 170)
     }
@@ -60,10 +60,19 @@ object Partie {
 
     //TODO
     //TODO doit regarder que l'enchere est legale
-    // renvoie : (couleur,score)
-    def effectuerEnchere():Option[Enchere] = None
+    def effectuerEnchere():Option[Enchere] = {
+      var ret:Option[Enchere] = None
+      val couleur = Reader.getCouleur
+      if (!(couleur == 0)) {
+        var contrat = -1
+        do contrat = Reader.getContrat while (!annonceLegal(contrat))
+        ret = Some(new Enchere(couleur-1,contrat,currentPlayer.Equipe,1))
+      }
+      ret
+    }
 
 
+    // Boucle principale lors des encheres
     while ( (ret == None && nbPasse < 4) || // tant qu'il n'y pas eu d'enchere, on attend les 4 passes
             (nbPasse < 3) ||                // apres, 3 passes finissent les encheres
             (!annonceImpossible())          // ou l'impossibilite de monter
@@ -104,7 +113,11 @@ object Partie {
       // boucle sur les encheres tant qu'il n'y en a pas
       def boucleEnchere():Enchere = {
         val e = enchere()
-        if (e.isEmpty) {deck=Deck.shuffle(deck);boucleEnchere()}
+        if (e.isEmpty) {
+          Reader.pasDePrise
+          deck=Deck.shuffle(deck)
+          boucleEnchere()
+        }
         else e.get
       }
       val e = boucleEnchere()
