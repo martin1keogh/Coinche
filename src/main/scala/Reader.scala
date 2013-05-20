@@ -1,5 +1,3 @@
-import _root_.Partie.Enchere
-
 /**
  * Created with IntelliJ IDEA.
  * User: martin
@@ -39,7 +37,9 @@ object Reader {
   }
 
   def enchereFinie(e:Enchere) {
-    println()
+    println("--------------Fin des encheres ----------------")
+    println(e)
+    println("-----------------------------------------------")
   }
 
 }

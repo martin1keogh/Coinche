@@ -5,7 +5,9 @@
  * Time: 17:16
  * To change this template use File | Settings | File Templates.
  */
+
 object Partie {
+
   val (j1,j2,j3,j4) = (new Joueur(0),
                        new Joueur(1),
                        new Joueur(2),
@@ -33,63 +35,6 @@ object Partie {
     0
   }
 
-  case class Enchere(couleur:Int,contrat:Int,equipe:Symbol,coinche:Int)
-
-  //TODO gerer les coinches
-  /**
-   *
-   * @return (couleur,contrat,equipe,coinche)
-   *         equipe : symbol 'NS ou 'EO
-   *         coinche : 1 = pas de coinche, 2 = coinche, 4 = contre
-   */
-  def enchere():Option[Enchere] = {
-
-    var ret:Option[Enchere] = None
-    var nbPasse = 0
-
-    def annonceLegal(a:Int):Boolean = {
-      val annonceCourante = ret.getOrElse(new Enchere(0,70,'FU,0)).contrat
-      //TODO gerer les capots/generales
-      (a%10 == 0 && a > annonceCourante && a < 170)
-    }
-
-    def annonceImpossible():Boolean = {
-      if (ret.isEmpty) true
-      else ret.get.contrat >= 160
-    }
-
-    //TODO
-    //TODO doit regarder que l'enchere est legale
-    def effectuerEnchere():Option[Enchere] = {
-      var ret:Option[Enchere] = None
-      val couleur = Reader.getCouleur
-      if (!(couleur == 0)) {
-        var contrat = -1
-        do contrat = Reader.getContrat while (!annonceLegal(contrat))
-        ret = Some(new Enchere(couleur-1,contrat,currentPlayer.Equipe,1))
-      }
-      ret
-    }
-
-
-    // Boucle principale lors des encheres
-    while ( (ret == None && nbPasse < 4) || // tant qu'il n'y pas eu d'enchere, on attend les 4 passes
-            (nbPasse < 3) ||                // apres, 3 passes finissent les encheres
-            (!annonceImpossible())          // ou l'impossibilite de monter
-          ){
-      val enchere = effectuerEnchere()
-      if (enchere.isEmpty) nbPasse=nbPasse+1
-      else {
-        //une enchere a etait faite, on remet le nombre de passe a zero
-        nbPasse=0
-        ret = enchere
-      }
-      currentPlayer = nextPlayer(currentPlayer)
-    }
-
-    ret
-  }
-
   /**
    *
    * @param contrat Le contrat a realise
@@ -112,15 +57,16 @@ object Partie {
 
       // boucle sur les encheres tant qu'il n'y en a pas
       def boucleEnchere():Enchere = {
-        val e = enchere()
+        val e = Enchere.enchere()
         if (e.isEmpty) {
-          Reader.pasDePrise
+          Reader.pasDePrise()
           deck=Deck.shuffle(deck)
           boucleEnchere()
         }
         else e.get
       }
       val e = boucleEnchere()
+      Reader.enchereFinie(e)
       val (couleur,contrat,equipe,coinche) = (e.couleur,e.contrat,e.equipe,e.coinche)
 
       val scoreFaitParNS = jouerLaMain(couleur)
