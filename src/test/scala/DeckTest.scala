@@ -1,4 +1,5 @@
 import org.scalatest.FlatSpec
+import scala.util.Random
 
 /**
  * Created with IntelliJ IDEA.
@@ -35,5 +36,9 @@ class DeckTest extends FlatSpec{
     val (p1,p2,p3,p4) = Deck.distribution(deck)
     val total = p1++p2++p3++p4
     assert(total.distinct.size == p1.size+p2.size+p3.size+p4.size)
+  }
+  "After cutting a deck, it" should "still have the same number of cards" in {
+    val deck = Deck.newShuffledDeck
+    assert(Deck.coupe(deck,Random.nextInt(25)+4).get.size == deck.size)
   }
 }
