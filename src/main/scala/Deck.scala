@@ -18,6 +18,11 @@ object Deck {
     Random.shuffle(deck)
   }
 
+  /**
+   *
+   * @param deck Le deck a distribue
+   * @return Un 4-Tuples de 4*8 cartes
+   */
   def distribution(deck:List[Card]) = {
       (deck.slice(0,3)++deck.slice(12,14)++deck.slice(20,23),
        deck.slice(3,6)++deck.slice(14,16)++deck.slice(23,26),
@@ -35,6 +40,7 @@ object Deck {
    * @return Le deck avec les cartes coupees mises, dans le meme ordre,
    *         dessous du paquet
    */
+  @throws[IllegalArgumentException]("Si le nombre de carte a couper est invalide")
   def coupe(deck:List[Card],nbCartesCoupees:Int):Option[List[Card]] = {
     require(nbCartesCoupees > 3 && nbCartesCoupees < 29,"Erreur : coupe invalide")
     Some(deck.takeRight(nbCartesCoupees)++deck.take(32-nbCartesCoupees))
