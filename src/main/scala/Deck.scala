@@ -19,13 +19,25 @@ object Deck {
   }
 
   def distribution(deck:List[Card]) = {
-    val ret =
       (deck.slice(0,3)++deck.slice(12,14)++deck.slice(20,23),
        deck.slice(3,6)++deck.slice(14,16)++deck.slice(23,26),
        deck.slice(6,9)++deck.slice(16,18)++deck.slice(26,29),
        deck.slice(9,12)++deck.slice(18,20)++deck.slice(29,32)
       )
-    ret
+  }
+
+  /**
+   *
+   * @param deck Deck a couper
+   * @param nbCartesCoupees Nombre de cartes dans le paquet superieurs,
+   *                        doit etre superieur strict a 3 et
+   *                        et inferieur strict a 29
+   * @return Le deck avec les cartes coupees mises, dans le meme ordre,
+   *         dessous du paquet
+   */
+  def coupe(deck:List[Card],nbCartesCoupees:Int):Option[List[Card]] = {
+    require(nbCartesCoupees > 3 && nbCartesCoupees < 29,"Erreur : coupe invalide")
+    Some(deck.takeRight(nbCartesCoupees)++deck.take(32-nbCartesCoupees))
   }
 
 }
