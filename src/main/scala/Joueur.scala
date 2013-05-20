@@ -7,7 +7,7 @@
  */
 class Joueur(id:Int) {
 
-  def idPartenaire = (id+2)%4
+  val idPartenaire = (id+2)%4
 
   override def toString = id match {
     case 0 => "Sud" // le joueur
