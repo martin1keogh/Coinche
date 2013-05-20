@@ -42,8 +42,8 @@ object Partie {
    * @param equipe true si le contrat appartient a Nord/Sud
    * @return
    */
-  def pointsPourNS(contrat: Int,score: Int, equipe: Symbol): Boolean = {
-    if (equipe == 'NS) score>contrat
+  def pointsPourNS(contrat: Int,score: Int, id: Int): Boolean = {
+    if (id%2==0) score>contrat
     else score<contrat
   }
 
@@ -67,7 +67,7 @@ object Partie {
       }
       val e = boucleEnchere()
       Reader.enchereFinie(e)
-      val (couleur,contrat,equipe,coinche) = (e.couleur,e.contrat,e.equipe,e.coinche)
+      val (couleur,contrat,equipe,coinche) = (e.couleur,e.contrat,e.id,e.coinche)
 
       val scoreFaitParNS = jouerLaMain(couleur)
 
@@ -77,6 +77,10 @@ object Partie {
         scoreTotalNS=scoreTotalNS+(contrat*coinche)
       }
       else scoreTotalEO=scoreTotalEO+(contrat*coinche)
+
+      // on fait tourner les roles
+      dealer = nextPlayer(dealer)
+      currentPlayer = nextPlayer(dealer)
     }
 
     // fin de la partie

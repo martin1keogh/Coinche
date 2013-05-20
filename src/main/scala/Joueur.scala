@@ -5,7 +5,7 @@
  * Time: 21:10
  * To change this template use File | Settings | File Templates.
  */
-class Joueur(id:Int) {
+case class Joueur(id:Int) {
 
   val idPartenaire = (id+2)%4
 

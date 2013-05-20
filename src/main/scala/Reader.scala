@@ -32,6 +32,10 @@ object Reader {
     contrat
   }
 
+  def tourJoueurEnchere(j:Joueur) {
+    println(">>>> A "+j+" de parler")
+  }
+
   def pasDePrise() {
     println("Pas de Prise !")
   }
