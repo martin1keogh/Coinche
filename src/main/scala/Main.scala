@@ -8,5 +8,6 @@
 object Main {
 
   def main(args: Array[String]) {
+    Partie.start()
   }
 }
