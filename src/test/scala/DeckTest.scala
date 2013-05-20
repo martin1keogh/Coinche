@@ -15,7 +15,7 @@ class DeckTest extends FlatSpec{
   it must "have only distinct cards" in{
     assert(Deck.sortedDeck.size == Deck.sortedDeck.distinct.size)
   }
-  "A shuffle deck" must "have exactly 32 cards" in{
+  "A shuffled deck" must "have exactly 32 cards" in{
     val deck = Deck.newShuffledDeck
     assert(deck.size == 32)
   }
