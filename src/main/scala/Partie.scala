@@ -41,21 +41,26 @@ object Partie {
    *         coinche : 1 = pas de coinche, 2 = coinche, 4 = contre
    */
   def enchere():Option[(Int,Int,Symbol,Int)] = {
+
     var ret:Option[(Int,Int,Symbol,Int)] = None
-    var annonce = 70
-    var couleur = -1
     var nbPasse = 0
 
     def annonceLegal(a:Int):Boolean = {
+      val annonceCourante = ret.getOrElse({(0,0,'FU,0)})._2
       //TODO gerer les capots/generales
-      (a%10 == 0 && a > annonce && a < 170)
+      (a%10 == 0 && a > annonceCourante && a < 170)
     }
-    def annonceImpossible():Boolean = annonce >= 160
+
+    def annonceImpossible():Boolean = {
+      if (ret.isEmpty) true
+      else ret.get._2 >= 160
+    }
 
     //TODO
     //TODO doit regarder que l'enchere est legale
     // renvoie : (couleur,score)
     def effectuerEnchere():Option[(Int,Int)] = None
+
 
     while ( (ret == None && nbPasse < 4) || // tant qu'il n'y pas eu d'enchere, on attend les 4 passes
             (nbPasse < 3) ||                // apres, 3 passes finissent les encheres
@@ -87,6 +92,7 @@ object Partie {
   }
 
   def start() {
+
     // reset des scores et du jeu
     deck = Deck.newShuffledDeck
     var (scoreTotalEO,scoreTotalNS) = (0,0)
