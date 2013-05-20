@@ -6,22 +6,26 @@
  * To change this template use File | Settings | File Templates.
  */
 class Card(n:Int) {
-  def famille:String = (n/8) match {
+  val famille:Int = (n/8)
+
+  val valeur:Int = (n%8)
+
+  def familleToString:String = famille match {
     case 0 => "Pique"
     case 1 => "Carreau"
     case 2 => "Trefle"
     case 3 => "Coeur"
   }
 
-  def valeur:String = (n%8) match {
-    case 0 => "As"
-    case 1 => "Sept"
-    case 2 => "Huit"
-    case 3 => "Neuf"
-    case 4 => "Dix"
-    case 5 => "Valet"
-    case 6 => "Dame"
-    case 7 => "Roi"
+  def valeurToString:String = valeur match {
+    case 0 => "Sept"
+    case 1 => "Huit"
+    case 2 => "Neuf"
+    case 3 => "Valet"
+    case 4 => "Dame"
+    case 5 => "Roi"
+    case 6 => "Dix"
+    case 7 => "As"
   }
 
 
@@ -29,5 +33,5 @@ class Card(n:Int) {
     c.valeur == valeur && c.famille == famille
   }
 
-  override def toString:String = valeur+" de "+famille
+  override def toString:String = valeurToString+" de "+familleToString
 }
