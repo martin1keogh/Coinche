@@ -1,5 +1,7 @@
 package GameLogic
 
+import UI.Reader
+
 /**
  * Created with IntelliJ IDEA.
  * User: martin
