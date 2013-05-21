@@ -16,6 +16,8 @@ case class Joueur(id:Int) {
     else 'EO
   }
 
+  var main = List[Card]()
+
   override def toString = id match {
     case 0 => "Sud" // le joueur
     case 1 => "Ouest"
