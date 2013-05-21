@@ -42,8 +42,16 @@ object Reader {
       case "h" => printHelp()
       case "l" => printListEnchere()
       case "s" => printScores()
+      case "c" => printCartes()
       case _ => ()
     }
+  }
+
+  def printCartes() {
+    println("----------------------------------")
+    println(Partie.currentPlayer.main)
+    println("----------------------------------")
+
   }
 
   def printListEnchere() {
@@ -60,6 +68,7 @@ object Reader {
     println("l/ liste des precedentes encheres")
     println("h/ afficher cette aide")
     println("s/ voir les scores")
+    println("c/ voir ses cartes")
     println("----------------------------------")
   }
 
