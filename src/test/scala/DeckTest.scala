@@ -1,3 +1,4 @@
+import GameLogic.Deck
 import org.scalatest.FlatSpec
 import scala.util.Random
 

@@ -1,6 +1,6 @@
 package GameLogic
 
-import GameLogic.{Joueur, Enchere, Deck}
+import UI.Reader
 
 /**
  * Created with IntelliJ IDEA.
