@@ -39,6 +39,9 @@ case class Enchere(couleur:Int,contrat:Int,id:Int,coinche:Int){
 
 
 object Enchere {
+
+  var listEnchere:List[Enchere] = List()
+
   //TODO gerer les coinches
   /**
    *
@@ -70,6 +73,7 @@ object Enchere {
         do contrat = Reader.getContrat while (!annonceLegal(contrat))
         ret = Some(new Enchere(couleur-1,contrat,Partie.currentPlayer.id,1))
       }
+      if (ret.nonEmpty) listEnchere=ret.get::listEnchere
       ret
     }
 
@@ -86,6 +90,7 @@ object Enchere {
       }
       Partie.currentPlayer = Partie.nextPlayer(Partie.currentPlayer)
     }
+    listEnchere = List()
     ret
   }
 }

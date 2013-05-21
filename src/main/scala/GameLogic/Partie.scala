@@ -22,6 +22,8 @@ object Partie {
   var dealer = j1
   var currentPlayer = j2
 
+  var (scoreTotalEO,scoreTotalNS) = (0,0)
+
   def nextPlayer(j:Joueur):Joueur = j match {
     case `j1` => j2
     case `j2` => j3
@@ -55,7 +57,7 @@ object Partie {
 
     // reset des scores et du jeu
     deck = Deck.newShuffledDeck
-    var (scoreTotalEO,scoreTotalNS) = (0,0)
+    scoreTotalEO = 0;scoreTotalNS = 0
 
     while (scoreTotalEO < 1000 || scoreTotalNS < 1000){
 
@@ -87,6 +89,7 @@ object Partie {
       currentPlayer = nextPlayer(dealer)
     }
 
+    //todo passer ca dans la partie UI
     // fin de la partie
     if (scoreTotalEO > 1000) println("GG Est Ouest")
     if (scoreTotalNS > 1000) println("GG Nord Sud")
