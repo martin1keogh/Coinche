@@ -11,16 +11,21 @@ import GameLogic.{Joueur, Enchere}
  */
 object Reader {
 
+  def printHelp() {
+    println("----------------------------------")
+    println("Aide de jeu :")
+    println("vide pour l'instant, so go die")
+    println("----------------------------------")
+  }
+
   def getCouleur:Int = {
     var couleur = -1
     do {
-      println("Quelle couleur (0 pour passer) ?")
+      println("Quelle couleur (0 pour passer, h pour l'aide) ?")
       println("1/Pique;2/Carreau;3/Trefle;4/Coeur;5/Tout atout;6/Sans Atout")
-      couleur = try {
-        readInt()
-      } catch {
-        case e:NumberFormatException => -1
-      }
+      val c = readChar()
+      if (c == 'h') printHelp()
+      couleur = c.asDigit
     } while (couleur < 0 || couleur > 6)
     couleur
   }
@@ -28,12 +33,10 @@ object Reader {
   def getContrat:Int = {
     var contrat = -1
     println("Quelle annonce ?")
-    contrat = try {
-      readInt()
-    } catch {
-      case e:NumberFormatException => -1
-    }
-    contrat
+    val c = readLine()
+    if (c == "h") printHelp()
+    try {c.toInt}
+    catch {case e:NumberFormatException => -1}
   }
 
   def tourJoueurEnchere(j:Joueur) {
