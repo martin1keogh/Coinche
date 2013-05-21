@@ -1,6 +1,6 @@
 package UI
 
-import GameLogic.{Joueur, Enchere}
+import GameLogic.{Partie, Joueur, Enchere}
 
 /**
  * Created with IntelliJ IDEA.
@@ -11,32 +11,63 @@ import GameLogic.{Joueur, Enchere}
  */
 object Reader {
 
-  def printHelp() {
-    println("----------------------------------")
-    println("Aide de jeu :")
-    println("vide pour l'instant, so go die")
-    println("----------------------------------")
-  }
-
   def getCouleur:Int = {
     var couleur = -1
     do {
-      println("Quelle couleur (0 pour passer, h pour l'aide) ?")
+      println("Quelle couleur (entree pour passer, h pour l'aide) ?")
       println("1/Pique;2/Carreau;3/Trefle;4/Coeur;5/Tout atout;6/Sans Atout")
-      val c = readChar()
-      if (c == 'h') printHelp()
-      couleur = c.asDigit
+      couleur = try {
+        val c = readLine()
+        printSmth(c)
+        if (c == "") 0 // tres sale,permet de gerer le <entree> pour passer son tour
+        else c.toInt
+      }
+      catch {
+        case e:NumberFormatException => -1
+      }
     } while (couleur < 0 || couleur > 6)
     couleur
   }
 
   def getContrat:Int = {
-    var contrat = -1
     println("Quelle annonce ?")
     val c = readLine()
-    if (c == "h") printHelp()
+    printSmth(c)
     try {c.toInt}
     catch {case e:NumberFormatException => -1}
+  }
+
+  def printSmth(s:String) {
+    s match {
+      case "h" => printHelp()
+      case "l" => printListEnchere()
+      case "s" => printScores()
+      case _ => ()
+    }
+  }
+
+  def printListEnchere() {
+    println("----------------------------------")
+    println("liste de precedentes annonces :")
+    Enchere.listEnchere.foreach(println(_))
+    println()
+    println("----------------------------------")
+  }
+
+  def printHelp() {
+    println("----------------------------------")
+    println("Aide de jeu :")
+    println("l/ liste des precedentes encheres")
+    println("h/ afficher cette aide")
+    println("s/ voir les scores")
+    println("----------------------------------")
+  }
+
+  def printScores() {
+    println("----------------------------------")
+    println("Score Nord/Sud : "+Partie.scoreTotalNS)
+    println("Score Est/Ouest : "+Partie.scoreTotalEO)
+    println("----------------------------------")
   }
 
   def tourJoueurEnchere(j:Joueur) {
