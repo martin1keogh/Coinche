@@ -1,3 +1,5 @@
+package GameLogic
+
 /**
  * Created with IntelliJ IDEA.
  * User: martin

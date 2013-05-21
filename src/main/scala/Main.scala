@@ -1,3 +1,5 @@
+import GameLogic.Partie
+
 /**
  * Created with IntelliJ IDEA.
  * User: martin

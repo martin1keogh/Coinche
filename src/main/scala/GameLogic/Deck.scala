@@ -1,3 +1,6 @@
+package GameLogic
+
+import GameLogic.Card
 import scala.util.Random
 
 /**

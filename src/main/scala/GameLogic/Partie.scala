@@ -1,3 +1,7 @@
+package GameLogic
+
+import GameLogic.{Joueur, Enchere, Deck}
+
 /**
  * Created with IntelliJ IDEA.
  * User: martin
@@ -39,7 +43,7 @@ object Partie {
    *
    * @param contrat Le contrat a realise
    * @param score Le score fait par Nord/Sud
-   * @param equipe true si le contrat appartient a Nord/Sud
+   * @param id 0 ou 2 si le contrat appartient a Nord/Sud
    * @return
    */
   def pointsPourNS(contrat: Int,score: Int, id: Int): Boolean = {

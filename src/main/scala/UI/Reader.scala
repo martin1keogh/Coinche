@@ -1,3 +1,7 @@
+package UI
+
+import GameLogic.{Joueur, Enchere}
+
 /**
  * Created with IntelliJ IDEA.
  * User: martin
