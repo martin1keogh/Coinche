@@ -11,16 +11,18 @@ import GameLogic.{Partie, Joueur, Enchere,Card}
  */
 object Reader {
 
+  @throws[Exception]("Fin de la partie.")
   def getCouleur:Int = {
     var couleur = -1
     do {
-      println("Quelle couleur (entree pour passer, h pour l'aide) ?")
+      println("Quelle couleur (entree pour passer, h pour l'aide, quit pour quitter) ?")
       println("1/Pique;2/Carreau;3/Trefle;4/Coeur;5/Tout atout;6/Sans Atout")
       couleur = try {
         val c = readLine()
         printSmth(c)
         println()
         if (c == "") 0 // tres sale,permet de gerer le <entree> pour passer son tour
+        else if (c == "quit") sys.exit()
         else c.toInt
       }
       catch {
