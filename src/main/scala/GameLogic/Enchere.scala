@@ -45,9 +45,9 @@ object Enchere {
   //TODO gerer les coinches
   /**
    *
-   * @return (couleur,contrat,id,coinche)
-   *         id : symbol 'NS ou 'EO
-   *         coinche : 1 = pas de coinche, 2 = coinche, 4 = contre
+   * @return Option sur enchere : (couleur,contrat,id,coinche)
+   *         id : 0 pour sud, 1 pour ouest, 2 pour nord, 3 pour est
+   *         coinche : 1 = pas de coinche, 2 = coinché, 4 = contré
    */
   def enchere():Option[Enchere] = {
 
