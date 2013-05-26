@@ -1,6 +1,6 @@
 package UI
 
-import GameLogic.{Partie, Joueur, Enchere}
+import GameLogic.{Partie, Joueur, Enchere,Card}
 
 /**
  * Created with IntelliJ IDEA.
@@ -19,6 +19,7 @@ object Reader {
       couleur = try {
         val c = readLine()
         printSmth(c)
+        println()
         if (c == "") 0 // tres sale,permet de gerer le <entree> pour passer son tour
         else c.toInt
       }
@@ -33,6 +34,7 @@ object Reader {
     println("Quelle annonce ?")
     val c = readLine()
     printSmth(c)
+    println()
     try {c.toInt}
     catch {case e:NumberFormatException => -1}
   }
@@ -47,9 +49,19 @@ object Reader {
     }
   }
 
+  def printFamille(famille:List[Card]) {
+    val couleur = famille.head.familleToString
+    val valeurs = famille.map(_.valeurToString).mkString(", ")
+    println(couleur+" : "+valeurs)
+  }
+
   def printCartes() {
     println("----------------------------------")
-    println(Partie.currentPlayer.main)
+    val main = Partie.currentPlayer.main
+    val listCartesParFamille = main.groupBy(_.famille)
+    listCartesParFamille.foreach({famille =>
+      printFamille(famille._2)
+    })
     println("----------------------------------")
 
   }
