@@ -71,7 +71,7 @@ object Reader {
   def printListEnchere() {
     println("----------------------------------")
     println("liste de precedentes annonces :")
-    Enchere.listEnchere.foreach(println(_))
+    Enchere.listEnchere.reverse.foreach(println(_))
     println()
     println("----------------------------------")
   }
