@@ -68,10 +68,10 @@ object Partie {
 
       // distribution des cartes
       val (m1,m2,m3,m4) = Deck.distribution(deck)
-      dealer.main = m4
-      nextPlayer(dealer).main = m1
-      nextPlayer(nextPlayer(dealer)).main = m2
-      nextPlayer(nextPlayer(nextPlayer(dealer))).main = m3
+      dealer.main = Deck.trierMain(m4)
+      nextPlayer(dealer).main = Deck.trierMain(m1)
+      nextPlayer(nextPlayer(dealer)).main = Deck.trierMain(m2)
+      nextPlayer(nextPlayer(nextPlayer(dealer))).main = Deck.trierMain(m3)
       //TODO trouver une facon moins moche de faire ca
 
 

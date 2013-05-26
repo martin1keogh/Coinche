@@ -35,6 +35,16 @@ object Deck {
 
   /**
    *
+   * @param main La main a trier
+   * @return La main trier, l'ordre des familles est quelconque,
+   *         l'ordre dans une famille est sans-atout
+   */
+  def trierMain(main:List[Card]):List[Card] = {
+    main.sortBy({card => (card.famille,-card.valeur)})
+  }
+
+  /**
+   *
    * @param deck Deck a couper
    * @param nbCartesCoupees Nombre de cartes dans le paquet superieurs,
    *                        doit etre superieur strict a 3 et
