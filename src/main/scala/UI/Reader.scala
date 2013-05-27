@@ -1,6 +1,6 @@
 package UI
 
-import GameLogic.{Partie, Joueur, Enchere,Card}
+import GameLogic.{Partie,Card}
 
 /**
  * Created with IntelliJ IDEA.
@@ -19,7 +19,7 @@ object Reader {
       println("1/Pique;2/Carreau;3/Trefle;4/Coeur;5/Tout atout;6/Sans Atout")
       couleur = try {
         val c = readLine()
-        printSmth(c)
+        Printer.printSmth(c)
         println()
         if (c == "") 0 // tres sale,permet de gerer le <entree> pour passer son tour
         else if (c == "quit") sys.exit()
@@ -35,76 +35,15 @@ object Reader {
   def getContrat:Int = {
     println("Quelle annonce ?")
     val c = readLine()
-    printSmth(c)
+    Printer.printSmth(c)
     println()
     try {c.toInt}
     catch {case e:NumberFormatException => -1}
   }
 
-  def printSmth(s:String) {
-    s match {
-      case "h" => printHelp()
-      case "l" => printListEnchere()
-      case "s" => printScores()
-      case "c" => printCartes()
-      case _ => ()
-    }
+  def getCard(jouables:List[Card],autres:List[Card]):Card = {
+    Partie.currentPlayer.main.head
   }
 
-  def printFamille(famille:List[Card]) {
-    val couleur = famille.head.familleToString
-    val valeurs = famille.map(_.valeurToString).mkString(", ")
-    println(couleur+" : "+valeurs)
-  }
-
-  def printCartes() {
-    println("----------------------------------")
-    val main = Partie.currentPlayer.main
-    val listCartesParFamille = main.groupBy(_.famille)
-    listCartesParFamille.foreach({famille =>
-      printFamille(famille._2)
-    })
-    println("----------------------------------")
-
-  }
-
-  def printListEnchere() {
-    println("----------------------------------")
-    println("liste de precedentes annonces :")
-    Enchere.listEnchere.reverse.foreach(println(_))
-    println()
-    println("----------------------------------")
-  }
-
-  def printHelp() {
-    println("----------------------------------")
-    println("Aide de jeu :")
-    println("l/ liste des precedentes encheres")
-    println("h/ afficher cette aide")
-    println("s/ voir les scores")
-    println("c/ voir ses cartes")
-    println("----------------------------------")
-  }
-
-  def printScores() {
-    println("----------------------------------")
-    println("Score Nord/Sud : "+Partie.scoreTotalNS)
-    println("Score Est/Ouest : "+Partie.scoreTotalEO)
-    println("----------------------------------")
-  }
-
-  def tourJoueurEnchere(j:Joueur) {
-    println(">>>> A "+j+" de parler")
-  }
-
-  def pasDePrise() {
-    println("Pas de Prise !")
-  }
-
-  def enchereFinie(e:Enchere) {
-    println("--------------Fin des encheres ----------------")
-    println(e)
-    println("-----------------------------------------------")
-  }
 
 }

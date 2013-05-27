@@ -1,6 +1,6 @@
 package GameLogic
 
-import UI.Reader
+import UI.{Reader,Printer}
 
 /**
  * Created with IntelliJ IDEA.
@@ -80,7 +80,7 @@ object Enchere {
     // Boucle principale lors des encheres
     while ( (!annonceImpossible() && (nbPasse < 3) // apres 3 passes on finit les encheres// on arrete les annonces si on ne peut plus monter
             || (ret == None && nbPasse == 3))){   // sauf s'il n'y a pas eu d'annonce,auquel cas on attend le dernier joueur
-      Reader.tourJoueurEnchere(Partie.currentPlayer)
+      Printer.tourJoueurEnchere(Partie.currentPlayer)
       val enchere = effectuerEnchere()
       if (enchere.isEmpty) nbPasse=nbPasse+1
       else {

@@ -1,6 +1,6 @@
 package GameLogic
 
-import UI.Reader
+import UI.{Printer, Reader}
 
 /**
  * Created with IntelliJ IDEA.
@@ -246,7 +246,7 @@ object Partie {
       def boucleEnchere():Enchere = {
         val e = Enchere.enchere()
         if (e.isEmpty) {
-          Reader.pasDePrise()
+          Printer.pasDePrise()
           deck=Deck.shuffle(deck)
           boucleEnchere()
         }
@@ -255,7 +255,7 @@ object Partie {
       val e = boucleEnchere()
 
       //Les encheres sont finies, la main commence
-      Reader.enchereFinie(e)
+      Printer.enchereFinie(e)
       val (couleur,contrat,equipe,coinche) = (e.couleur,e.contrat,e.id,e.coinche)
       val scoreFaitParNS = jouerLaMain(couleur)
 
