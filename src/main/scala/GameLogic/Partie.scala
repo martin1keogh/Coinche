@@ -41,12 +41,12 @@ object Partie {
     // La variable currentPlayer a ete modifie pendant les encheres
     // La variable dealer ne l'a pas ete
     var premierJoueur = nextPlayer(dealer)
-    currentPlayer = premierJoueur
     var tour = 1
     var scoreNS = 0
 
     //parce que desfois l'imperatif c'est quand meme pratique
     while (tour < 9) {
+      currentPlayer = premierJoueur
       // la liste des cartes sur le pli
       var plis = List[(Joueur,Card)]()
       var couleurDemande:Option[Int] = None
@@ -54,13 +54,16 @@ object Partie {
 
 
       // Tant que tout le monde n'a pas joué
-      while (plis.length < 4){
-        currentPlayer = nextPlayer(currentPlayer)
+      while (plis.length != 4){
         val (jouables,autres) = cartesJouables(currentPlayer.main,
                                             couleurDemande,
                                             couleurAtout,
                                             plusFortAtout)
+
         val carteJoue = Reader.getCard(jouables,autres)
+
+        currentPlayer.main = currentPlayer.main.filterNot(_ == carteJoue)
+
         // Si c'est la premiere carte joue, renseigner la couleur demande
         if (couleurDemande.isEmpty) couleurDemande = Some(carteJoue.famille)
         // Si c'est un atout, on regarde s'il est meilleur
@@ -69,7 +72,9 @@ object Partie {
           if (plusFortAtout.isEmpty) plusFortAtout = Some(carteJoue)
           else if (carteJoue.stronger(couleurAtout,plusFortAtout.get).getOrElse(false)) plusFortAtout = Some(carteJoue)
         }
+
         plis = (currentPlayer,carteJoue)::plis
+        currentPlayer = nextPlayer(currentPlayer)
       }
 
       premierJoueur = vainqueur(plis.reverse,couleurAtout)
@@ -217,7 +222,7 @@ object Partie {
    */
   def pointsPourNS(contrat: Int,score: Int, id: Int): Boolean = {
     if (id%2==0) score>contrat
-    else score<contrat
+    else (162-score)<contrat
   }
 
   def start() {
