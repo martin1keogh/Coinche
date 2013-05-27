@@ -62,8 +62,26 @@ object Printer {
     println("----------------------------------")
   }
 
+
+  def printCartes(jouables:List[Card],autres:List[Card]) {
+    println("----------------------------------")
+    print("Jouables : ")
+    jouables.zipWithIndex.foreach({case (card:Card,index:Int) => print(index+"/"+card+"; ")})
+    println()
+    if (!autres.isEmpty){
+      print("Non Jouables : ")
+      autres.foreach({card => print(card.toString+" ; ")})
+      println()
+    }
+    println("----------------------------------")
+  }
+
   def tourJoueurEnchere(j:Joueur) {
     println(">>>> A "+j+" de parler")
+  }
+
+  def tourJoueur(j:Joueur){
+    println(">>>> A "+j+" de jouer")
   }
 
   def pasDePrise() {

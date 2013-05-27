@@ -42,7 +42,14 @@ object Reader {
   }
 
   def getCard(jouables:List[Card],autres:List[Card]):Card = {
-    Partie.currentPlayer.main.head
+    Printer.printCartes(jouables,autres)
+    val c = readLine()
+    if (c == "quit") sys.exit()
+    try {jouables(c.toInt)}
+    catch {
+      case e:NumberFormatException => getCard(jouables,autres)
+      case e:IndexOutOfBoundsException => getCard(jouables,autres)
+    }
   }
 
 
