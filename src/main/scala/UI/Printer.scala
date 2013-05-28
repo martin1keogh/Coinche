@@ -89,6 +89,11 @@ object Printer {
     println(">>>> A "+j+" de parler")
   }
 
+  def joueurAJoue(c:Card) {
+    println(Partie.currentPlayer+" a joué "+c)
+    println()
+  }
+
   def printEnchere(){
     println("Enchere courante : "+Partie.enchere)
   }
@@ -99,12 +104,14 @@ object Printer {
 
   def pasDePrise() {
     println("Pas de Prise !")
+    println()
   }
 
   def enchereFinie(e:Enchere) {
     println("--------------Fin des encheres ----------------")
     println(e)
     println("-----------------------------------------------")
+    println()
   }
 
 }

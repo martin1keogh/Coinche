@@ -66,6 +66,7 @@ object Partie {
 
         Printer.tourJoueur(currentPlayer)
         val carteJoue = Reader.getCard(jouables,autres)
+        Printer.joueurAJoue(carteJoue)
 
         currentPlayer.main = currentPlayer.main.filterNot(_ == carteJoue)
 
