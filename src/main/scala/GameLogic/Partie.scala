@@ -16,6 +16,7 @@ object Partie {
                        new Joueur(1),
                        new Joueur(2),
                        new Joueur(3))
+  val listJoueur = List[Joueur](j1,j2,j3,j4)
 
   var deck = Deck.newShuffledDeck
 
@@ -23,6 +24,9 @@ object Partie {
   var currentPlayer = j2
 
   var (scoreTotalEO,scoreTotalNS) = (0,0)
+
+  // contient l'enchere courante
+  var enchere:Enchere = new Enchere(0,0,0,0)
 
   def nextPlayer(j:Joueur):Joueur = j match {
     case `j1` => j2
@@ -215,16 +219,6 @@ object Partie {
     }
 
 
-  def trierMain(main:List[Card],couleurAtout:Int):List[Card] = {
-    val groupeDeFamille:Map[Int,List[Card]] = main.groupBy(_.famille)
-    def trierFamille(famille:List[Card]):List[Card] =
-      if (couleurAtout == 4) famille.sortBy(_.pointsAtout)
-      else famille match{
-      case f if (f == couleurAtout) => famille.sortBy(_.pointsAtout)
-      case _ => famille.sortBy(_.pointsClassique)
-    }
-    groupeDeFamille.flatMap({case (i,famille) => trierFamille(famille)}).toList
-  }
 
   /**
    *
@@ -270,11 +264,13 @@ object Partie {
         }
         else e.get
       }
-      val e = boucleEnchere()
+      enchere = boucleEnchere()
 
       //Les encheres sont finies, la main commence
-      Printer.enchereFinie(e)
-      val (couleur,contrat,equipe,coinche) = (e.couleur,e.contrat,e.id,e.coinche)
+      Printer.enchereFinie(enchere)
+      val (couleur,contrat,equipe,coinche) = (enchere.couleur,enchere.contrat,enchere.id,enchere.coinche)
+      listJoueur.foreach({joueur => joueur.main = Deck.trierMain(joueur.main,couleur)})
+
       val scoreFaitParNS = jouerLaMain(couleur)
 
       // scores update

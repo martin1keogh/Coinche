@@ -43,6 +43,13 @@ object Deck {
     main.sortBy({card => (card.famille,-card.valeur)})
   }
 
+  def trierMain(main:List[Card],couleurAtout:Int):List[Card] = couleurAtout match{
+    case 5 => trierMain(main)
+    case 4 => main.sortBy({card => (card.famille,-card.pointsToutAtout)})
+    case c => main.sortBy({card => if (card.famille == c) (card.famille,-card.pointsAtout)
+                                   else (card.famille,-card.pointsClassique) })
+  }
+
   /**
    *
    * @param deck Deck a couper
