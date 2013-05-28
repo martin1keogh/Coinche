@@ -64,6 +64,7 @@ object Partie {
                                             couleurAtout,
                                             plusFortAtout)
 
+        println(couleurDemande+" "+couleurAtout+" "+plusFortAtout)
         Printer.tourJoueur(currentPlayer)
         val carteJoue = Reader.getCard(jouables,autres)
         Printer.joueurAJoue(carteJoue)
@@ -84,6 +85,7 @@ object Partie {
       }
 
       premierJoueur = vainqueur(plis.reverse,couleurAtout)
+      Printer.remporte(premierJoueur,plis.map(_._2))
       if (premierJoueur.id%2 == 0) scoreNS = scoreNS + countPoints(couleurAtout,plis.unzip._2)
       tour = tour + 1
     }
@@ -192,7 +194,7 @@ object Partie {
           else {
             // on doit monter, si on peut
             val plusHaute = cartesCouleurDemande.filter(_.pointsAtout > plusForte.pointsAtout)
-            if (plusHaute.isEmpty) main.span(_.famille == couleurAtout)
+            if (plusHaute.isEmpty) main.partition(_.famille == couleurAtout)
             else (plusHaute,main.diff(plusHaute))
           }
         }
@@ -210,7 +212,7 @@ object Partie {
         if (cartesCouleurDemande.isEmpty) {
           // on doit couper, si on peut
           if (main.filter((_.famille == couleurAtout)).isEmpty) (main,List[Card]())
-          else main.span(_.famille == couleurAtout)
+          else main.partition(_.famille == couleurAtout)
         }
         // on joue la carte qu'on veut dans la famille demande
         else {
