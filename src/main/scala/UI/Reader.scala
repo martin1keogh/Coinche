@@ -45,6 +45,7 @@ object Reader {
     Printer.printCartes(jouables,autres)
     val c = readLine()
     if (c == "quit") sys.exit()
+    if (c == "e") Printer.printEnchere()
     try {jouables(c.toInt)}
     catch {
       case e:NumberFormatException => getCard(jouables,autres)

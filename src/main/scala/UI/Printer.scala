@@ -80,8 +80,12 @@ object Printer {
     println(">>>> A "+j+" de parler")
   }
 
+  def printEnchere(){
+    println("Enchere courante : "+Partie.enchere)
+  }
+
   def tourJoueur(j:Joueur){
-    println(">>>> A "+j+" de jouer")
+    println(">>>> A "+j+" de jouer (e pour voir l'enchere courante)")
   }
 
   def pasDePrise() {
