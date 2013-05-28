@@ -1,6 +1,7 @@
 package UI
 
 import GameLogic.{Joueur, Enchere, Partie, Card}
+import scala.collection.immutable.SortedMap
 
 /**
  * Created with IntelliJ IDEA.
@@ -65,13 +66,21 @@ object Printer {
 
   def printCartes(jouables:List[Card],autres:List[Card]) {
     println("----------------------------------")
-    print("Jouables : ")
-    jouables.zipWithIndex.foreach({case (card:Card,index:Int) => print(index+"/"+card+"; ")})
+    println("Jouables : ")
+    //TRES SALE
+    SortedMap(jouables.zipWithIndex.groupBy(_._1.famille).toSeq:_*).foreach(
+      {case (cle,l) =>
+        if (l.head._1.famille == Partie.enchere.couleur) print("(Atout) ") else print("        ")
+        l.foreach({case (card:Card,index:Int) => print(index+"/"+card+"; ")});println()
+      })
     println()
     if (!autres.isEmpty){
-      print("Non Jouables : ")
-      autres.foreach({card => print(card.toString+" ; ")})
-      println()
+      println("Non Jouables : ")
+      SortedMap(autres.zipWithIndex.groupBy(_._1.famille).toSeq:_*).foreach(
+      {case (cle,l) =>
+        if (l.head._1.famille == Partie.enchere.couleur) print("(Atout) ") else print("        ")
+        l.foreach({case (card:Card,index:Int) => print(index+"/"+card+"; ")});println()
+      })
     }
     println("----------------------------------")
   }
