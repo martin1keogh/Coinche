@@ -64,7 +64,6 @@ object Partie {
                                             couleurAtout,
                                             plusFortAtout)
 
-        println(couleurDemande+" "+couleurAtout+" "+plusFortAtout)
         Printer.tourJoueur(currentPlayer)
         val carteJoue = Reader.getCard(jouables,autres)
         Printer.joueurAJoue(carteJoue)

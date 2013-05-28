@@ -102,6 +102,10 @@ object Printer {
     println(">>>> A "+j+" de jouer (e pour voir l'enchere courante)")
   }
 
+  def remporte(joueur:Joueur,plis:List[Card]) {
+    println(joueur+" remporte le pli : "+plis.reverse)
+  }
+
   def pasDePrise() {
     println("Pas de Prise !")
     println()
