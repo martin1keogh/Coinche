@@ -55,6 +55,11 @@ object Partie {
       var plis = List[(Joueur,Card)]()
       var couleurDemande:Option[Int] = None
       var plusFortAtout:Option[Card] = None
+      var joueurMaitre = currentPlayer
+      // cartemaitre et plusFortAtout pourrait etre regroupé
+      // mais 1/ suppose de refactorise le code, donc fuck off
+      //      2/ suppose de checker a chaque fois si carteMaitre est un atout
+      var carteMaitre:Option[Card] = None
 
 
       // Tant que tout le monde n'a pas joué
@@ -62,8 +67,10 @@ object Partie {
         val (jouables,autres) = cartesJouables(currentPlayer.main,
                                             couleurDemande,
                                             couleurAtout,
-                                            plusFortAtout)
+                                            plusFortAtout,
+                                            joueurMaitre)
 
+        println(couleurDemande+" "+couleurAtout+" "+plusFortAtout+" "+joueurMaitre)
         Printer.tourJoueur(currentPlayer)
         val carteJoue = Reader.getCard(jouables,autres)
         Printer.joueurAJoue(carteJoue)
@@ -72,6 +79,11 @@ object Partie {
 
         // Si c'est la premiere carte joue, renseigner la couleur demande
         if (couleurDemande.isEmpty) couleurDemande = Some(carteJoue.famille)
+
+        // On met a jour la carte maitre et le joueur correspondant
+        if (carteMaitre.isEmpty) carteMaitre = Some(carteJoue)
+        else if (carteJoue.stronger(couleurAtout,carteMaitre.get).getOrElse(false)) {carteMaitre = Some(carteJoue);joueurMaitre = currentPlayer}
+
         // Si c'est un atout, on regarde s'il est meilleur
         if ((carteJoue.famille == couleurAtout) || (couleurDemande.getOrElse(-1) == carteJoue.famille && couleurAtout == 4)) {
           //premier atout
@@ -121,6 +133,7 @@ object Partie {
    * @param couleurDemande
    * @param couleurAtout
    * @param plusFortAtout
+   * @param joueurMaitre
    * @return Renvoie une paire de listes
    *         la premiere contient les cartes jouables,
    *         la deuxieme les cartes non-jouables
@@ -128,18 +141,11 @@ object Partie {
   def cartesJouables(main:List[Card],
                      couleurDemande:Option[Int],
                      couleurAtout:Int,
-                     plusFortAtout:Option[Card]):(List[Card],List[Card]) =
+                     plusFortAtout:Option[Card],
+                     joueurMaitre:Joueur):(List[Card],List[Card]) =
     (couleurDemande,couleurAtout,plusFortAtout) match {
       //premier a jouer, on fait ce qu'on veux
       case (None,_,_) => (main,List[Card]())
-
-/*      // on n'as pas la couleur demande et personne n'as mis d'atout
-      case (Some(couleurDemande),Some(couleurAtout),None) if (main.filter((_.famille == couleurDemande)).isEmpty) => {
-        val carteAtout = main.filter((_.famille == couleurAtout))
-        if (carteAtout.isEmpty) (main,List[Card]())
-        else (carteAtout,main.diff(carteAtout))
-      }
-      */
 
       // On joue a sans atout
       // le 'None' en meilleur carte sur la table est obligé
@@ -188,11 +194,15 @@ object Partie {
         val cartesCouleurDemande = main.filter((_.famille == couleurDemande))
         // on a pas  la couleur demande
         if (cartesCouleurDemande.isEmpty) {
-          // on doit couper, si on peut
-          if (main.filter((_.famille == couleurAtout)).isEmpty) (main,List[Card]())
+          // on doit couper, si on peut ou si le partenaire n'est pas maitre
+          if (main.filter((_.famille == couleurAtout)).isEmpty || joueurMaitre.id == currentPlayer.idPartenaire) {
+            // mais si on choisit de couper qd le part' est maitre, on doit monter
+            val plusBasse = main.filter(_.famille == couleurAtout).filter(_.pointsAtout < plusForte.pointsAtout)
+            (main.diff(plusBasse),plusBasse)
+          }
           else {
             // on doit monter, si on peut
-            val plusHaute = cartesCouleurDemande.filter(_.pointsAtout > plusForte.pointsAtout)
+            val plusHaute = main.filter(_.famille == couleurAtout).filter(_.pointsAtout > plusForte.pointsAtout)
             if (plusHaute.isEmpty) main.partition(_.famille == couleurAtout)
             else (plusHaute,main.diff(plusHaute))
           }
@@ -210,7 +220,7 @@ object Partie {
         // on a pas  la couleur demande
         if (cartesCouleurDemande.isEmpty) {
           // on doit couper, si on peut
-          if (main.filter((_.famille == couleurAtout)).isEmpty) (main,List[Card]())
+          if (main.filter((_.famille == couleurAtout)).isEmpty || joueurMaitre.id == currentPlayer.idPartenaire) (main,List[Card]())
           else main.partition(_.famille == couleurAtout)
         }
         // on joue la carte qu'on veut dans la famille demande
