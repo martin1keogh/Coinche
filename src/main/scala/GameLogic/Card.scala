@@ -88,8 +88,8 @@ class Card(n:Int) {
    *         A sans/tout atout, none si elle ne sont pas de la meme famille, true/false sinon
    */
   def stronger(couleurAtout:Int,c:Card):Option[Boolean] = couleurAtout match {
-    case 6 => if (c.famille == famille) Some(pointsSansAtout > c.pointsSansAtout) else None
-    case 5 => if (c.famille == famille) Some(pointsToutAtout > c.pointsToutAtout) else None
+    case 5 => if (c.famille == famille) Some(pointsSansAtout > c.pointsSansAtout) else None
+    case 4 => if (c.famille == famille) Some(pointsToutAtout > c.pointsToutAtout) else None
     case a => if (c.famille == famille && famille == a) Some(pointsToutAtout > c.pointsToutAtout)
          else if (c.famille == famille) Some(pointsSansAtout > c.pointsSansAtout)
          else if (c.famille == a) Some(false)
