@@ -60,6 +60,7 @@ object Partie {
                                             couleurAtout,
                                             plusFortAtout)
 
+        Printer.tourJoueur(currentPlayer)
         val carteJoue = Reader.getCard(jouables,autres)
 
         currentPlayer.main = currentPlayer.main.filterNot(_ == carteJoue)
@@ -212,6 +213,18 @@ object Partie {
         }
       }
     }
+
+
+  def trierMain(main:List[Card],couleurAtout:Int):List[Card] = {
+    val groupeDeFamille:Map[Int,List[Card]] = main.groupBy(_.famille)
+    def trierFamille(famille:List[Card]):List[Card] =
+      if (couleurAtout == 4) famille.sortBy(_.pointsAtout)
+      else famille match{
+      case f if (f == couleurAtout) => famille.sortBy(_.pointsAtout)
+      case _ => famille.sortBy(_.pointsClassique)
+    }
+    groupeDeFamille.flatMap({case (i,famille) => trierFamille(famille)}).toList
+  }
 
   /**
    *
