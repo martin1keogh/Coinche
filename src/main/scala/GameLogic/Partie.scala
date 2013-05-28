@@ -72,7 +72,7 @@ object Partie {
         // Si c'est la premiere carte joue, renseigner la couleur demande
         if (couleurDemande.isEmpty) couleurDemande = Some(carteJoue.famille)
         // Si c'est un atout, on regarde s'il est meilleur
-        if (carteJoue.famille == couleurAtout) {
+        if ((carteJoue.famille == couleurAtout) || (couleurDemande.getOrElse(-1) == carteJoue.famille && couleurAtout == 4)) {
           //premier atout
           if (plusFortAtout.isEmpty) plusFortAtout = Some(carteJoue)
           else if (carteJoue.stronger(couleurAtout,plusFortAtout.get).getOrElse(false)) plusFortAtout = Some(carteJoue)
