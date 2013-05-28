@@ -70,7 +70,6 @@ object Partie {
                                             plusFortAtout,
                                             joueurMaitre)
 
-        println(couleurDemande+" "+couleurAtout+" "+plusFortAtout+" "+joueurMaitre)
         Printer.tourJoueur(currentPlayer)
         val carteJoue = Reader.getCard(jouables,autres)
         Printer.joueurAJoue(carteJoue)
@@ -96,7 +95,7 @@ object Partie {
       }
 
       premierJoueur = vainqueur(plis.reverse,couleurAtout)
-      Printer.remporte(premierJoueur,plis.map(_._2))
+      Printer.remporte(premierJoueur,plis.reverse)
       if (premierJoueur.id%2 == 0) scoreNS = scoreNS + countPoints(couleurAtout,plis.unzip._2)
       tour = tour + 1
     }

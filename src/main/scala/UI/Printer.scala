@@ -76,10 +76,10 @@ object Printer {
     println()
     if (!autres.isEmpty){
       println("Non Jouables : ")
-      SortedMap(autres.zipWithIndex.groupBy(_._1.famille).toSeq:_*).foreach(
+      SortedMap(autres.groupBy(_.famille).toSeq:_*).foreach(
       {case (cle,l) =>
-        if (l.head._1.famille == Partie.enchere.couleur) print("(Atout) ") else print("        ")
-        l.foreach({case (card:Card,index:Int) => print(index+"/"+card+"; ")});println()
+        if (l.head.famille == Partie.enchere.couleur) print("(Atout) ") else print("        ")
+        l.foreach({case card:Card => print(card+"; ")});println()
       })
     }
     println("----------------------------------")
@@ -102,8 +102,12 @@ object Printer {
     println(">>>> A "+j+" de jouer (e pour voir l'enchere courante)")
   }
 
-  def remporte(joueur:Joueur,plis:List[Card]) {
-    println(joueur+" remporte le pli : "+plis.reverse)
+  def remporte(joueur:Joueur,plis:List[(Joueur,Card)]) {
+    println(joueur+" remporte le pli avec : "+plis.find(_._1 == joueur).get._2)
+    print("Pli : ")
+    print("ouverture de "+plis.head._1+" au "+plis.head._2+", puis ")
+    plis.tail.foreach({case (joueur,card) => print(joueur+" joue "+card+"; ")})
+    println()
   }
 
   def pasDePrise() {
