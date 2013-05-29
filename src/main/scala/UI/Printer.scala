@@ -110,6 +110,13 @@ object Printer {
     println()
   }
 
+  def printFin(NS:Int,EO:Int){
+    println("Score de Nord/Sud : "+NS)
+    println("Score de ESt/Ouest : "+EO)
+    if (NS>EO) println("Nord/Sud gagnent !")
+    else println("Est/Ouest gagnent !")
+  }
+
   def pasDePrise() {
     println("Pas de Prise !")
     println()

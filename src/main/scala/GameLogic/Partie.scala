@@ -35,7 +35,6 @@ object Partie {
     case `j4` => j1
   }
 
-  //TODO
   /**
    *
    * @param couleurAtout couleur de l'atout
@@ -119,7 +118,7 @@ object Partie {
     plis.foreach({elem => {
       val (joueur,card) = elem
       // si les deux cartes ne sont pas comparables (stronger renvoie None)
-      // bestCard gagne (soit la couleur demande, soit de l'atout)
+      // bestCard gagne (puisque soit la couleur demande, soit de l'atout)
       if (card.stronger(couleurAtout,bestCard).getOrElse(false)) {bestCard = card;bestPlayer = joueur}
       }
     }
@@ -297,7 +296,6 @@ object Partie {
 
     //todo passer ca dans la partie UI
     // fin de la partie
-    if (scoreTotalEO > 1000) println("GG Est Ouest")
-    if (scoreTotalNS > 1000) println("GG Nord Sud")
+    Printer.printFin(scoreTotalNS,scoreTotalEO)
   }
 }
