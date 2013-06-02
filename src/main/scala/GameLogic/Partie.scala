@@ -293,6 +293,9 @@ object Partie {
       }
       else scoreTotalEO=scoreTotalEO+(contrat*coinche)
 
+      // On affiche les scores
+      Printer.printScores()
+
       // on fait tourner les roles
       dealer = nextPlayer(dealer)
       currentPlayer = nextPlayer(dealer)
