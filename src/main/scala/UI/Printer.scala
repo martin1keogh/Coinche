@@ -1,132 +1,95 @@
 package UI
 
-import GameLogic.{Joueur, Enchere, Partie, Card}
-import scala.collection.immutable.SortedMap
+import GameLogic.{Joueur, Enchere, Card}
 
 /**
  * Created with IntelliJ IDEA.
  * User: martin
- * Date: 27/05/13
- * Time: 02:16
+ * Date: 02/06/13
+ * Time: 19:03
  * To change this template use File | Settings | File Templates.
  */
-object Printer {
-  def printSmth(s:String) {
-    s match {
-      case "h" => printHelp()
-      case "l" => printListEnchere()
-      case "s" => printScores()
-      case "c" => printCartes()
-      case _ => ()
-    }
-  }
+trait Printer {
 
-  def printFamille(famille:List[Card]) {
-    val couleur = famille.head.familleToString
-    val valeurs = famille.map(_.valeurToString).mkString(", ")
-    println(couleur+" : "+valeurs)
-  }
+  /**
+   * Affiche les cartes du joueur, trier par famille.
+   * Afficher uniquement durant les encheres.
+   */
+  def printCartes()
 
-  def printCartes() {
-    println("----------------------------------")
-    val main = Partie.currentPlayer.main
-    val listCartesParFamille = main.groupBy(_.famille)
-    listCartesParFamille.foreach({famille =>
-      printFamille(famille._2)
-    })
-    println("----------------------------------")
+  /**
+   * Affiche toutes les encheres effectuees durant ce tour d'annonces
+   */
+  def printListEnchere()
 
-  }
+  /**
+   * Affiche les differentes commandes accessibles, ainsi que leur but
+   * Peut-etre inutile avec une vrai interface graphique
+   */
+  def printHelp() {}
 
-  def printListEnchere() {
-    println("----------------------------------")
-    println("liste de precedentes annonces :")
-    Enchere.listEnchere.reverse.foreach(println(_))
-    println()
-    println("----------------------------------")
-  }
+  /**
+   * Affiche les scores (ou les met a jour pour une GUI).
+   * Appelée a chaque fin de main.
+   */
+  def printScores()
 
-  def printHelp() {
-    println("----------------------------------")
-    println("Aide de jeu :")
-    println("l/ liste des precedentes encheres")
-    println("h/ afficher cette aide")
-    println("s/ voir les scores")
-    println("c/ voir ses cartes")
-    println("----------------------------------")
-  }
+  /**
+   * Affiche les cartes de la main du joueur, separees en deux groupes.
+   * Appelée a chaque tour du joueur.
+   * @param jouables cartes jouables en fonction des cartes deja jouees
+   * @param autres cartes non jouables
+   */
+  def printCartes(jouables:List[Card],autres:List[Card])
 
-  def printScores() {
-    println("----------------------------------")
-    println("Score Nord/Sud : "+Partie.scoreTotalNS)
-    println("Score Est/Ouest : "+Partie.scoreTotalEO)
-    println("----------------------------------")
-  }
+  /**
+   * Affiche "A X de parler"
+   * @param joueur
+   */
+  def tourJoueurEnchere(joueur:Joueur)
 
+  /**
+   * Affiche "A X de jouer"
+   * @param j
+   */
+  def tourJoueur(j:Joueur)
 
-  def printCartes(jouables:List[Card],autres:List[Card]) {
-    println("----------------------------------")
-    println("Jouables : ")
-    //TRES SALE
-    SortedMap(jouables.zipWithIndex.groupBy(_._1.famille).toSeq:_*).foreach(
-      {case (cle,l) =>
-        if (l.head._1.famille == Partie.enchere.couleur) print("(Atout) ") else print("        ")
-        l.foreach({case (card:Card,index:Int) => print(index+"/"+card+"; ")});println()
-      })
-    println()
-    if (!autres.isEmpty){
-      println("Non Jouables : ")
-      SortedMap(autres.groupBy(_.famille).toSeq:_*).foreach(
-      {case (cle,l) =>
-        if (l.head.famille == Partie.enchere.couleur) print("(Atout) ") else print("        ")
-        l.foreach({case card:Card => print(card+"; ")});println()
-      })
-    }
-    println("----------------------------------")
-  }
+  /**
+   * Affiche l'enchere courante.
+   * Peut-etre inutile avec une vrai interface graphique (si l'enchere est toujours affichée).
+   */
+  def printEnchere() {}
 
-  def tourJoueurEnchere(j:Joueur) {
-    println(">>>> A "+j+" de parler")
-  }
+  /**
+   * Affiche la carte joue.
+   * @param c la carte joue
+   */
+  def joueurAJoue(c:Card)
 
-  def joueurAJoue(c:Card) {
-    println(Partie.currentPlayer+" a joué "+c)
-    println()
-  }
+  /**
+   * Signale quel joueur a remporte le pli, et comment.
+   * @param joueur le joueur ayant remporte le pli
+   * @param plis List de type (Joueur,Card)
+   *             Represente les cartes jouées, dans l'ordre (FIFO).
+   */
+  def remporte(joueur:Joueur,plis:List[(Joueur,Card)])
 
-  def printEnchere(){
-    println("Enchere courante : "+Partie.enchere)
-  }
+  /**
+   * Affiche qui a gagner, les scores
+   * @param NS score Nord/Sud
+   * @param EO score Est/Ouest
+   */
+  def printFin(NS:Int,EO:Int)
 
-  def tourJoueur(j:Joueur){
-    println(">>>> A "+j+" de jouer (e pour voir l'enchere courante)")
-  }
+  /**
+   * Affiche "pas de prise"
+   */
+  def pasDePrise()
 
-  def remporte(joueur:Joueur,plis:List[(Joueur,Card)]) {
-    println(joueur+" remporte le pli avec : "+plis.find(_._1 == joueur).get._2)
-    print("Pli : ")
-    print("ouverture de "+plis.head._1+" au "+plis.head._2+", puis ")
-    plis.tail.foreach({case (joueur,card) => print(joueur+" joue "+card+"; ")})
-    println()
-  }
-
-  def printFin(NS:Int,EO:Int){
-    println("Score de Nord/Sud : "+NS)
-    println("Score de ESt/Ouest : "+EO)
-    if (NS>EO) println("Nord/Sud gagnent !")
-    else println("Est/Ouest gagnent !")
-  }
-
-  def pasDePrise() {
-    println("Pas de Prise !")
-    println()
-  }
-
-  def enchereFinie(e:Enchere) {
-    println("--------------Fin des encheres ----------------")
-    println(e)
-    println("-----------------------------------------------")
-    println()
-  }
+  /**
+   * Annonce la fin des encheres, et affiche l'enchere gagnante
+   * @param e enchere gagnante.
+   */
+  def enchereFinie(e:Enchere)
 
 }

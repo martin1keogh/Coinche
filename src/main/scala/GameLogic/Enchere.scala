@@ -1,6 +1,6 @@
 package GameLogic
 
-import UI.{Reader,Printer}
+import Main.Main
 
 /**
  * Created with IntelliJ IDEA.
@@ -39,6 +39,9 @@ case class Enchere(couleur:Int,contrat:Int,id:Int,coinche:Int){
 
 
 object Enchere {
+
+  val Printer = Main.Printer
+  val Reader = Main.Reader
 
   var listEnchere:List[Enchere] = List()
 

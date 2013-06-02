@@ -1,4 +1,8 @@
+package Main
+
 import GameLogic.Partie
+import UI._
+import UI.Console.{ReaderConsole, PrinterConsole}
 
 /**
  * Created with IntelliJ IDEA.
@@ -9,7 +13,13 @@ import GameLogic.Partie
  */
 object Main {
 
+  // Default I/O, modified in main
+  var Printer:Printer = PrinterConsole
+  var Reader:Reader = ReaderConsole
+
+
   def main(args: Array[String]) {
+
     Partie.start()
   }
 }
