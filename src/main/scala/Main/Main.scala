@@ -2,6 +2,7 @@ package Main
 
 import GameLogic.Partie
 import UI._
+import UI.Console.{ReaderConsole, PrinterConsole}
 
 /**
  * Created with IntelliJ IDEA.
