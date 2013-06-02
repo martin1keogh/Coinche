@@ -1,6 +1,6 @@
 package GameLogic
 
-import UI.{Printer, Reader}
+import Main.Main
 
 /**
  * Created with IntelliJ IDEA.
@@ -11,6 +11,9 @@ import UI.{Printer, Reader}
  */
 
 object Partie {
+
+  val Printer = Main.Printer
+  val Reader = Main.Reader
 
   val (j1,j2,j3,j4) = (new Joueur(0),
                        new Joueur(1),
@@ -70,6 +73,7 @@ object Partie {
                                             joueurMaitre)
 
         Printer.tourJoueur(currentPlayer)
+        Printer.printCartes(jouables,autres)
         val carteJoue = Reader.getCard(jouables,autres)
         Printer.joueurAJoue(carteJoue)
 
