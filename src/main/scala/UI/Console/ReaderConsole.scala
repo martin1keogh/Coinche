@@ -1,7 +1,6 @@
 package UI.Console
 
-import GameLogic.{Partie,Card}
-import UI.Console.PrinterConsole
+import GameLogic.Card
 import UI.Reader
 
 /**
