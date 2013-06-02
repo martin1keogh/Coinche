@@ -1,6 +1,8 @@
-package UI
+package UI.Console
 
 import GameLogic.{Partie,Card}
+import UI.Console.PrinterConsole
+import UI.Reader
 
 /**
  * Created with IntelliJ IDEA.

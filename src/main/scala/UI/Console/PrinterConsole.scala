@@ -1,7 +1,8 @@
-package UI
+package UI.Console
 
 import GameLogic.{Joueur, Enchere, Partie, Card}
 import scala.collection.immutable.SortedMap
+import UI.Printer
 
 /**
  * Created with IntelliJ IDEA.
