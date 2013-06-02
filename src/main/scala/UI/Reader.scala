@@ -1,57 +1,45 @@
 package UI
 
-import GameLogic.{Partie,Card}
+import GameLogic.Card
 
 /**
  * Created with IntelliJ IDEA.
  * User: martin
- * Date: 20/05/13
- * Time: 22:13
+ * Date: 02/06/13
+ * Time: 19:27
  * To change this template use File | Settings | File Templates.
  */
-object Reader {
+trait Reader {
 
-  @throws[Exception]("Fin de la partie.")
-  def getCouleur:Int = {
-    var couleur = -1
-    do {
-      println("Quelle couleur (entree pour passer, h pour l'aide, quit pour quitter) ?")
-      println("1/Pique;2/Carreau;3/Trefle;4/Coeur;5/Tout atout;6/Sans Atout")
-      couleur = try {
-        val c = readLine()
-        Printer.printSmth(c)
-        println()
-        if (c == "") 0 // tres sale,permet de gerer le <entree> pour passer son tour
-        else if (c == "quit") sys.exit()
-        else c.toInt
-      }
-      catch {
-        case e:NumberFormatException => -1
-      }
-    } while (couleur < 0 || couleur > 6)
-    couleur
-  }
+  /**
+   * Renvoie la couleur annoncé :
+   *    1 => pique
+   *    2 => carreau
+   *    3 => trefle
+   *    4 => coeur
+   *    5 => tout atout
+   *    6 => sans atout
+   *
+   *    0 => passe
+   *
+   * Ne doit renvoyer qu'un entier convenable !
+   *
+   * @return la couleur annoncé
+   */
+  def getCouleur:Int
 
-  def getContrat:Int = {
-    println("Quelle annonce ?")
-    val c = readLine()
-    Printer.printSmth(c)
-    println()
-    try {c.toInt}
-    catch {case e:NumberFormatException => -1}
-  }
+  /**
+   * Renvoie la valeur du contrat
+   * @return le contrat
+   */
+  def getContrat:Int
 
-  def getCard(jouables:List[Card],autres:List[Card]):Card = {
-    Printer.printCartes(jouables,autres)
-    val c = readLine()
-    if (c == "quit") sys.exit()
-    if (c == "e") Printer.printEnchere()
-    try {jouables(c.toInt)}
-    catch {
-      case e:NumberFormatException => getCard(jouables,autres)
-      case e:IndexOutOfBoundsException => getCard(jouables,autres)
-    }
-  }
-
+  /**
+   * Renvoie la carte jouée (doit etre dans jouable)
+   * @param jouables les cartes autorisées
+   * @param autres les cartes non jouables
+   * @return la carte jouée
+   */
+  def getCard(jouables:List[Card],autres:List[Card]):Card
 
 }
