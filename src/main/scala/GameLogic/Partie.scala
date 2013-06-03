@@ -259,14 +259,12 @@ object Partie {
       // todo couper au hasard ?
       deck = Deck.coupe(deck,10).getOrElse(deck)
 
-      // distribution des cartes
-      val (m1,m2,m3,m4) = Deck.distribution(deck)
-      dealer.main = Deck.trierMain(m4)
-      nextPlayer(dealer).main = Deck.trierMain(m1)
-      nextPlayer(nextPlayer(dealer)).main = Deck.trierMain(m2)
-      nextPlayer(nextPlayer(nextPlayer(dealer))).main = Deck.trierMain(m3)
-      //TODO trouver une facon moins moche de faire ca
-
+      //distribution
+      val mainList = Deck.distribution(deck).map(Deck.trierMain(_))
+      lazy val joueurStream:Stream[Joueur] = nextPlayer(dealer)#::(joueurStream.map(nextPlayer(_)))
+      val joueurList = joueurStream.take(4).toList
+      //assignement au joueur
+      joueurList.zip(mainList).foreach({case (j,l) => j.main = l})
 
       // boucle sur les encheres tant qu'il n'y en a pas
       def boucleEnchere():Enchere = {
