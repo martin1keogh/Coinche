@@ -39,4 +39,13 @@ class DeckTest extends FlatSpec{
     val deck = Deck.newShuffledDeck
     assert(Deck.coupe(deck,Random.nextInt(25)+4).get.size == deck.size)
   }
+  "A complete deck" should " be worth 152 points when playing without trumps" in {
+    assert (Partie.countPoints(6,Deck.newShuffledDeck) == 152)
+  }
+  it should "be worth 152 points when all suits are trumps" in {
+    assert (Partie.countPoints(5,Deck.newShuffledDeck) == 152)
+  }
+  it should "be worth 152 points when there is only one trump suit" in {
+    assert (Partie.countPoints(3,Deck.newShuffledDeck) == 152)
+  }
 }
