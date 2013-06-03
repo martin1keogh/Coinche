@@ -27,17 +27,13 @@ class DeckTest extends FlatSpec{
   }
   "After distribtion, the players" should "have 8 cards each" in {
     val deck = Deck.newShuffledDeck
-    val (p1,p2,p3,p4) = Deck.distribution(deck)
-    assert (p1.size == 8)
-    assert (p2.size == 8)
-    assert (p3.size == 8)
-    assert (p4.size == 8)
+    val l = Deck.distribution(deck)
+    assert (l.forall(_.size == 8))
   }
   it should "have only distinct cards" in {
     val deck = Deck.newShuffledDeck
-    val (p1,p2,p3,p4) = Deck.distribution(deck)
-    val total = p1++p2++p3++p4
-    assert(total.distinct.size == p1.size+p2.size+p3.size+p4.size)
+    val l = Deck.distribution(deck)
+    assert(l.flatten.distinct.size == (l.map(_.size).sum))
   }
   "After cutting a deck, it" should "still have the same number of cards" in {
     val deck = Deck.newShuffledDeck
