@@ -47,7 +47,7 @@ object PrinterConsole extends Printer{
     println("----------------------------------")
   }
 
-  override def printHelp() {
+  def printHelp() {
     println("----------------------------------")
     println("Aide de jeu :")
     println("l/ liste des precedentes encheres")
@@ -95,7 +95,7 @@ object PrinterConsole extends Printer{
     println()
   }
 
-  override def printEnchere(){
+  def printEnchere(){
     println("Enchere courante : "+Partie.enchere)
   }
 

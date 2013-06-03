@@ -13,7 +13,7 @@ trait Printer {
 
   /**
    * Affiche les cartes du joueur, trier par famille.
-   * Afficher uniquement durant les encheres.
+   * Utiliser uniquement durant les encheres.
    */
   def printCartes()
 
@@ -22,11 +22,13 @@ trait Printer {
    */
   def printListEnchere()
 
+  /*
   /**
    * Affiche les differentes commandes accessibles, ainsi que leur but
    * Peut-etre inutile avec une vrai interface graphique
    */
   def printHelp() {}
+  */
 
   /**
    * Affiche les scores (ou les met a jour pour une GUI).
@@ -35,7 +37,7 @@ trait Printer {
   def printScores()
 
   /**
-   * Affiche les cartes de la main du joueur, separees en deux groupes.
+   * Affiche les cartes de la main du joueur.
    * Appelée a chaque tour du joueur.
    * @param jouables cartes jouables en fonction des cartes deja jouees
    * @param autres cartes non jouables
@@ -54,11 +56,13 @@ trait Printer {
    */
   def tourJoueur(j:Joueur)
 
+  /*
   /**
    * Affiche l'enchere courante.
    * Peut-etre inutile avec une vrai interface graphique (si l'enchere est toujours affichée).
    */
   def printEnchere() {}
+  */
 
   /**
    * Affiche la carte joue.
