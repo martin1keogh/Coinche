@@ -33,8 +33,8 @@ case class Enchere(couleur:Int,contrat:Int,id:Int,coinche:Int = 1){
 
 object Enchere {
 
-  val Printer = Main.Printer
-  val Reader = Main.Reader
+  var Printer = Main.Printer
+  var Reader = Main.Reader
 
   var listEnchere:List[Enchere] = List()
   var current:Option[Enchere] = None

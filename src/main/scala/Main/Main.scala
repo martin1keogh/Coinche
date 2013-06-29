@@ -20,7 +20,7 @@ object Main {
 
   def main(args: Array[String]) {
 
-    parseArgs(args.toList)
+//    parseArgs(args.toList)
 
     Partie.start()
   }
