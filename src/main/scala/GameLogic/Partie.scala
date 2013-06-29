@@ -5,8 +5,8 @@ import Main.Main
 
 object Partie {
 
-  val Printer = Main.Printer
-  val Reader = Main.Reader
+  var Printer = Main.Printer
+  var Reader = Main.Reader
 
   val (j1,j2,j3,j4) = (new Joueur(0,"Sud"),
                        new Joueur(1,"Ouest"),
