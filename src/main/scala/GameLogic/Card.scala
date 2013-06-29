@@ -1,12 +1,5 @@
 package GameLogic
 
-/**
- * Created with IntelliJ IDEA.
- * User: martin
- * Date: 19/05/13
- * Time: 19:34
- * To change this template use File | Settings | File Templates.
- */
 class Card(n:Int) {
   val famille:Int = (n/8)
 

@@ -3,13 +3,6 @@ package UI.Console
 import GameLogic.Card
 import UI.Reader
 
-/**
- * Created with IntelliJ IDEA.
- * User: martin
- * Date: 20/05/13
- * Time: 22:13
- * To change this template use File | Settings | File Templates.
- */
 object ReaderConsole extends Reader{
 
   @throws[Exception]("Fin de la partie.")

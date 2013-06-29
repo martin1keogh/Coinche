@@ -2,13 +2,6 @@ package GameLogic
 
 import scala.util.Random
 
-/**
- * Created with IntelliJ IDEA.
- * User: martin
- * Date: 19/05/13
- * Time: 19:51
- * To change this template use File | Settings | File Templates.
- */
 object Deck {
   val sortedDeck:List[Card] = List.tabulate(32){new Card(_)}
 

@@ -2,13 +2,6 @@ package GameLogic
 
 import Main.Main
 
-/**
- * Created with IntelliJ IDEA.
- * User: martin
- * Date: 20/05/13
- * Time: 22:31
- * To change this template use File | Settings | File Templates.
- */
 
 case class Enchere(couleur:Int,contrat:Int,id:Int,coinche:Int = 1){
 

@@ -4,13 +4,6 @@ import GameLogic.{Joueur, Enchere, Partie, Card}
 import scala.collection.immutable.SortedMap
 import UI.Printer
 
-/**
- * Created with IntelliJ IDEA.
- * User: martin
- * Date: 27/05/13
- * Time: 02:16
- * To change this template use File | Settings | File Templates.
- */
 object PrinterConsole extends Printer{
   def printSmth(s:String) {
     s match {

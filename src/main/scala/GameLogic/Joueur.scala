@@ -1,13 +1,6 @@
 package GameLogic
 
-/**
- * Created with IntelliJ IDEA.
- * User: martin
- * Date: 19/05/13
- * Time: 21:10
- * To change this template use File | Settings | File Templates.
- */
-case class Joueur(id:Int) {
+case class Joueur(id:Int, var nom:String) {
 
   val idPartenaire = (id+2)%4
 
@@ -18,10 +11,7 @@ case class Joueur(id:Int) {
 
   var main = List[Card]()
 
-  override def toString = id match {
-    case 0 => "Sud" // le joueur
-    case 1 => "Ouest"
-    case 2 => "Nord"
-    case 3 => "Est"
-  }
+  def rename(n:String):Unit = nom = n
+
+  override def toString = nom
 }

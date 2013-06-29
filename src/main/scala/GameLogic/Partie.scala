@@ -2,23 +2,16 @@ package GameLogic
 
 import Main.Main
 
-/**
- * Created with IntelliJ IDEA.
- * User: martin
- * Date: 20/05/13
- * Time: 17:16
- * To change this template use File | Settings | File Templates.
- */
 
 object Partie {
 
   val Printer = Main.Printer
   val Reader = Main.Reader
 
-  val (j1,j2,j3,j4) = (new Joueur(0),
-                       new Joueur(1),
-                       new Joueur(2),
-                       new Joueur(3))
+  val (j1,j2,j3,j4) = (new Joueur(0,"Sud"),
+                       new Joueur(1,"Ouest"),
+                       new Joueur(2,"Nord"),
+                       new Joueur(3,"Est"))
   val listJoueur = List[Joueur](j1,j2,j3,j4)
 
   var deck = Deck.newShuffledDeck
