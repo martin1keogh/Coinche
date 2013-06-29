@@ -77,6 +77,8 @@ object Enchere {
     nbPasse = 0
     listEnchere = List()
 
+    Printer.printCardsToAll()
+
     // Boucle principale lors des encheres
     while ( (!annonceImpossible() && (nbPasse < 3) // apres 3 passes on finit les encheres// on arrete les annonces si on ne peut plus monter
             || (current == None && nbPasse == 3))){   // sauf s'il n'y a pas eu d'annonce,auquel cas on attend le dernier joueur

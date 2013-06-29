@@ -15,6 +15,8 @@ object PrinterConsole extends Printer{
     }
   }
 
+  def printCardsToAll() {}
+
   def printFamille(famille:List[Card]) {
     val couleur = famille.head.familleToString
     val valeurs = famille.map(_.valeurToString).mkString(", ")

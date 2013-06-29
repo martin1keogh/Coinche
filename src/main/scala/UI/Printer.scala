@@ -5,8 +5,8 @@ import GameLogic.{Joueur, Enchere, Card}
 trait Printer {
 
   /**
-   * Affiche les cartes du joueur, trier par famille.
-   * Utiliser uniquement durant les encheres.
+   * Affiche les cartes du joueur courant, trier par famille.
+   * Utiliser uniquement durant les encheres (et en mode console).
    */
   def printCartes()
 
@@ -14,6 +14,11 @@ trait Printer {
    * Affiche toutes les encheres effectuees durant ce tour d'annonces
    */
   def printListEnchere()
+
+  /**
+   * Show everyone their hand.
+   */
+  def printCardsToAll()
 
   /*
   /**
