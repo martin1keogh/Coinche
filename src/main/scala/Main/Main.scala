@@ -11,8 +11,10 @@ object Main {
   var Reader:Reader = ReaderConsole
 
   def parseArgs(list:List[String]): Unit = list match {
-    case "--printer" :: value :: tail => Printer = Class.forName(value+"$").getField("MODULE$").get(null).asInstanceOf[Printer]
-    case "--reader" :: value :: tail => Reader = Class.forName(value+"$").getField("MODULE$").get(null).asInstanceOf[Reader]
+    case "--printer" :: value :: tail => {Printer = Class.forName(value+"$").getField("MODULE$").get(null).asInstanceOf[Printer];
+                                          parseArgs(tail)}
+    case "--reader" :: value :: tail => {Reader = Class.forName(value+"$").getField("MODULE$").get(null).asInstanceOf[Reader];
+                                         parseArgs(tail)}
     case _ => ()
   }
 
