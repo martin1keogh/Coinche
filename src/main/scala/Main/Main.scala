@@ -18,7 +18,7 @@ object Main {
 
   def main(args: Array[String]) {
 
-    parseArgs(List[String]("--printer","UI.Console.PrinterConsole"))
+    parseArgs(args.toList)
 
     Partie.start()
   }
