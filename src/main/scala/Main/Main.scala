@@ -20,6 +20,7 @@ object Main {
 
   def main(args: Array[String]) {
 
+//    FIXME : Appears to block
 //    parseArgs(args.toList)
 
     Partie.start()
