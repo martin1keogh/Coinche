@@ -14,12 +14,7 @@ case class Enchere(couleur:Int,contrat:Int,id:Int,coinche:Int = 1){
     case 5 => "Sans Atout"
   }
 
-  def idToString:String = id match {
-    case 0 => "Sud"
-    case 1 => "Ouest"
-    case 2 => "Nord"
-    case 3 => "Est"
-  }
+  def idToString:String = Partie.listJoueur.find(_.id == id).get.nom
 
   def coincheToString:String = coinche match {
     case 1 => "."
