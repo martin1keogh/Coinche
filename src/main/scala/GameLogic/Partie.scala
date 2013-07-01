@@ -5,13 +5,28 @@ import Main.Main
 
 object Partie {
 
+  object State extends Enumeration {
+    type State = Value
+    val stopped = Value
+    val running = Value
+    val bidding = Value
+    val playing = Value
+  }
+
+  case class Stopped() extends Exception
+
+  // Game is not running from the start
+  var state = State.stopped
+
   var Printer = Main.Printer
   var Reader = Main.Reader
 
+  // the 4 players
   val (j1,j2,j3,j4) = (new Joueur(0,"Sud"),
                        new Joueur(1,"Ouest"),
                        new Joueur(2,"Nord"),
                        new Joueur(3,"Est"))
+  // just for ease-of-use
   val listJoueur = List[Joueur](j1,j2,j3,j4)
 
   var deck = Deck.newShuffledDeck
@@ -30,6 +45,19 @@ object Partie {
     case `j3` => j4
     case `j4` => j1
   }
+
+  def init():Unit = {
+    state = State.stopped
+    dealer = j1
+    currentPlayer = j2
+    (scoreTotalEO,scoreTotalNS) = (0,0)
+    enchere = new Enchere(0,0,0,0)
+  }
+
+  // checks if someone (authorized) asked for the game to be stopped
+  def checkStop() : Boolean = state == State.stopped
+
+  def stopGame() : Unit = state = State.stopped
 
   /**
    *
@@ -59,6 +87,7 @@ object Partie {
 
       // Tant que tout le monde n'a pas joué
       while (plis.length != 4){
+        if (checkStop()) throw Stopped()
         val (jouables,autres) = cartesJouables(currentPlayer.main,
                                             couleurDemande,
                                             couleurAtout,
@@ -66,8 +95,12 @@ object Partie {
                                             joueurMaitre)
 
         Printer.tourJoueur(currentPlayer)
+        // state change before printCartes, as the player may already know
+        // which card he'll play
+        state = State.playing
         Printer.printCartes(jouables,autres)
         val carteJoue = Reader.getCard(jouables,autres)
+        state = State.running
         Printer.joueurAJoue(carteJoue)
 
         currentPlayer.main = currentPlayer.main.filterNot(_ == carteJoue)
@@ -241,10 +274,12 @@ object Partie {
   }
 
   def start() {
+    try {
 
     // reset des scores et du jeu
     deck = Deck.newShuffledDeck
     scoreTotalEO = 0;scoreTotalNS = 0
+    state = State.running
 
     while (scoreTotalEO < 1000 || scoreTotalNS < 1000){
 
@@ -293,8 +328,10 @@ object Partie {
       currentPlayer = nextPlayer(dealer)
     }
 
-    //todo passer ca dans la partie UI
     // fin de la partie
     Printer.printFin(scoreTotalNS,scoreTotalEO)
+    } catch {
+      case s : Stopped => init()
+    }
   }
 }

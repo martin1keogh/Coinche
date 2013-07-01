@@ -72,11 +72,14 @@ object Enchere {
     nbPasse = 0
     listEnchere = List()
 
+    Partie.state = Partie.State.bidding
+
     Printer.printCardsToAll()
 
     // Boucle principale lors des encheres
     while ( (!annonceImpossible() && (nbPasse < 3) // apres 3 passes on finit les encheres// on arrete les annonces si on ne peut plus monter
             || (current == None && nbPasse == 3))){   // sauf s'il n'y a pas eu d'annonce,auquel cas on attend le dernier joueur
+      if (Partie.checkStop()) throw Partie.Stopped()
       Printer.tourJoueurEnchere(Partie.currentPlayer)
       val enchere = effectuerEnchere()
       if (enchere.isEmpty) nbPasse=nbPasse+1
@@ -87,6 +90,9 @@ object Enchere {
       }
       Partie.currentPlayer = Partie.nextPlayer(Partie.currentPlayer)
     }
+
+    Partie.state = Partie.State.running
+
     current
   }
 }
