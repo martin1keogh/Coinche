@@ -50,7 +50,8 @@ object Partie {
     state = State.stopped
     dealer = j1
     currentPlayer = j2
-    (scoreTotalEO,scoreTotalNS) = (0,0)
+    scoreTotalEO = 0
+    scoreTotalNS = 0
     enchere = new Enchere(0,0,0,0)
   }
 
