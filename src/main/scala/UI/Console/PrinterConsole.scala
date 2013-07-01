@@ -125,4 +125,22 @@ object PrinterConsole extends Printer{
     println()
   }
 
+  /**
+   * Affiche le nombre de points fait par chaque equipe, si la donne est chutee, etc
+   *
+   * @param scoreNS Nombre de points fait par Nord/Sud durant cette main
+   * @param enchere Enchere de la main
+   */
+  def printScoreMain(scoreNS: Int, enchere: Enchere) {
+    println("Contrat : "+enchere.toString)
+    val prisParNS = (enchere.id % 2 == 0)
+    if (prisParNS) {
+      if (scoreNS >= enchere.contrat) {println("Passe de "+(scoreNS - enchere.contrat))}
+      else {println("Chute de "+(enchere.contrat - scoreNS))}
+    } else {
+      val scoreEO = 162 - scoreNS
+      if (scoreEO >= enchere.contrat) {println("Passe de "+(scoreEO - enchere.contrat))}
+      else {println("Chute de "+(enchere.contrat - scoreEO))}
+    }
+  }
 }

@@ -35,6 +35,14 @@ trait Printer {
   def printScores()
 
   /**
+   * Affiche le nombre de points fait par chaque equipe, si la donne est chutee, etc
+   *
+   * @param scoreNS Nombre de points fait par Nord/Sud durant cette main
+   * @param enchere Enchere de la main
+   */
+  def printScoreMain(scoreNS:Int,enchere:Enchere)
+
+  /**
    * Affiche les cartes de la main du joueur.
    * Appelée a chaque tour du joueur.
    * @param jouables cartes jouables en fonction des cartes deja jouees

@@ -97,7 +97,8 @@ object Partie {
     }
     // dix de der
     if (premierJoueur.id%2 == 0) scoreNS=scoreNS+10
-    println(scoreNS)
+
+    Printer.printScoreMain(scoreNS,enchere)
     scoreNS
   }
 
