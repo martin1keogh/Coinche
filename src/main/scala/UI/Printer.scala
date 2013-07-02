@@ -6,6 +6,9 @@ trait Printer {
 
   /**
    * Affiche les cartes du joueur courant, trier par famille.
+   * /!\ N'affiche les cartes que lorsque le tour du joueur arrive.
+   * Utiliser printCartesToAll pour afficher les cartes a chaque joueur en
+   * meme temps.
    * Utiliser uniquement durant les encheres (et en mode console).
    */
   def printCartes()

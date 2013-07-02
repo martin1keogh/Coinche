@@ -5,24 +5,6 @@ class Card(n:Int) {
 
   val valeur:Int = (n%8)
 
-  val familleToString:String = famille match {
-    case 0 => "Pique"
-    case 1 => "Carreau"
-    case 2 => "Trefle"
-    case 3 => "Coeur"
-  }
-
-  val valeurToString:String = valeur match {
-    case 0 => "Sept"
-    case 1 => "Huit"
-    case 2 => "Neuf"
-    case 3 => "Valet"
-    case 4 => "Dame"
-    case 5 => "Roi"
-    case 6 => "Dix"
-    case 7 => "As"
-  }
-
   val pointsToutAtout:Int = valeur match {
     case 0 => 0  // Sept
     case 1 => 0  // Huit
@@ -68,6 +50,9 @@ class Card(n:Int) {
     case 7 => 11  // As
   }
 
+  val valeurToString:String = Card.valeurToString(valeur)
+  val familleToString:String = Card.familleToString(famille)
+
   def equals(c: Card): Boolean = {
     c.valeur == valeur && c.famille == famille
   }
@@ -91,4 +76,44 @@ class Card(n:Int) {
   }
 
   override def toString:String = valeurToString+" de "+familleToString
+}
+
+object Card {
+
+  def stringToFamille(s:String):Int = s match {
+    case "Pique"   => 0
+    case "Carreau" => 1
+    case "Trefle"  => 2
+    case "Coeur"   => 3
+  }
+
+  def stringToValeur(s:String):Int = s match {
+    case "Sept" => 0
+    case "Huit" => 1
+    case "Neuf" => 2
+    case "Valet"=> 3
+    case "Dame" => 4
+    case "Roi"  => 5
+    case "Dix"  => 6
+    case "As"   => 7
+  }
+
+  def familleToString(famille:Int):String = famille match {
+    case 0 => "Pique"
+    case 1 => "Carreau"
+    case 2 => "Trefle"
+    case 3 => "Coeur"
+  }
+
+  def valeurToString(valeur:Int):String = valeur match {
+    case 0 => "Sept"
+    case 1 => "Huit"
+    case 2 => "Neuf"
+    case 3 => "Valet"
+    case 4 => "Dame"
+    case 5 => "Roi"
+    case 6 => "Dix"
+    case 7 => "As"
+  }
+
 }
