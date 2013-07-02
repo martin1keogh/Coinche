@@ -18,6 +18,11 @@ object Partie {
   // Game is not running from the start
   var state = State.stopped
 
+  // Only print hand once (after trumps have been decided),
+  // not every time you play a card.
+  // Useful when I/O is a problem (IRC bot)
+  var printOnlyOnce = false
+
   var Printer = Main.Printer
   var Reader = Main.Reader
 
@@ -72,6 +77,8 @@ object Partie {
     var tour = 1
     var scoreNS = 0
 
+    if (printOnlyOnce) Printer.printCardsToAll(couleurAtout)
+
     //parce que desfois l'imperatif c'est quand meme pratique
     while (tour < 9) {
       currentPlayer = premierJoueur
@@ -99,7 +106,7 @@ object Partie {
         // state change before printCartes, as the player may already know
         // which card he'll play
         state = State.playing
-        Printer.printCartes(jouables,autres)
+        if (!printOnlyOnce) Printer.printCartes(jouables,autres)
         val carteJoue = Reader.getCard(jouables,autres)
         state = State.running
         Printer.joueurAJoue(carteJoue)

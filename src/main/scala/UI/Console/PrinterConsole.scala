@@ -143,4 +143,6 @@ object PrinterConsole extends Printer{
       else {println("Chute de "+(enchere.contrat - scoreEO))}
     }
   }
+
+  def printCardsToAll(couleurAtout: Int) {}
 }

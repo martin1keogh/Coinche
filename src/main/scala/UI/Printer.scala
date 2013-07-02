@@ -23,6 +23,8 @@ trait Printer {
    */
   def printCardsToAll()
 
+  def printCardsToAll(couleurAtout:Int)
+
   /*
   /**
    * Affiche les differentes commandes accessibles, ainsi que leur but
