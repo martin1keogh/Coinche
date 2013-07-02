@@ -80,22 +80,24 @@ class Card(n:Int) {
 
 object Card {
 
-  def stringToFamille(s:String):Int = s match {
-    case "Pique"   => 0
-    case "Carreau" => 1
-    case "Trefle"  => 2
-    case "Coeur"   => 3
+  def stringToFamille(s:String):Int = s toUpperCase() match {
+    case "PIQUE" | "P" | "PI" => 0
+    case "CARREAU" | "CA" => 1
+    case "TREFLE" | "T" | "TR" => 2
+    case "COEUR" | "CO"  => 3
+    case _ => -1
   }
 
-  def stringToValeur(s:String):Int = s match {
-    case "Sept" => 0
-    case "Huit" => 1
-    case "Neuf" => 2
-    case "Valet"=> 3
-    case "Dame" => 4
-    case "Roi"  => 5
-    case "Dix"  => 6
-    case "As"   => 7
+  def stringToValeur(s:String):Int = s toUpperCase() match {
+    case "SEPT" | "7" => 0
+    case "HUIT" | "8" => 1
+    case "NEUF" | "9" => 2
+    case "VALET"| "V" | "J" => 3
+    case "DAME" | "D" | "Q" => 4
+    case "ROI"  | "R" | "K" => 5
+    case "DIX"  | "10" => 6
+    case "AS" => 7
+    case _ => -1
   }
 
   def familleToString(famille:Int):String = famille match {
