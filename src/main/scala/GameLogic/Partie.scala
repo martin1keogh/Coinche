@@ -329,6 +329,9 @@ object Partie {
       }
       enchere = boucleEnchere()
 
+      // si c'est une generale, le joueur prend la main
+      if (enchere.contrat == 400) currentPlayer = listJoueur.find(_.id == enchere.id).get
+
       //Les encheres sont finies, la main commence
       Printer.enchereFinie(enchere)
       val (couleur,contrat,equipe,coinche) = (enchere.couleur,enchere.contrat,enchere.id,enchere.coinche)
