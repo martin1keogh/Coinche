@@ -75,7 +75,8 @@ object Partie {
   def jouerLaMain(couleurAtout:Int):Int = {
     // La variable currentPlayer a ete modifie pendant les encheres
     // La variable dealer ne l'a pas ete
-    var premierJoueur = nextPlayer(dealer)
+    // Sur generale, le joueur prend la main
+    var premierJoueur = if (enchere.contrat == 400) listJoueur.find(_.id == enchere.id).get else nextPlayer(dealer)
     var tour = 1
     var scoreNS = 0
     capotChute = false; generalChute = false
@@ -328,9 +329,6 @@ object Partie {
         else e.get
       }
       enchere = boucleEnchere()
-
-      // si c'est une generale, le joueur prend la main
-      if (enchere.contrat == 400) currentPlayer = listJoueur.find(_.id == enchere.id).get
 
       //Les encheres sont finies, la main commence
       Printer.enchereFinie(enchere)
