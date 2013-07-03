@@ -107,4 +107,9 @@ trait Printer {
    */
   def enchereFinie(e:Enchere)
 
+  /**
+   * Prints '5 more secs to sur-coinche'
+   */
+  def printCoinche() : Unit
+
 }

@@ -14,6 +14,7 @@ class Card(n:Int) {
     case 5 => 3  // Roi
     case 6 => 4  // Dix
     case 7 => 6  // As
+
   }
 
   val pointsSansAtout:Int = valeur match {

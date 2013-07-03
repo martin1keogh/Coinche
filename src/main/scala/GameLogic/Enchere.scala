@@ -1,9 +1,9 @@
 package GameLogic
 
-import Main.Main
+import scala.concurrent.{Future, Await}
+import scala.concurrent.duration.Duration
 
-
-case class Enchere(couleur:Int,contrat:Int,id:Int,coinche:Int = 1){
+case class Enchere(couleur:Int,contrat:Int,id:Int,var coinche:Int = 1){
 
   def couleurToString:String = couleur match {
     case 0 => "Pique"
@@ -28,8 +28,10 @@ case class Enchere(couleur:Int,contrat:Int,id:Int,coinche:Int = 1){
 
 object Enchere {
 
-  var Printer = Main.Printer
-  var Reader = Main.Reader
+  import scala.concurrent.ExecutionContext.Implicits.global
+
+  var Printer = Partie.Printer
+  var Reader = Partie.Reader
 
   var listEnchere:List[Enchere] = List()
   var current:Option[Enchere] = None
@@ -38,12 +40,12 @@ object Enchere {
   def annonceLegal(a:Int):Boolean = {
     val annonceCourante = current.getOrElse(new Enchere(0,70,0,1)).contrat
     //TODO gerer les capots/generales
-    (a%10 == 0 && a > annonceCourante && a < 170)
+    a>annonceCourante && ( a == 250 || a == 400 || (a%10 == 0 && a < 170))
   }
 
   def annonceImpossible():Boolean = {
     if (current.isEmpty) false
-    else (current.get.contrat >= 160 || current.get.coinche > 1)
+    else (current.get.contrat == 400 || current.get.coinche > 1)
   }
 
   def effectuerEnchere():Option[Enchere] = {
@@ -58,8 +60,6 @@ object Enchere {
     ret
   }
 
-
-  //TODO gerer les coinches
   /**
    *
    * @return Option sur enchere : (couleur,contrat,id,coinche)
@@ -77,9 +77,15 @@ object Enchere {
     Printer.printCardsToAll()
 
     // Boucle principale lors des encheres
-    while ( (!annonceImpossible() && (nbPasse < 3) // apres 3 passes on finit les encheres// on arrete les annonces si on ne peut plus monter
-            || (current == None && nbPasse == 3))){   // sauf s'il n'y a pas eu d'annonce,auquel cas on attend le dernier joueur
+    while ( (nbPasse < 3) // apres 3 passes on finit les encheres// on arrete les annonces si on ne peut plus monter
+         || (current == None && nbPasse == 3)){   // sauf s'il n'y a pas eu d'annonce,auquel cas on attend le dernier joueur
       if (Partie.checkStop()) throw Partie.Stopped()
+      if (current.getOrElse(new Enchere(0,0,0)).coinche > 1) {
+        Printer.printCoinche()
+        Reader.getCouleur
+        Await.result(Future{Thread.sleep(5000)},Duration.Inf)
+        return current
+      }
       Printer.tourJoueurEnchere(Partie.currentPlayer)
       val enchere = effectuerEnchere()
       if (enchere.isEmpty) nbPasse=nbPasse+1

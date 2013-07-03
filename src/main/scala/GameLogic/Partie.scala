@@ -2,7 +2,6 @@ package GameLogic
 
 import Main.Main
 
-
 object Partie {
 
   object State extends Enumeration {
@@ -41,6 +40,9 @@ object Partie {
 
   var (scoreTotalEO,scoreTotalNS) = (0,0)
 
+  var capotChute = false
+  var generalChute = false
+
   // contient l'enchere courante
   var enchere:Enchere = new Enchere(0,0,0,0)
 
@@ -76,6 +78,7 @@ object Partie {
     var premierJoueur = nextPlayer(dealer)
     var tour = 1
     var scoreNS = 0
+    capotChute = false; generalChute = false
 
     if (printOnlyOnce) Printer.printCardsToAll(couleurAtout)
 
@@ -132,6 +135,13 @@ object Partie {
       }
 
       premierJoueur = vainqueur(plis.reverse,couleurAtout)
+
+      // on regarde si capot/general chute
+      if (premierJoueur.id != Enchere.current.get.id) {
+        generalChute = true
+        if (premierJoueur.idPartenaire != Enchere.current.get.id) capotChute = true
+      }
+
       Printer.remporte(premierJoueur,plis.reverse)
       if (premierJoueur.id%2 == 0) scoreNS = scoreNS + countPoints(couleurAtout,plis.unzip._2)
       tour = tour + 1
@@ -277,8 +287,12 @@ object Partie {
    * @return
    */
   def pointsPourNS(contrat: Int,score: Int, id: Int): Boolean = {
-    if (id%2==0) score>contrat
-    else (162-score)<contrat
+    if (id%2==0) {
+      (contrat == 400 && !generalChute) || (contrat == 250 && !capotChute) || score>contrat
+    }
+    else {
+      (contrat == 400 && generalChute) || (contrat == 250 && capotChute) || (162-score)<contrat
+    }
   }
 
   def start() {
@@ -289,7 +303,7 @@ object Partie {
     scoreTotalEO = 0;scoreTotalNS = 0
     state = State.running
 
-    while (scoreTotalEO < 1000 || scoreTotalNS < 1000){
+    while (scoreTotalEO < 1000 && scoreTotalNS < 1000){
 
       // on melange le jeu
       deck = Deck.shuffle(deck)

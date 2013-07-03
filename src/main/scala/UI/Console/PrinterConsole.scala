@@ -133,8 +133,7 @@ object PrinterConsole extends Printer{
    */
   def printScoreMain(scoreNS: Int, enchere: Enchere) {
     println("Contrat : "+enchere.toString)
-    val prisParNS = (enchere.id % 2 == 0)
-    if (prisParNS) {
+    if (enchere.id % 2 == 0) {
       if (scoreNS >= enchere.contrat) {println("Passe de "+(scoreNS - enchere.contrat))}
       else {println("Chute de "+(enchere.contrat - scoreNS))}
     } else {
@@ -145,4 +144,8 @@ object PrinterConsole extends Printer{
   }
 
   def printCardsToAll(couleurAtout: Int) {}
+
+  def printCoinche() : Unit = {
+    println("5 secondes pour sur-coinché !")
+  }
 }

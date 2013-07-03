@@ -15,6 +15,8 @@ trait Reader {
    *
    *    0 => passe
    *
+   * Aussi en charge de mettre Enchere.current.coinche a 2 ou 4 (coinche/surcoinche) !!
+   *
    * Ne doit renvoyer qu'un entier convenable !
    *
    * @return la couleur annoncé
