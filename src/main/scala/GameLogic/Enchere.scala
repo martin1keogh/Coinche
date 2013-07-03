@@ -82,7 +82,6 @@ object Enchere {
       if (Partie.checkStop()) throw Partie.Stopped()
       if (current.getOrElse(new Enchere(0,0,0)).coinche > 1) {
         Printer.printCoinche()
-        Reader.getCouleur
         Await.result(Future{Thread.sleep(5000)},Duration.Inf)
         return current
       }

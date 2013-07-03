@@ -352,6 +352,7 @@ object Partie {
 
     // fin de la partie
     Printer.printFin(scoreTotalNS,scoreTotalEO)
+    init()
     } catch {
       case s : Stopped => init()
     }
