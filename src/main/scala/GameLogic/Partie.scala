@@ -288,10 +288,15 @@ object Partie {
    */
   def pointsPourNS(contrat: Int,score: Int, id: Int): Boolean = {
     if (id%2==0) {
-      (contrat == 400 && !generalChute) || (contrat == 250 && !capotChute) || score>contrat
+      // N/S on pris
+      if (contrat == 400) !generalChute
+      else if (contrat == 250) !capotChute
+      else score>contrat
     }
     else {
-      (contrat == 400 && generalChute) || (contrat == 250 && capotChute) || (162-score)<contrat
+      if (contrat == 400) generalChute
+      else if (contrat == 250) capotChute
+      else (162-score)<contrat
     }
   }
 
