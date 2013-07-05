@@ -51,6 +51,19 @@ class Card(n:Int) {
     case 7 => 11  // As
   }
 
+  val ordreAtout:Int = valeur match {
+    case 0 => 0   // Sept
+    case 1 => 1   // Huit
+    case 2 => 6   // Neuf
+    case 3 => 7   // Valet
+    case 4 => 2   // Dame
+    case 5 => 3   // Roi
+    case 6 => 4  // Dix
+    case 7 => 5  // As
+  }
+
+  val ordreClassique:Int = valeur
+
   val valeurToString:String = Card.valeurToString(valeur)
   val familleToString:String = Card.familleToString(famille)
 
