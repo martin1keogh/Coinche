@@ -178,28 +178,28 @@ object Partie {
 
   /**
    * @param main
-   * @param couleurDemande
+   * @param couleurDemandeOption
    * @param couleurAtout
-   * @param plusFortAtout
+   * @param plusFortAtoutOption
    * @param joueurMaitre
    * @return Renvoie une paire de listes
    *         la premiere contient les cartes jouables,
    *         la deuxieme les cartes non-jouables
    */
   def cartesJouables(main:List[Card],
-                     couleurDemande:Option[Int],
+                     couleurDemandeOption:Option[Int],
                      couleurAtout:Int,
-                     plusFortAtout:Option[Card],
+                     plusFortAtoutOption:Option[Card],
                      joueurMaitre:Joueur):(List[Card],List[Card]) =
-    (couleurDemande,couleurAtout,plusFortAtout) match {
+    (couleurDemandeOption,plusFortAtoutOption) match {
       //premier a jouer, on fait ce qu'on veux
-      case (None,_,_) => (main,List[Card]())
+      case (None,_) => (main,List[Card]())
 
       // On joue a sans atout
       // le 'None' en meilleur carte sur la table est obligé
       // sinon, il y a une incoherence
       // todo match sur le cas ou ce n'est pas none et gerer l'exception
-      case (Some(`couleurDemande`),5,_) => {
+      case (Some(couleurDemande),_) if couleurAtout == 5 => {
         val cartesCouleurDemande = main.filter(_.famille == couleurDemande)
         if (cartesCouleurDemande.isEmpty) // on a pas  la couleur demande
           (main,List[Card]())
@@ -210,12 +210,12 @@ object Partie {
       // le 'Some' en meilleur carte sur la table est obligé
       // sinon, il y a une incoherence
       // todo match sur le cas ou ce n'est pas Some et gerer l'exception
-      case (Some(`couleurDemande`),4,Some(plusForte)) => {
+      case (Some(couleurDemande),Some(plusForte)) if couleurAtout == 4 => {
         val cartesCouleurDemande = main.filter(_.famille == couleurDemande)
         if (cartesCouleurDemande.isEmpty) // on a pas  la couleur demande
           (main,List[Card]())
         else { // On doit monter, ....
-          val plusHautes = cartesCouleurDemande.filter(_.ordreAtout > plusForte.ordreAtout)
+        val plusHautes = cartesCouleurDemande.filter(_.ordreAtout > plusForte.ordreAtout)
           // sauf si on ne peut pas
           if (plusHautes.isEmpty) (cartesCouleurDemande,main.diff(cartesCouleurDemande))
           else (plusHautes,main.diff(plusHautes))
@@ -223,9 +223,7 @@ object Partie {
       }
 
       // On joue la couleur de l'atout
-      // les cartes jouables sont les memes quand tout atout
-      // mais scala ne permet de matcher plusieurs possibilites en nommant les variables (ie couleurDemande)
-      case (Some(`couleurDemande`), `couleurAtout`,Some(plusForte)) if couleurDemande == couleurAtout => {
+      case (Some(couleurDemande), Some(plusForte)) if couleurDemande == couleurAtout=> {
         val cartesCouleurDemande = main.filter(_.famille == couleurDemande)
         if (cartesCouleurDemande.isEmpty) // on a pas  la couleur demande
           (main,List[Card]())
@@ -238,7 +236,7 @@ object Partie {
       }
 
       // On joue une couleur autre que atout
-      case (Some(`couleurDemande`), `couleurAtout`,Some(plusForte)) => {
+      case (Some(couleurDemande), Some(plusForte)) => {
         val cartesCouleurDemande = main.filter(_.famille == couleurDemande)
         // on a pas  la couleur demande
         if (cartesCouleurDemande.isEmpty) {
@@ -263,7 +261,7 @@ object Partie {
 
       // On joue une couleur autre que atout
       // et pas encore d'atout joue
-      case (Some(`couleurDemande`), `couleurAtout`,None) => {
+      case (Some(couleurDemande), None) => {
         val cartesCouleurDemande = main.filter(_.famille == couleurDemande)
         // on a pas  la couleur demande
         if (cartesCouleurDemande.isEmpty) {
@@ -276,8 +274,8 @@ object Partie {
           (cartesCouleurDemande,main.diff(cartesCouleurDemande))
         }
       }
+      case _ => println(couleurDemandeOption + " " + couleurAtout + " " + plusFortAtoutOption);(List[Card](),List[Card]())
     }
-
 
 
   /**
