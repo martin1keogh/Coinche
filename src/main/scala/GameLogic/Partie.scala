@@ -162,6 +162,7 @@ object Partie {
   }
 
   def vainqueur(plis:List[(Joueur,Card)],couleurAtout:Int):Joueur = {
+    // at first, the best card/player is the one who opened
     var bestCard = plis.head._2
     var bestPlayer = plis.head._1
 
@@ -282,8 +283,8 @@ object Partie {
    *
    * @param contrat Le contrat a realise
    * @param score Le score fait par Nord/Sud
-   * @param id 0 ou 2 si le contrat appartient a Nord/Sud
-   * @return
+   * @param id 0 ou 2 si le contrat appartient a Nord/Sud, 1 ou 3 sinon
+   * @return vrai si les points sont pour NS, faux sinon
    */
   def pointsPourNS(contrat: Int,score: Int, id: Int): Boolean = {
     if (id%2==0) {
@@ -310,11 +311,15 @@ object Partie {
       deck = Deck.coupe(deck,10).getOrElse(deck)
 
       //distribution
-      val mainList = Deck.distribution(deck).map(Deck.trierMain(_))
-      lazy val joueurStream:Stream[Joueur] = nextPlayer(dealer)#::(joueurStream.map(nextPlayer(_)))
-      val joueurList = joueurStream.take(4).toList
-      //assignement au joueur
-      joueurList.zip(mainList).foreach({case (j,l) => j.main = l})
+      def distribute (deck:List[Card]) : Unit = {
+        val mainList = Deck.distribution(deck).map(Deck.trierMain(_))
+        lazy val joueurStream:Stream[Joueur] = nextPlayer(dealer)#::(joueurStream.map(nextPlayer(_)))
+        val joueurList = joueurStream.take(4).toList
+        //assignement au joueur
+        joueurList.zip(mainList).foreach({case (j,l) => j.main = l})
+      }
+
+      distribute(deck)
 
       // boucle sur les encheres tant qu'il n'y en a pas
       def boucleEnchere():Enchere = {
@@ -322,6 +327,7 @@ object Partie {
         if (e.isEmpty) {
           Printer.pasDePrise()
           deck=Deck.shuffle(deck)
+          distribute(deck)
           boucleEnchere()
         }
         else e.get
