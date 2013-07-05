@@ -313,10 +313,10 @@ object Partie {
       //distribution
       def distribute (deck:List[Card]) : Unit = {
         val mainList = Deck.distribution(deck).map(Deck.trierMain(_))
-        lazy val joueurStream:Stream[Joueur] = nextPlayer(dealer)#::(joueurStream.map(nextPlayer(_)))
-        val joueurList = joueurStream.take(4).toList
-        //assignement au joueur
-        joueurList.zip(mainList).foreach({case (j,l) => j.main = l})
+        nextPlayer(currentPlayer).main = mainList(0)
+        nextPlayer(nextPlayer(currentPlayer)).main = mainList(1)
+        nextPlayer(nextPlayer(nextPlayer(currentPlayer))).main = mainList(2)
+        currentPlayer.main = mainList(3)
       }
 
       distribute(deck)
@@ -327,6 +327,7 @@ object Partie {
         if (e.isEmpty) {
           Printer.pasDePrise()
           deck=Deck.shuffle(deck)
+          deck = Deck.coupe(deck,10).getOrElse(deck)
           distribute(deck)
           boucleEnchere()
         }
