@@ -43,6 +43,9 @@ object Partie {
   var capotChute = false
   var generalChute = false
 
+  // Does someone has 'belote' ?
+  var belote:Option[Joueur] = None
+
   // contient l'enchere courante
   var enchere:Enchere = new Enchere(0,0,0,0)
 
@@ -67,6 +70,12 @@ object Partie {
 
   def stopGame() : Unit = state = State.stopped
 
+  def hasBelote(couleurAtout:Int,joueur:Joueur):Boolean = {
+    val atout = joueur.main.filter(_.famille == couleurAtout)
+    // Has the queen               // Has the king
+    atout.exists(_.valeur == 4) && atout.exists(_.valeur == 5)
+  }
+
   /**
    *
    * @param couleurAtout couleur de l'atout
@@ -80,6 +89,8 @@ object Partie {
     var tour = 1
     var scoreNS = 0
     capotChute = false; generalChute = false
+
+    belote = listJoueur.find(hasBelote(couleurAtout,_))
 
     if (printOnlyOnce) Printer.printCardsToAll(couleurAtout)
 
@@ -148,7 +159,12 @@ object Partie {
       tour = tour + 1
     }
     // dix de der
-    if (premierJoueur.id%2 == 0) scoreNS=scoreNS+10
+    if (premierJoueur.id%2 == 0) scoreNS+=10
+
+    // belote
+    if (belote.exists(_.id % 2 == enchere.id % 2)) {
+      if (enchere.id % 2 == 0) scoreNS+=20 else scoreNS-=20
+    }
 
     Printer.printScoreMain(scoreNS,enchere)
     scoreNS
