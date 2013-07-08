@@ -145,6 +145,8 @@ object PrinterConsole extends Printer{
 
   def printCardsToAll(couleurAtout: Int) {}
 
+  def annonceBelote(b:Boolean) = {if (b) println("belote") else println("re")}
+
   def printCoinche() : Unit = {
     println("5 secondes pour sur-coinché !")
   }

@@ -71,9 +71,9 @@ object Partie {
   def stopGame() : Unit = state = State.stopped
 
   def hasBelote(couleurAtout:Int,joueur:Joueur):Boolean = {
-    val atout = joueur.main.filter(_.famille == couleurAtout)
+    val atouts = joueur.main.filter(_.famille == couleurAtout)
     // Has the queen               // Has the king
-    atout.exists(_.valeur == 4) && atout.exists(_.valeur == 5)
+    atouts.exists(_.valeur == 4) && atouts.exists(_.valeur == 5)
   }
 
   /**
@@ -125,6 +125,12 @@ object Partie {
         val carteJoue = Reader.getCard(jouables,autres)
         state = State.running
         Printer.joueurAJoue(carteJoue)
+        // need to print 'belote' or 'rebelote'
+        if (belote.exists(j => j.id == currentPlayer.id && j.id % 2 == enchere.id % 2) // player has belote and his team won the bidding
+            && carteJoue.famille == couleurAtout                                       // he plays a trump card
+            && (carteJoue.valeur == 4 || carteJoue.valeur == 5)) {                     // which is the queen or the king
+          Printer.annonceBelote(currentPlayer.main.filter(_.famille == couleurAtout).count(c => c.valeur == 4 || c.valeur == 5) == 2)
+        }
 
         currentPlayer.main = currentPlayer.main.filterNot(_ == carteJoue)
 

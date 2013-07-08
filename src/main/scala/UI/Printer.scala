@@ -102,6 +102,12 @@ trait Printer {
   def pasDePrise()
 
   /**
+   *
+   * @param first true if the first of the two cards (i.e, true if 'belote', false if 'rebelote')
+   */
+  def annonceBelote(first:Boolean):Unit
+
+  /**
    * Annonce la fin des encheres, et affiche l'enchere gagnante
    * @param e enchere gagnante.
    */
