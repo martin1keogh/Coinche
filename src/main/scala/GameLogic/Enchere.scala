@@ -51,7 +51,7 @@ object Enchere {
   def effectuerEnchere():Option[Enchere] = {
     var ret:Option[Enchere] = None
     val couleur = Reader.getCouleur
-    if (!(couleur == 0)) {
+    if (couleur != 0) {
       var contrat = -1
       do contrat = Reader.getContrat while (!annonceLegal(contrat))
       ret = Some(new Enchere(couleur-1,contrat,Partie.currentPlayer.id,1))
@@ -84,7 +84,7 @@ object Enchere {
         Printer.printCoinche()
         Await.result(Future{Thread.sleep(5000)},Duration.Inf)
         return current
-      }
+      } else
       Printer.tourJoueurEnchere(Partie.currentPlayer)
       val enchere = effectuerEnchere()
       if (enchere.isEmpty) nbPasse=nbPasse+1
@@ -94,6 +94,14 @@ object Enchere {
         current = enchere
       }
       Partie.currentPlayer = Partie.nextPlayer(Partie.currentPlayer)
+    }
+    // si c'est le dernier joueur qui a coinché
+    // on laisse le temps au autre joueur de surcoinche
+    // (ce qui ce fait normalement dans la boucle while)
+    if (current.getOrElse(new Enchere(0,0,0)).coinche == 2) {
+      Printer.printCoinche()
+      Await.result(Future{Thread.sleep(5000)},Duration.Inf)
+      return current
     }
 
     Partie.state = Partie.State.running
