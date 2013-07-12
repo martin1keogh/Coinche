@@ -47,7 +47,7 @@ object Partie {
   var belote:Option[Joueur] = None
 
   // contient l'enchere courante
-  var enchere:Enchere = new Enchere(0,0,0,0)
+  var enchere:Enchere = new Enchere(-1,0,0,0)
 
   def nextPlayer(j:Joueur):Joueur = j match {
     case `j1` => j2
@@ -62,7 +62,7 @@ object Partie {
     currentPlayer = j2
     scoreTotalEO = 0
     scoreTotalNS = 0
-    enchere = new Enchere(0,0,0,0)
+    enchere = new Enchere(-1,0,0,0)
   }
 
   // checks if someone (authorized) asked for the game to be stopped
@@ -161,6 +161,7 @@ object Partie {
       }
 
       Printer.remporte(premierJoueur,plis.reverse)
+      println("points du pli :" + countPoints(couleurAtout,plis.unzip._2))
       if (premierJoueur.id%2 == 0) scoreNS = scoreNS + countPoints(couleurAtout,plis.unzip._2)
       tour = tour + 1
     }
@@ -177,8 +178,8 @@ object Partie {
   }
 
   def countPoints(couleurAtout:Int,plis:List[Card]):Int = couleurAtout match{
-    case 6 => plis.map(_.pointsSansAtout).sum
-    case 5 => plis.map(_.pointsToutAtout).sum
+    case 5 => plis.map(_.pointsSansAtout).sum
+    case 4 => plis.map(_.pointsToutAtout).sum
     case a => plis.map({card => if (card.famille == couleurAtout) card.pointsAtout
                                 else card.pointsClassique}).sum
   }
