@@ -10,4 +10,4 @@ Use sbt to build.
 - GUI
 - AI
 - Documentation
-- Implement all rules (capot/generale, coinche/sur-coinche,...)
+- Implement all rules (annulation de partie)
