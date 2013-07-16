@@ -1,6 +1,7 @@
 package GameLogic
 
 import Main.Main
+import scala.util.Random
 
 object Partie {
 
@@ -70,6 +71,12 @@ object Partie {
 
   def stopGame() : Unit = state = State.stopped
 
+  /**
+   *
+   * @param couleurAtout
+   * @param joueur
+   * @return Returns true if 'joueur' has belote at 'couleurAtout'
+   */
   def hasBelote(couleurAtout:Int,joueur:Joueur):Boolean = {
     val atouts = joueur.main.filter(_.famille == couleurAtout)
     // Has the queen               // Has the king
@@ -335,8 +342,7 @@ object Partie {
 
       // on melange le jeu
       deck = Deck.shuffle(deck)
-      // todo couper au hasard ?
-      deck = Deck.coupe(deck,10).getOrElse(deck)
+      deck = Deck.coupe(deck,Random.nextInt(26)+3).getOrElse(deck)
 
       //distribution
       def distribute (deck:List[Card]) : Unit = {
@@ -382,6 +388,9 @@ object Partie {
       // on fait tourner les roles
       dealer = nextPlayer(dealer)
       currentPlayer = nextPlayer(dealer)
+
+      // on reinitialise l'enchere
+      enchere = new Enchere(-1,0,0)
     }
 
     // fin de la partie
