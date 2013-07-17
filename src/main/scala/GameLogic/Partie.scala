@@ -1,9 +1,11 @@
 package GameLogic
 
-import Main.Main
 import scala.util.Random
+import UI.Console.{ReaderConsole, PrinterConsole}
 
-object Partie {
+class Partie {
+
+  implicit val partie = this
 
   object State extends Enumeration {
     type State = Value
@@ -23,8 +25,9 @@ object Partie {
   // Useful when I/O is a problem (IRC bot)
   var printOnlyOnce = false
 
-  var Printer = Main.Printer
-  var Reader = Main.Reader
+  // Default values
+  var Printer = new PrinterConsole(this)
+  var Reader = new ReaderConsole(Printer)
 
   // the 4 players
   val (j1,j2,j3,j4) = (new Joueur(0,"Sud"),
@@ -162,9 +165,9 @@ object Partie {
       premierJoueur = vainqueur(plis.reverse,couleurAtout)
 
       // on regarde si capot/general chute
-      if (premierJoueur.id != Enchere.current.get.id) {
+      if (premierJoueur.id != enchere.current.get.id) {
         generalChute = true
-        if (premierJoueur.idPartenaire != Enchere.current.get.id) capotChute = true
+        if (premierJoueur.idPartenaire != enchere.current.get.id) capotChute = true
       }
 
       Printer.remporte(premierJoueur,plis.reverse)
@@ -357,7 +360,7 @@ object Partie {
 
       // boucle sur les encheres tant qu'il n'y en a pas
       def boucleEnchere():Enchere = {
-        val e = Enchere.enchere()
+        val e = enchere.enchere()
         if (e.isEmpty) {
           Printer.pasDePrise()
           deck=Deck.shuffle(deck)

@@ -3,7 +3,7 @@ package GameLogic
 import scala.concurrent.{Future, Await}
 import scala.concurrent.duration.Duration
 
-case class Enchere(couleur:Int,contrat:Int,id:Int,var coinche:Int = 1){
+case class Enchere(couleur:Int,contrat:Int,id:Int,var coinche:Int = 1)(implicit Partie:Partie){
 
   def couleurToString:String = couleur match {
     case 0 => "Pique"
@@ -23,10 +23,6 @@ case class Enchere(couleur:Int,contrat:Int,id:Int,var coinche:Int = 1){
   }
 
   override def toString = contrat+" a "+couleurToString+" par "+idToString+coincheToString
-}
-
-
-object Enchere {
 
   import scala.concurrent.ExecutionContext.Implicits.global
 
@@ -39,7 +35,6 @@ object Enchere {
 
   def annonceLegal(a:Int):Boolean = {
     val annonceCourante = current.getOrElse(new Enchere(0,70,0,1)).contrat
-    //TODO gerer les capots/generales
     a>annonceCourante && ( a == 250 || a == 400 || (a%10 == 0 && a < 170))
   }
 

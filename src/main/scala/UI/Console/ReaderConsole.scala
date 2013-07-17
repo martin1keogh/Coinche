@@ -3,7 +3,7 @@ package UI.Console
 import GameLogic.{Enchere, Card}
 import UI.Reader
 
-object ReaderConsole extends Reader{
+class ReaderConsole(PrinterConsole:PrinterConsole) extends Reader{
 
   @throws[Exception]("Fin de la partie.")
   def getCouleur:Int = {
@@ -17,8 +17,8 @@ object ReaderConsole extends Reader{
         println()
         if (c == "") 0 // tres sale,permet de gerer le <entree> pour passer son tour
         else if (c == "quit") sys.exit()
-        else if (c == "coinche") {Enchere.current.get.coinche = 2;0}
-        else if (c == "sur") {println("surcoinche");Enchere.current.get.coinche = 4;0}
+        else if (c == "coinche") {PrinterConsole.Partie.enchere.current.get.coinche = 2;0}
+        else if (c == "sur") {println("surcoinche");PrinterConsole.Partie.enchere.current.get.coinche = 4;0}
         else c.toInt
       }
       catch {

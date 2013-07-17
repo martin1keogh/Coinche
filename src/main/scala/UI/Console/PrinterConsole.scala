@@ -4,7 +4,7 @@ import GameLogic.{Joueur, Enchere, Partie, Card}
 import scala.collection.immutable.SortedMap
 import UI.Printer
 
-object PrinterConsole extends Printer{
+class PrinterConsole(val Partie:Partie) extends Printer{
   def printSmth(s:String) {
     s match {
       case "h" => printHelp()
@@ -37,7 +37,7 @@ object PrinterConsole extends Printer{
   def printListEnchere() {
     println("----------------------------------")
     println("liste de precedentes annonces :")
-    Enchere.listEnchere.reverse.foreach(println(_))
+    Partie.enchere.listEnchere.reverse.foreach(println(_))
     println()
     println("----------------------------------")
   }
