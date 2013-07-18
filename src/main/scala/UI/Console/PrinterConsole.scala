@@ -1,72 +1,57 @@
 package UI.Console
 
-import GameLogic.{Joueur, Enchere, Partie, Card}
+import GameLogic._
 import scala.collection.immutable.SortedMap
 import UI.Printer
+import GameLogic.Joueur
 
-class PrinterConsole(val Partie:Partie) extends Printer{
-  def printSmth(s:String) {
-    s match {
-      case "h" => printHelp()
-      case "l" => printListEnchere()
-      case "s" => printScores()
-      case "c" => printCartes()
-      case _ => ()
-    }
-  }
-
-  def printCardsToAll() {}
-
+class PrinterConsole() extends Printer{
   def printFamille(famille:List[Card]) {
     val couleur = famille.head.familleToString
     val valeurs = famille.map(_.valeurToString).mkString(", ")
     println(couleur+" : "+valeurs)
   }
 
-  def printCartes() {
+  def printCards(implicit joueur:Joueur) {
     println("----------------------------------")
-    val main = Partie.currentPlayer.main
-    val listCartesParFamille = main.groupBy(_.famille)
-    listCartesParFamille.foreach({famille =>
-      printFamille(famille._2)
-    })
+    val listCartesParFamille = joueur.main.groupBy(_.famille)
+    listCartesParFamille.foreach({case (_,famille) => printFamille(famille) })
     println("----------------------------------")
-
   }
 
-  def printListEnchere() {
+  def printCards(couleurAtout:Int)(implicit joueur:Joueur) {
+    println("----------------------------------")
+    val listCartesParFamille = joueur.main.groupBy(_.famille)
+    listCartesParFamille.foreach({case (_,famille) =>
+      if (famille.head.famille == couleurAtout) printFamille(famille.sortBy(-_.pointsAtout))
+      else printFamille(famille)
+    })
+    println("----------------------------------")
+  }
+
+  def printListEnchere(listEnchere:List[Enchere]) {
     println("----------------------------------")
     println("liste de precedentes annonces :")
-    Partie.enchere.listEnchere.reverse.foreach(println(_))
+    listEnchere.reverse.foreach(println(_))
     println()
     println("----------------------------------")
   }
 
-  def printHelp() {
+  def printScores(NS:Int,EO:Int)(implicit listJoueur:List[Joueur]) {
     println("----------------------------------")
-    println("Aide de jeu :")
-    println("l/ liste des precedentes encheres")
-    println("h/ afficher cette aide")
-    println("s/ voir les scores")
-    println("c/ voir ses cartes")
-    println("----------------------------------")
-  }
-
-  def printScores() {
-    println("----------------------------------")
-    println("Score Nord/Sud : "+Partie.scoreTotalNS)
-    println("Score Est/Ouest : "+Partie.scoreTotalEO)
+    println("Score Nord/Sud : "+NS)
+    println("Score Est/Ouest : "+EO)
     println("----------------------------------")
   }
 
 
-  def printCartes(jouables:List[Card],autres:List[Card]) {
+  def printCards(jouables:List[Card],autres:List[Card])(implicit joueur:Joueur,couleurAtout:Int) {
     println("----------------------------------")
     println("Jouables : ")
     //TRES SALE
     SortedMap(jouables.zipWithIndex.groupBy(_._1.famille).toSeq:_*).foreach(
       {case (cle,l) =>
-        if (l.head._1.famille == Partie.enchere.couleur) print("(Atout) ") else print("        ")
+        if (l.head._1.famille == couleurAtout) print("(Atout) ") else print("        ")
         l.foreach({case (card:Card,index:Int) => print(index+"/"+card+"; ")});println()
       })
     println()
@@ -74,27 +59,23 @@ class PrinterConsole(val Partie:Partie) extends Printer{
       println("Non Jouables : ")
       SortedMap(autres.groupBy(_.famille).toSeq:_*).foreach(
       {case (cle,l) =>
-        if (l.head.famille == Partie.enchere.couleur) print("(Atout) ") else print("        ")
+        if (l.head.famille == couleurAtout) print("(Atout) ") else print("        ")
         l.foreach({case card:Card => print(card+"; ")});println()
       })
     }
     println("----------------------------------")
   }
 
-  def tourJoueurEnchere(j:Joueur) {
+  def tourJoueurEnchere(implicit j:Joueur) {
     println(">>>> A "+j+" de parler")
   }
 
-  def joueurAJoue(c:Card) {
-    println(Partie.currentPlayer+" a joué "+c)
+  def joueurAJoue(c:Card)(implicit j:Joueur) {
+    println(j+" a joué "+c)
     println()
   }
 
-  def printEnchere(){
-    println("Enchere courante : "+Partie.enchere)
-  }
-
-  def tourJoueur(j:Joueur){
+  def tourJoueur(implicit j:Joueur){
     println(">>>> A "+j+" de jouer (e pour voir l'enchere courante)")
   }
 
@@ -106,7 +87,7 @@ class PrinterConsole(val Partie:Partie) extends Printer{
     println()
   }
 
-  def printFin(NS:Int,EO:Int){
+  def printFin(NS:Int,EO:Int)(implicit listJoueur:List[Joueur]){
     println("Score de Nord/Sud : "+NS)
     println("Score de ESt/Ouest : "+EO)
     if (NS>EO) println("Nord/Sud gagnent !")
@@ -129,9 +110,9 @@ class PrinterConsole(val Partie:Partie) extends Printer{
    * Affiche le nombre de points fait par chaque equipe, si la donne est chutee, etc
    *
    * @param scoreNS Nombre de points fait par Nord/Sud durant cette main
-   * @param enchere Enchere de la main
+   * @param enchere EnchereController de la main
    */
-  def printScoreMain(scoreNS: Int, enchere: Enchere) {
+  def printScoreMain(scoreNS: Int, enchere: Enchere,capotChute:Boolean,generaleChute:Boolean) {
     println("Contrat : "+enchere.toString)
     if (enchere.id % 2 == 0) {
       if (scoreNS >= enchere.contrat) {println("Passe de "+(scoreNS - enchere.contrat))}
@@ -143,11 +124,25 @@ class PrinterConsole(val Partie:Partie) extends Printer{
     }
   }
 
-  def printCardsToAll(couleurAtout: Int) {}
+  /**
+   * Show everyone their hand.
+   */
+  def printCardsToAll(implicit listJoueur: List[Joueur]) {
+    listJoueur.foreach(printCards(_))
+  }
 
-  def annonceBelote(b:Boolean) = {if (b) println("belote") else println("re")}
+  def printCardsToAll(couleurAtout: Int)(implicit listJoueur: List[Joueur]) {
+    listJoueur.foreach(printCards(couleurAtout)(_))
+  }
 
-  def printCoinche() : Unit = {
-    println("5 secondes pour sur-coinché !")
+  def printCoinche() {println("Coinche !")}
+
+  /**
+   *
+   * @param first true if the first of the two cards (i.e, true if 'belote', false if 'rebelote')
+   */
+  def annonceBelote(first: Boolean)(implicit joueur: Joueur) {
+    if (first) println(joueur+" annonce Belote.")
+    else println(joueur+" annonce rebelote.")
   }
 }
