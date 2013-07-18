@@ -1,9 +1,11 @@
 package GameLogic
 
-import Main.Main
 import scala.util.Random
+import UI.{Reader, Printer}
 
-object Partie {
+class Partie(val Printer:Printer,val Reader:Reader){
+
+  implicit val partie = this
 
   object State extends Enumeration {
     type State = Value
@@ -23,21 +25,19 @@ object Partie {
   // Useful when I/O is a problem (IRC bot)
   var printOnlyOnce = false
 
-  var Printer = Main.Printer
-  var Reader = Main.Reader
-
   // the 4 players
   val (j1,j2,j3,j4) = (new Joueur(0,"Sud"),
                        new Joueur(1,"Ouest"),
                        new Joueur(2,"Nord"),
                        new Joueur(3,"Est"))
   // just for ease-of-use
-  val listJoueur = List[Joueur](j1,j2,j3,j4)
+  implicit val listJoueur = List[Joueur](j1,j2,j3,j4)
 
+  val Deck = new Deck
   var deck = Deck.newShuffledDeck
 
   var dealer = j1
-  var currentPlayer = j2
+  implicit var currentPlayer = j2
 
   var (scoreTotalEO,scoreTotalNS) = (0,0)
 
@@ -47,8 +47,7 @@ object Partie {
   // Does someone has 'belote' ?
   var belote:Option[Joueur] = None
 
-  // contient l'enchere courante
-  var enchere:Enchere = new Enchere(-1,0,0,0)
+  val enchereController:EnchereController = new EnchereController
 
   def nextPlayer(j:Joueur):Joueur = j match {
     case `j1` => j2
@@ -63,7 +62,6 @@ object Partie {
     currentPlayer = j2
     scoreTotalEO = 0
     scoreTotalNS = 0
-    enchere = new Enchere(-1,0,0,0)
   }
 
   // checks if someone (authorized) asked for the game to be stopped
@@ -88,11 +86,11 @@ object Partie {
    * @param couleurAtout couleur de l'atout
    * @return Score realise par NORD/SUD
    */
-  def jouerLaMain(couleurAtout:Int):Int = {
+  def jouerLaMain(implicit couleurAtout:Int):Int = {
     // La variable currentPlayer a ete modifie pendant les encheres
     // La variable dealer ne l'a pas ete
     // Sur generale, le joueur prend la main
-    var premierJoueur = if (enchere.contrat == 400) listJoueur.find(_.id == enchere.id).get else nextPlayer(dealer)
+    var premierJoueur = if (enchereController.contrat == 400) listJoueur.find(_.id == enchereController.id).get else nextPlayer(dealer)
     var tour = 1
     var scoreNS = 0
     capotChute = false; generalChute = false
@@ -125,15 +123,15 @@ object Partie {
                                                joueurMaitre)
 
         Printer.tourJoueur(currentPlayer)
-        // state change before printCartes, as the player may already know
+        // state change before printCards, as the player may already know
         // which card he'll play
         state = State.playing
-        if (!printOnlyOnce) Printer.printCartes(jouables,autres)
+        if (!printOnlyOnce) Printer.printCards(jouables,autres)
         val carteJoue = Reader.getCard(jouables,autres)
         state = State.running
         Printer.joueurAJoue(carteJoue)
         // need to print 'belote' or 'rebelote'
-        if (belote.exists(j => j.id == currentPlayer.id && j.id % 2 == enchere.id % 2) // player has belote and his team won the bidding
+        if (belote.exists(j => j.id == currentPlayer.id && j.id % 2 == enchereController.id % 2) // player has belote and his team won the bidding
             && carteJoue.famille == couleurAtout                                       // he plays a trump card
             && (carteJoue.valeur == 4 || carteJoue.valeur == 5)) {                     // which is the queen or the king
           Printer.annonceBelote(currentPlayer.main.filter(_.famille == couleurAtout).count(c => c.valeur == 4 || c.valeur == 5) == 2)
@@ -162,9 +160,9 @@ object Partie {
       premierJoueur = vainqueur(plis.reverse,couleurAtout)
 
       // on regarde si capot/general chute
-      if (premierJoueur.id != Enchere.current.get.id) {
+      if (premierJoueur.id != enchereController.current.get.id) {
         generalChute = true
-        if (premierJoueur.idPartenaire != Enchere.current.get.id) capotChute = true
+        if (premierJoueur.idPartenaire != enchereController.current.get.id) capotChute = true
       }
 
       Printer.remporte(premierJoueur,plis.reverse)
@@ -176,11 +174,11 @@ object Partie {
     if (premierJoueur.id%2 == 0) scoreNS+=10
 
     // belote
-    if (belote.exists(_.id % 2 == enchere.id % 2)) {
-      if (enchere.id % 2 == 0) scoreNS+=20 else scoreNS-=20
+    if (belote.exists(_.id % 2 == enchereController.id % 2)) {
+      if (enchereController.id % 2 == 0) scoreNS+=20 else scoreNS-=20
     }
 
-    Printer.printScoreMain(scoreNS,enchere)
+    Printer.printScoreMain(scoreNS,enchereController.current.get,capotChute,generalChute)
     scoreNS
   }
 
@@ -357,7 +355,8 @@ object Partie {
 
       // boucle sur les encheres tant qu'il n'y en a pas
       def boucleEnchere():Enchere = {
-        val e = Enchere.enchere()
+        Printer.printCardsToAll
+        val e: Option[Enchere] = enchereController.enchere()
         if (e.isEmpty) {
           Printer.pasDePrise()
           deck=Deck.shuffle(deck)
@@ -367,7 +366,7 @@ object Partie {
         }
         else e.get
       }
-      enchere = boucleEnchere()
+      val enchere = boucleEnchere()
 
       //Les encheres sont finies, la main commence
       Printer.enchereFinie(enchere)
@@ -383,14 +382,11 @@ object Partie {
       else scoreTotalEO=scoreTotalEO+(contrat*coinche)
 
       // On affiche les scores
-      Printer.printScores()
+      Printer.printScores(scoreTotalNS,scoreTotalEO)
 
       // on fait tourner les roles
       dealer = nextPlayer(dealer)
       currentPlayer = nextPlayer(dealer)
-
-      // on reinitialise l'enchere
-      enchere = new Enchere(-1,0,0)
     }
 
     // fin de la partie

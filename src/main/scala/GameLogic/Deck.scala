@@ -2,7 +2,7 @@ package GameLogic
 
 import scala.util.Random
 
-object Deck {
+class Deck {
   val sortedDeck:List[Card] = List.tabulate(32){new Card(_)}
 
   def newShuffledDeck:List[Card] = {
