@@ -5,6 +5,8 @@ import UI.{Reader, Printer}
 
 class Partie(val Printer:Printer,val Reader:Reader){
 
+  val debug = true
+
   implicit val partie = this
 
   object State extends Enumeration {
@@ -123,6 +125,8 @@ class Partie(val Printer:Printer,val Reader:Reader){
                                                joueurMaitre)
 
         Printer.tourJoueur(currentPlayer)
+        println(jouables)
+        println(autres)
         // state change before printCards, as the player may already know
         // which card he'll play
         state = State.playing
@@ -264,22 +268,29 @@ class Partie(val Printer:Printer,val Reader:Reader){
         }
       }
 
-      // On joue une couleur autre que atout
+      // On joue une couleur autre que atout et un atout a ete joue
       case (Some(couleurDemande), Some(plusForte)) => {
         val cartesCouleurDemande = main.filter(_.famille == couleurDemande)
         // on a pas  la couleur demande
         if (cartesCouleurDemande.isEmpty) {
-          // on doit couper, a part si on ne peut pas ou si le partenaire est pas maitre
-          if (main.filter(_.famille == couleurAtout).isEmpty || joueurMaitre.id == currentPlayer.idPartenaire) {
-            // mais si on choisit de couper qd le part' est maitre, on doit monter
-            val plusBasse = main.filter(_.famille == couleurAtout).filter(_.ordreAtout < plusForte.ordreAtout)
-            (main.diff(plusBasse),plusBasse)
+          // si on a pas d'atout, on joue ce qu'on veut
+          if (main.filter(_.famille == couleurAtout).isEmpty) (main,List())
+          // si on ne peut pas monter
+          else if (main.exists(c => c.famille == couleurAtout && c.ordreAtout < plusForte.ordreAtout)) {
+            // si le part' est maitre, on joue ce qu'on veut
+            if (joueurMaitre.id == currentPlayer.idPartenaire) (main,List())
+            // sinon on doit sous-couper
+            else main.partition(_.famille == couleurAtout)
           }
+          // si on peut monter
           else {
-            // on doit monter, si on peut
-            val plusHaute = main.filter(_.famille == couleurAtout).filter(_.ordreAtout > plusForte.ordreAtout)
-            if (plusHaute.isEmpty) main.partition(_.famille == couleurAtout)
-            else (plusHaute,main.diff(plusHaute))
+            // si le part' est maitre, on peut tout jouer sauf des atouts plus faibles
+            if (joueurMaitre.id == currentPlayer.idPartenaire) {
+              val plusFaibles = main.filter(c => c.famille == couleurAtout && c.ordreAtout < plusForte.ordreAtout)
+              (main diff plusFaibles,plusFaibles)
+            }
+            // sinon on doit sur-couper
+            else main.partition(c => c.famille == couleurAtout && c.ordreAtout > plusForte.ordreAtout)
           }
         }
         // on joue la carte qu'on veut dans la famille demande
