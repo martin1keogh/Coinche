@@ -351,7 +351,8 @@ class Partie(val Printer:Printer,val Reader:Reader){
 
       // on melange le jeu
       deck = Deck.shuffle(deck)
-      deck = Deck.coupe(deck,Random.nextInt(26)+3).getOrElse(deck)
+      // nombre de carte coupé > 3 et < 29
+      deck = Deck.coupe(deck,Random.nextInt(25)+4).getOrElse(deck)
 
       //distribution
       def distribute (deck:List[Card]) : Unit = {
