@@ -64,6 +64,7 @@ class Partie(val Printer:Printer,val Reader:Reader){
     currentPlayer = j2
     scoreTotalEO = 0
     scoreTotalNS = 0
+    listJoueur.zip(List[String]("Sud","Ouest","Nord","Est")).foreach({case (j:Joueur,s:String) => j.rename(s)})
   }
 
   // checks if someone (authorized) asked for the game to be stopped
