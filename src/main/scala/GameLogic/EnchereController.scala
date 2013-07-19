@@ -1,7 +1,7 @@
 package GameLogic
 
 import scala.concurrent.{Future, Await}
-import scala.concurrent.duration.Duration
+import scala.concurrent.duration._
 
 class EnchereController(implicit Partie:Partie){
 
@@ -44,22 +44,25 @@ class EnchereController(implicit Partie:Partie){
     // coinche
     if (couleur == 7) {
       if (listEnchere.nonEmpty && validCoinche(listEnchere.head,Partie.currentPlayer))
-       {val e = listEnchere.head; e.coinche = 2;ret = Some(e)}
+        listEnchere.head.coinche = 2
       else effectuerEnchere()
     }
-    // surcoinche
-    else if (couleur == 8) {
-      if (listEnchere.nonEmpty && validSurCoinche(listEnchere.head,Partie.currentPlayer))
-        {val e = listEnchere.head; e.coinche = 2; ret = Some(e)}
-      else effectuerEnchere()
-    }
-    else if (couleur != 0) {
+    else if (couleur > 0 && couleur < 7) {
       var contrat = -1
       do contrat = Reader.getContrat while (!annonceLegal(contrat))
       ret = Some(new Enchere(couleur-1,contrat,Partie.currentPlayer.id,Partie.currentPlayer.nom,1))
     }
     if (ret.nonEmpty) listEnchere=ret.get::listEnchere
     ret
+  }
+
+  def getSurCoinche():Unit = {
+    def aux() : Unit = {
+      if (Reader.getCouleur == 8) listEnchere.head.coinche = 4
+      else aux()
+    }
+    try {Await.result(Future{aux()},5.seconds)}
+    catch {case e : Throwable => ()}
   }
 
   /**
@@ -78,14 +81,14 @@ class EnchereController(implicit Partie:Partie){
 
     // Boucle principale lors des encheres
     while ( (nbPasse < 3) // apres 3 passes on finit les encheres// on arrete les annonces si on ne peut plus monter
-         || (current == None && nbPasse == 3)){   // sauf s'il n'y a pas eu d'annonce,auquel cas on attend le dernier joueur
+      || (current == None && nbPasse == 3)){   // sauf s'il n'y a pas eu d'annonce,auquel cas on attend le dernier joueur
       if (Partie.checkStop()) throw Partie.Stopped()
       if (current.getOrElse(enchereNull).coinche > 1) {
         Printer.printCoinche()
-        Await.result(Future{Thread.sleep(5000)},Duration.Inf)
+        getSurCoinche()
         return current
       } else
-      Printer.tourJoueurEnchere(Partie.currentPlayer)
+        Printer.tourJoueurEnchere(Partie.currentPlayer)
       val enchere = effectuerEnchere()
       if (enchere.isEmpty) nbPasse=nbPasse+1
       else {

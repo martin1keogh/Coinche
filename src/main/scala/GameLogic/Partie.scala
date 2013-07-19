@@ -126,8 +126,6 @@ class Partie(val Printer:Printer,val Reader:Reader){
                                                joueurMaitre)
 
         Printer.tourJoueur(currentPlayer)
-        println(jouables)
-        println(autres)
         // state change before printCards, as the player may already know
         // which card he'll play
         state = State.playing
