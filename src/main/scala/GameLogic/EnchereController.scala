@@ -24,27 +24,12 @@ class EnchereController(implicit Partie:Partie){
     a>annonceCourante && ( a == 250 || a == 400 || (a%10 == 0 && a < 170))
   }
 
-  def annonceImpossible():Boolean = {
-    if (current.isEmpty) false
-    else (current.get.contrat == 400 || current.get.coinche > 1)
-  }
-
-  def validCoinche(e:Enchere,j:Joueur):Boolean = {
-    // pas le droit de coincher un 80
-    e.contrat > 80 && e.id % 2 != j.id % 2
-  }
-
-  def validSurCoinche(e:Enchere,j:Joueur):Boolean = {
-    e.coinche == 2 && e.id % 2 == j.id % 2
-  }
-
   def effectuerEnchere():Option[Enchere] = {
     var ret:Option[Enchere] = None
     val couleur = Reader.getCouleur
     // coinche
     if (couleur == 7) {
-      if (listEnchere.nonEmpty && validCoinche(listEnchere.head,Partie.currentPlayer))
-        listEnchere.head.coinche = 2
+      if (listEnchere.nonEmpty && listEnchere.head.contrat > 80) listEnchere.head.coinche = 2
       else effectuerEnchere()
     }
     else if (couleur > 0 && couleur < 7) {

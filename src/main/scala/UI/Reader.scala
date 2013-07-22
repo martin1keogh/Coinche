@@ -19,6 +19,7 @@ trait Reader {
    *    8 => sur-coinche
    *
    * Ne doit renvoyer qu'un entier convenable !
+   * Doit verifier que la personne qui coinche peut le faire (i.e est dans l'equipe opposée)
    *
    * @return la couleur annoncé
    */

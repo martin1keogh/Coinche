@@ -37,14 +37,4 @@ class EnchereControllerTest extends FlatSpec{
     assert(!enchereController.annonceLegal(70))
     assert(enchereController.annonceLegal(110))
   }
-  "To still be able to bid, the last bid" must "be lower than 400" in {
-    enchereController.current = Some(new Enchere(0,400,0,"",0))
-    assert(enchereController.annonceImpossible())
-    enchereController.current = None
-  }
-  it must "not have been 'coinché'" in {
-    enchereController.current = Some(new Enchere(0,130,0,"",2))
-    assert(enchereController.annonceImpossible())
-    enchereController.current = None
-  }
 }

@@ -169,7 +169,6 @@ class Partie(val Printer:Printer,val Reader:Reader){
       }
 
       Printer.remporte(premierJoueur,plis.reverse)
-      println("points du pli :" + countPoints(couleurAtout,plis.unzip._2))
       if (premierJoueur.id%2 == 0) scoreNS = scoreNS + countPoints(couleurAtout,plis.unzip._2)
       tour = tour + 1
     }
