@@ -30,7 +30,7 @@ class EnchereController(implicit Partie:Partie){
     // coinche
     if (couleur == 7) {
       if (listEnchere.exists(_.contrat > 80)) listEnchere.head.coinche = 2
-      else effectuerEnchere()
+      else return effectuerEnchere()
     }
     else if (couleur > 0 && couleur < 7) {
       var contrat = -1
