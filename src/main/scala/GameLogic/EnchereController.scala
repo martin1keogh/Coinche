@@ -67,7 +67,6 @@ class EnchereController(implicit Partie:Partie){
     // Boucle principale lors des encheres
     while ( (nbPasse < 3) // apres 3 passes on finit les encheres// on arrete les annonces si on ne peut plus monter
       || (current == None && nbPasse == 3)){   // sauf s'il n'y a pas eu d'annonce,auquel cas on attend le dernier joueur
-      if (Partie.checkStop()) throw Partie.Stopped()
       if (current.exists(_.coinche > 1)) {
         Printer.printCoinche()
         getSurCoinche()

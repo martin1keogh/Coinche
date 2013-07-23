@@ -2,8 +2,11 @@ package GameLogic
 
 import scala.util.Random
 import UI.{Reader, Printer}
+import scala.concurrent.Future
 
 class Partie(val Printer:Printer,val Reader:Reader){
+
+  import scala.concurrent.ExecutionContext.Implicits.global
 
   val debug = true
 
@@ -33,7 +36,7 @@ class Partie(val Printer:Printer,val Reader:Reader){
                        new Joueur(2,"Nord"),
                        new Joueur(3,"Est"))
   // just for ease-of-use
-  implicit val listJoueur = List[Joueur](j1,j2,j3,j4)
+  implicit var listJoueur = List[Joueur](j1,j2,j3,j4)
 
   val Deck = new Deck
   var deck = Deck.newShuffledDeck
@@ -64,8 +67,7 @@ class Partie(val Printer:Printer,val Reader:Reader){
     currentPlayer = j2
     scoreTotalEO = 0
     scoreTotalNS = 0
-    listJoueur.zip(List[String]("Sud","Ouest","Nord","Est"))
-              .foreach({case (j:Joueur,s:String) => j.rename(s)})
+    listJoueur.zip(List[String]("Sud","Ouest","Nord","Est")).foreach({case (j:Joueur,s:String) => j.rename(s)})
   }
 
   // checks if someone asked for the game to be stopped
@@ -120,7 +122,6 @@ class Partie(val Printer:Printer,val Reader:Reader){
 
       // Tant que tout le monde n'a pas joué
       while (plis.length != 4){
-        if (checkStop()) throw Stopped()
         val (jouables,autres) = cartesJouables(currentPlayer.main,
                                                couleurDemande,
                                                couleurAtout,
@@ -340,12 +341,16 @@ class Partie(val Printer:Printer,val Reader:Reader){
   }
 
   def start() {
-    try {
-
     // reset des scores et du jeu
     deck = Deck.newShuffledDeck
     scoreTotalEO = 0;scoreTotalNS = 0
     state = State.running
+
+    // Check for 'Stop' every second
+    Future{while(true){
+      if (checkStop()) throw new Stopped
+      Thread.sleep(1000)
+    }}.onFailure({case s:Stopped => init();return})
 
     while (scoreTotalEO < 1001 && scoreTotalNS < 1001){
 
@@ -404,8 +409,5 @@ class Partie(val Printer:Printer,val Reader:Reader){
     // fin de la partie
     Printer.printFin(scoreTotalNS,scoreTotalEO)
     init()
-    } catch {
-      case s : Stopped => init()
-    }
   }
 }
