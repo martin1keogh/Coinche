@@ -19,10 +19,10 @@ class Deck {
    * @return Une liste de listes de 8 cartes
    */
   def distribution(deck:List[Card]):List[List[Card]] = {
-    val m1 = (deck.slice(0,3)++deck.slice(12,14)++deck.slice(20,23))
-    val m2 = (deck.slice(3,6)++deck.slice(14,16)++deck.slice(23,26))
-    val m3 = (deck.slice(6,9)++deck.slice(16,18)++deck.slice(26,29))
-    val m4 = (deck.slice(9,12)++deck.slice(18,20)++deck.slice(29,32))
+    val m1 = deck.slice(0, 3) ++ deck.slice(12, 14) ++ deck.slice(20, 23)
+    val m2 = deck.slice(3, 6) ++ deck.slice(14, 16) ++ deck.slice(23, 26)
+    val m3 = deck.slice(6, 9) ++ deck.slice(16, 18) ++ deck.slice(26, 29)
+    val m4 = deck.slice(9, 12) ++ deck.slice(18, 20) ++ deck.slice(29, 32)
     m1::m2::m3::m4::List[List[Card]]()
   }
 

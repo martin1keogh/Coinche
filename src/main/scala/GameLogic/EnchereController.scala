@@ -29,7 +29,7 @@ class EnchereController(implicit Partie:Partie){
     val couleur = Reader.getCouleur
     // coinche
     if (couleur == 7) {
-      if (listEnchere.nonEmpty && listEnchere.head.contrat > 80) listEnchere.head.coinche = 2
+      if (listEnchere.exists(_.contrat > 80)) listEnchere.head.coinche = 2
       else effectuerEnchere()
     }
     else if (couleur > 0 && couleur < 7) {
@@ -68,7 +68,7 @@ class EnchereController(implicit Partie:Partie){
     while ( (nbPasse < 3) // apres 3 passes on finit les encheres// on arrete les annonces si on ne peut plus monter
       || (current == None && nbPasse == 3)){   // sauf s'il n'y a pas eu d'annonce,auquel cas on attend le dernier joueur
       if (Partie.checkStop()) throw Partie.Stopped()
-      if (current.getOrElse(enchereNull).coinche > 1) {
+      if (current.exists(_.coinche > 1)) {
         Printer.printCoinche()
         getSurCoinche()
         return current
@@ -86,9 +86,9 @@ class EnchereController(implicit Partie:Partie){
     // si c'est le dernier joueur qui a coinché
     // on laisse le temps au autre joueur de surcoinche
     // (ce qui ce fait normalement dans la boucle while)
-    if (current.getOrElse(enchereNull).coinche == 2) {
+    if (current.exists(_.coinche == 2)) {
       Printer.printCoinche()
-      Await.result(Future{Thread.sleep(5000)},Duration.Inf)
+      getSurCoinche()
       return current
     }
 

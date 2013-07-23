@@ -64,10 +64,11 @@ class Partie(val Printer:Printer,val Reader:Reader){
     currentPlayer = j2
     scoreTotalEO = 0
     scoreTotalNS = 0
-    listJoueur.zip(List[String]("Sud","Ouest","Nord","Est")).foreach({case (j:Joueur,s:String) => j.rename(s)})
+    listJoueur.zip(List[String]("Sud","Ouest","Nord","Est"))
+              .foreach({case (j:Joueur,s:String) => j.rename(s)})
   }
 
-  // checks if someone (authorized) asked for the game to be stopped
+  // checks if someone asked for the game to be stopped
   def checkStop() : Boolean = state == State.stopped
 
   def stopGame() : Unit = state = State.stopped
@@ -93,7 +94,8 @@ class Partie(val Printer:Printer,val Reader:Reader){
     // La variable currentPlayer a ete modifie pendant les encheres
     // La variable dealer ne l'a pas ete
     // Sur generale, le joueur prend la main
-    var premierJoueur = if (enchereController.contrat == 400) listJoueur.find(_.id == enchereController.id).get else nextPlayer(dealer)
+    var premierJoueur = if (enchereController.contrat == 400) listJoueur.find(_.id == enchereController.id).get
+                        else nextPlayer(dealer)
     var tour = 1
     var scoreNS = 0
     capotChute = false; generalChute = false
@@ -140,7 +142,7 @@ class Partie(val Printer:Printer,val Reader:Reader){
           Printer.annonceBelote(currentPlayer.main.filter(_.famille == couleurAtout).count(c => c.valeur == 4 || c.valeur == 5) == 2)
         }
 
-        currentPlayer.main = currentPlayer.main.filterNot(_ == carteJoue)
+        currentPlayer.main = currentPlayer.main diff List(carteJoue)
 
         // Si c'est la premiere carte joue, renseigner la couleur demande
         if (couleurDemande.isEmpty) couleurDemande = Some(carteJoue.famille)
@@ -150,7 +152,7 @@ class Partie(val Printer:Printer,val Reader:Reader){
         else if (carteJoue.stronger(couleurAtout,carteMaitre.get).getOrElse(false)) {carteMaitre = Some(carteJoue);joueurMaitre = currentPlayer}
 
         // Si c'est un atout, on regarde s'il est meilleur
-        if ((carteJoue.famille == couleurAtout) || (couleurDemande.getOrElse(-1) == carteJoue.famille && couleurAtout == 4)) {
+        if ((carteJoue.famille == couleurAtout) || (couleurDemande.exists(_ == carteJoue.famille) && couleurAtout == 4)) {
           //premier atout
           if (plusFortAtout.isEmpty) plusFortAtout = Some(carteJoue)
           else if (carteJoue.stronger(couleurAtout,plusFortAtout.get).getOrElse(false)) plusFortAtout = Some(carteJoue)
@@ -345,7 +347,7 @@ class Partie(val Printer:Printer,val Reader:Reader){
     scoreTotalEO = 0;scoreTotalNS = 0
     state = State.running
 
-    while (scoreTotalEO < 1000 && scoreTotalNS < 1000){
+    while (scoreTotalEO < 1001 && scoreTotalNS < 1001){
 
       // on melange le jeu
       deck = Deck.shuffle(deck)
@@ -354,7 +356,7 @@ class Partie(val Printer:Printer,val Reader:Reader){
 
       //distribution
       def distribute (deck:List[Card]) : Unit = {
-        val mainList = Deck.distribution(deck).map(Deck.trierMain(_))
+        val mainList = Deck.distribution(deck).map(Deck.trierMain)
         nextPlayer(currentPlayer).main = mainList(0)
         nextPlayer(nextPlayer(currentPlayer)).main = mainList(1)
         nextPlayer(nextPlayer(nextPlayer(currentPlayer))).main = mainList(2)
@@ -370,7 +372,7 @@ class Partie(val Printer:Printer,val Reader:Reader){
         if (e.isEmpty) {
           Printer.pasDePrise()
           deck=Deck.shuffle(deck)
-          deck = Deck.coupe(deck,10).getOrElse(deck)
+          deck = Deck.coupe(deck,Random.nextInt(25)+4).getOrElse(deck)
           distribute(deck)
           boucleEnchere()
         }
