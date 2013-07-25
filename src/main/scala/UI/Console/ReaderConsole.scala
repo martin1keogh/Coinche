@@ -9,7 +9,7 @@ class ReaderConsole(PrinterConsole:PrinterConsole) extends Reader{
 
   import GameLogic.Enchere._
 
-  def getMessage:Message = {
+  def getMessage:(Joueur,Message) = {
     def getCouleur:Int = {
       var couleur = -1
       do {
@@ -40,11 +40,12 @@ class ReaderConsole(PrinterConsole:PrinterConsole) extends Reader{
     }
 
     val couleur = getCouleur
-    if (couleur == 0) return Passe()
-    // comment avoir le joueur qui a coinche quand il n'y a qu'un input ?
-    if (couleur == 7) return Coinche(new Joueur(-1,""))
-    if (couleur == 8) return SurCoinche(new Joueur(-1,""))
-    Bid(couleur-1,getContrat,new Joueur(-1,""))
+    // comment avoir le joueur qd il n'ya qu'un input ?
+    val j = new Joueur(-1,"")
+    if (couleur == 0) return (j,Passe())
+    if (couleur == 7) return (j,Coinche())
+    if (couleur == 8) return (j,SurCoinche())
+    (j,Bid(couleur-1,getContrat))
 
   }
 
@@ -63,5 +64,5 @@ class ReaderConsole(PrinterConsole:PrinterConsole) extends Reader{
    *
    * @return le joueur qui a surcoinche, ou None si personne n'a coinche apres 5 secondes
    */
-  def getSurCoinche: Option[Joueur] = None
+  def getSurCoinche: = List[Joueur]()
 }

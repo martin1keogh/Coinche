@@ -21,9 +21,9 @@ class EnchereController(implicit Partie:Partie){
   def id = current.getOrElse(enchereNull).id
   def coinche = current.getOrElse(enchereNull).coinche
 
-  def annonceLegal(a:Int):Boolean = {
+  def annonceLegal(j:Joueur,a:Int):Boolean = {
     val annonceCourante = current.getOrElse(enchereNull).contrat
-    a>annonceCourante && ( a == 250 || a == 400 || (a%10 == 0 && a < 170))
+    a>annonceCourante && ( a == 250 || a == 400 || (a%10 == 0 && a < 170)) && Partie.currentPlayer == j
   }
 
   def coincheValid(j:Joueur) = contrat > 80 && id % 2 != j.id % 2
@@ -36,10 +36,10 @@ class EnchereController(implicit Partie:Partie){
 
   def effectuerEnchere():Option[Enchere] = {
     def readMessage:Option[Enchere] = Reader.getMessage match {
-      case Coinche(j) if true => Some(enchereCoinche(current.get))
-      case SurCoinche(j) if surCoincheValid(j) => Some(enchereSurCoinche(current.get))
-      case Passe() => None
-      case Bid(couleur,valeur,j) if annonceLegal(valeur) => Some(new Enchere(couleur,valeur,j.id,j.nom))
+      case (j,Coinche()) if coincheValid(j) => Some(enchereCoinche(current.get))
+      case (j,SurCoinche()) if surCoincheValid(j) => Some(enchereSurCoinche(current.get))
+      case (j,Passe()) if (j == Partie.currentPlayer) => None
+      case (j,Bid(couleur,valeur)) if annonceLegal(j,valeur) => Some(new Enchere(couleur,valeur,j.id,j.nom))
       case _ => readMessage
     }
     val ret = readMessage
@@ -48,18 +48,11 @@ class EnchereController(implicit Partie:Partie){
   }
 
   def getSurCoinche():Option[Enchere] = {
-    def aux() : Option[Enchere] = {
-      Reader.getMessage match {
-        case SurCoinche(j) if surCoincheValid(j) => {
-          val surCoinche = enchereSurCoinche(current.get)
-          listEnchere = surCoinche :: listEnchere
-          Some(enchereSurCoinche(current.get))
-        }
-        case _ => aux()
-      }
-    }
-    try {Await.result(Future{aux()},5.seconds)}
-    catch {case e : Throwable => current}
+    if (Reader.getSurCoinche.exists(surCoincheValid)) {
+      val surCoinche = enchereSurCoinche(current.get)
+      listEnchere = surCoinche :: listEnchere
+      Some(enchereSurCoinche(current.get))
+    } else None
   }
 
   /**

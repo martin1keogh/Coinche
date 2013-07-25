@@ -2,11 +2,8 @@ package GameLogic
 
 import scala.util.Random
 import UI.{Reader, Printer}
-import scala.concurrent.Future
 
 class Partie(val Printer:Printer,val Reader:Reader){
-
-  import scala.concurrent.ExecutionContext.Implicits.global
 
   val debug = true
 

@@ -5,13 +5,13 @@ import GameLogic.Enchere.Couleur
 
 trait Reader {
 
-  def getMessage:Reader.Message
+  def getMessage:(Joueur,Reader.Message)
 
   /**
    *
-   * @return le joueur qui a surcoinche, ou None si personne n'a coinche apres 5 secondes
+   * @return la liste de toutes les personnes qui ont surcoinche durant les 5 secondes
    */
-  def getSurCoinche:Option[Joueur]
+  def getSurCoinche:List[Joueur]
 
   /**
    * Renvoie la carte jouée (doit etre dans jouable)
@@ -25,9 +25,9 @@ trait Reader {
 
 object Reader{
   abstract class Message
-  case class Bid(couleur:Couleur,valeur:Int,j:Joueur) extends Message
-  case class Coinche(j:Joueur) extends Message
-  case class SurCoinche(j:Joueur) extends Message
+  case class Bid(couleur:Couleur,valeur:Int) extends Message
+  case class Coinche() extends Message
+  case class SurCoinche() extends Message
   case class Passe() extends Message
 
 }
