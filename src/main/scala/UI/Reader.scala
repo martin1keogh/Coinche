@@ -1,6 +1,6 @@
 package UI
 
-import GameLogic.Card
+import GameLogic.{Joueur, Card}
 
 trait Reader {
 
@@ -30,6 +30,12 @@ trait Reader {
    * @return le contrat
    */
   def getContrat:Int
+
+  /**
+   *
+   * @return le joueur qui a surcoinche, ou None si personne n'a coinche apres 5 secondes
+   */
+  def getSurCoinche:Option[Joueur]
 
   /**
    * Renvoie la carte jouée (doit etre dans jouable)

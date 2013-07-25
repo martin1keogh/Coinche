@@ -1,6 +1,6 @@
 package UI.Console
 
-import GameLogic.{EnchereController, Card}
+import GameLogic.{Joueur, EnchereController, Card}
 import UI.Reader
 
 class ReaderConsole(PrinterConsole:PrinterConsole) extends Reader{
@@ -45,5 +45,9 @@ class ReaderConsole(PrinterConsole:PrinterConsole) extends Reader{
     }
   }
 
-
+  /**
+   *
+   * @return le joueur qui a surcoinche, ou None si personne n'a coinche apres 5 secondes
+   */
+  def getSurCoinche: Option[Joueur] = None
 }
