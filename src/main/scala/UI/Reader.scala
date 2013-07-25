@@ -1,35 +1,11 @@
 package UI
 
 import GameLogic.{Joueur, Card}
+import GameLogic.Enchere.Couleur
 
 trait Reader {
 
-  /**
-   * Renvoie la couleur annoncé :
-   *    1 => pique
-   *    2 => carreau
-   *    3 => trefle
-   *    4 => coeur
-   *    5 => tout atout
-   *    6 => sans atout
-   *
-   *    0 => passe
-   *
-   *    7 => coinche
-   *    8 => sur-coinche
-   *
-   * Ne doit renvoyer qu'un entier convenable !
-   * Doit verifier que la personne qui coinche peut le faire (i.e est dans l'equipe opposée)
-   *
-   * @return la couleur annoncé
-   */
-  def getCouleur:Int
-
-  /**
-   * Renvoie la valeur du contrat
-   * @return le contrat
-   */
-  def getContrat:Int
+  def getMessage:Reader.Message
 
   /**
    *
@@ -44,5 +20,14 @@ trait Reader {
    * @return la carte jouée
    */
   def getCard(jouables:List[Card],autres:List[Card]):Card
+
+}
+
+object Reader{
+  abstract class Message
+  case class Bid(couleur:Couleur,valeur:Int,j:Joueur) extends Message
+  case class Coinche(j:Joueur) extends Message
+  case class SurCoinche(j:Joueur) extends Message
+  case class Passe() extends Message
 
 }

@@ -2,10 +2,12 @@ package GameLogic
 
 import scala.concurrent.{Future, Await}
 import scala.concurrent.duration._
+import GameLogic.Enchere._
 
 class EnchereController(implicit Partie:Partie){
 
   import scala.concurrent.ExecutionContext.Implicits.global
+  import UI.Reader._
 
   var Printer = Partie.Printer
   var Reader = Partie.Reader
@@ -13,7 +15,7 @@ class EnchereController(implicit Partie:Partie){
   var listEnchere:List[Enchere] = List()
   var current:Option[Enchere] = None
 
-  val enchereNull = new Enchere(-1,70,-1,"",-1)
+  val enchereNull = new Enchere(Undef(),70,-1,"",-1)
   def couleur = current.getOrElse(enchereNull).couleur
   def contrat = current.getOrElse(enchereNull).contrat
   def id = current.getOrElse(enchereNull).id
@@ -24,30 +26,40 @@ class EnchereController(implicit Partie:Partie){
     a>annonceCourante && ( a == 250 || a == 400 || (a%10 == 0 && a < 170))
   }
 
+  def coincheValid(j:Joueur) = contrat > 80 && id % 2 != j.id % 2
+
+  def surCoincheValid(j:Joueur) = coinche == 2 && id % 2 == j.id % 2
+
+  def enchereCoinche(e:Enchere):Enchere = {val ret = e;ret.coinche = 2;ret}
+
+  def enchereSurCoinche(e:Enchere):Enchere = {val ret = e;ret.coinche = 4;ret}
+
   def effectuerEnchere():Option[Enchere] = {
-    var ret:Option[Enchere] = None
-    val couleur = Reader.getCouleur
-    // coinche
-    if (couleur == 7) {
-      if (listEnchere.exists(_.contrat > 80)) listEnchere.head.coinche = 2
-      else return effectuerEnchere()
+    def readMessage:Option[Enchere] = Reader.getMessage match {
+      case Coinche(j) if true => Some(enchereCoinche(current.get))
+      case SurCoinche(j) if surCoincheValid(j) => Some(enchereSurCoinche(current.get))
+      case Passe() => None
+      case Bid(couleur,valeur,j) if annonceLegal(valeur) => Some(new Enchere(couleur,valeur,j.id,j.nom))
+      case _ => readMessage
     }
-    else if (couleur > 0 && couleur < 7) {
-      var contrat = -1
-      do contrat = Reader.getContrat while (!annonceLegal(contrat))
-      ret = Some(new Enchere(couleur-1,contrat,Partie.currentPlayer.id,Partie.currentPlayer.nom,1))
-    }
+    val ret = readMessage
     if (ret.nonEmpty) listEnchere=ret.get::listEnchere
     ret
   }
 
-  def getSurCoinche():Unit = {
-    def aux() : Unit = {
-      if (Reader.getCouleur == 8) listEnchere.head.coinche = 4
-      else aux()
+  def getSurCoinche():Option[Enchere] = {
+    def aux() : Option[Enchere] = {
+      Reader.getMessage match {
+        case SurCoinche(j) if surCoincheValid(j) => {
+          val surCoinche = enchereSurCoinche(current.get)
+          listEnchere = surCoinche :: listEnchere
+          Some(enchereSurCoinche(current.get))
+        }
+        case _ => aux()
+      }
     }
     try {Await.result(Future{aux()},5.seconds)}
-    catch {case e : Throwable => ()}
+    catch {case e : Throwable => current}
   }
 
   /**
@@ -65,32 +77,24 @@ class EnchereController(implicit Partie:Partie){
     Partie.state = Partie.State.bidding
 
     // Boucle principale lors des encheres
-    while ( (nbPasse < 3) // apres 3 passes on finit les encheres// on arrete les annonces si on ne peut plus monter
+    while ( (nbPasse < 3)                      // apres 3 passes on finit les encheres
       || (current == None && nbPasse == 3)){   // sauf s'il n'y a pas eu d'annonce,auquel cas on attend le dernier joueur
       if (current.exists(_.coinche > 1)) {
         Printer.printCoinche()
-        getSurCoinche()
-        return current
-      } else
+        nbPasse = 4
+        current = getSurCoinche()
+      } else {
         Printer.tourJoueurEnchere(Partie.currentPlayer)
-      val enchere = effectuerEnchere()
-      if (enchere.isEmpty) nbPasse=nbPasse+1
-      else {
-        //une enchere a etait faite, on remet le nombre de passe a zero
-        nbPasse=0
-        current = enchere
+        val enchere = effectuerEnchere()
+        if (enchere.isEmpty) nbPasse=nbPasse+1
+        else {
+          //une enchere a etait faite, on remet le nombre de passe a zero
+          nbPasse=0
+          current = enchere
+        }
+        Partie.currentPlayer = Partie.nextPlayer(Partie.currentPlayer)
       }
-      Partie.currentPlayer = Partie.nextPlayer(Partie.currentPlayer)
     }
-    // si c'est le dernier joueur qui a coinché
-    // on laisse le temps au autre joueur de surcoinche
-    // (ce qui ce fait normalement dans la boucle while)
-    if (current.exists(_.coinche == 2)) {
-      Printer.printCoinche()
-      getSurCoinche()
-      return current
-    }
-
     Partie.state = Partie.State.running
 
     current
