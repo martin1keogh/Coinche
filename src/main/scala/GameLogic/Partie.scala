@@ -341,16 +341,11 @@ class Partie(val Printer:Printer,val Reader:Reader){
   }
 
   def start() {
+    try {
     // reset des scores et du jeu
     deck = Deck.newShuffledDeck
     scoreTotalEO = 0;scoreTotalNS = 0
     state = State.running
-
-    // Check for 'Stop' every second
-    Future{while(true){
-      if (checkStop()) throw new Stopped
-      Thread.sleep(1000)
-    }}.onFailure({case s:Stopped => init();return})
 
     while (scoreTotalEO < 1001 && scoreTotalNS < 1001){
 
@@ -409,5 +404,8 @@ class Partie(val Printer:Printer,val Reader:Reader){
     // fin de la partie
     Printer.printFin(scoreTotalNS,scoreTotalEO)
     init()
+    } catch{
+      case e : InterruptedException => ()
+    }
   }
 }
