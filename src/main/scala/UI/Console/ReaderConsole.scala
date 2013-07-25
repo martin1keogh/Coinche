@@ -64,5 +64,5 @@ class ReaderConsole(PrinterConsole:PrinterConsole) extends Reader{
    *
    * @return le joueur qui a surcoinche, ou None si personne n'a coinche apres 5 secondes
    */
-  def getSurCoinche: = List[Joueur]()
+  def getSurCoinche:List[Joueur] = List[Joueur]()
 }

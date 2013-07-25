@@ -1,12 +1,9 @@
 package GameLogic
 
-import scala.concurrent.{Future, Await}
-import scala.concurrent.duration._
 import GameLogic.Enchere._
 
 class EnchereController(implicit Partie:Partie){
 
-  import scala.concurrent.ExecutionContext.Implicits.global
   import UI.Reader._
 
   var Printer = Partie.Printer
@@ -75,7 +72,7 @@ class EnchereController(implicit Partie:Partie){
       if (current.exists(_.coinche > 1)) {
         Printer.printCoinche()
         nbPasse = 4
-        current = getSurCoinche()
+        current = getSurCoinche() orElse(current)
       } else {
         Printer.tourJoueurEnchere(Partie.currentPlayer)
         val enchere = effectuerEnchere()
