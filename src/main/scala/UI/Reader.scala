@@ -47,6 +47,8 @@ abstract class Reader{
 
   def sendMessage(messageOption:Option[Message]) = if (messageOption.isDefined) router ! messageOption.get
 
+  def stopGame = router ! StopGame
+
 //  def getMessage:(Joueur,Reader.Message)
 
   /**
@@ -68,6 +70,8 @@ object Reader{
   abstract class Message
   abstract class BiddingMessage extends Message
   abstract class PlayingMessage extends Message
+
+  case object StopGame extends Message
 
   case class Bid(joueur:Joueur,couleur:Couleur,valeur:Int) extends BiddingMessage
   case class Coinche(joueur:Joueur) extends BiddingMessage

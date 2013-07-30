@@ -1,7 +1,7 @@
 package UI
 
 import akka.actor.{ActorRef, Actor}
-import UI.Reader.{SurCoinche, PlayingMessage, BiddingMessage}
+import UI.Reader.{StopGame, SurCoinche, PlayingMessage, BiddingMessage}
 import GameLogic.Joueur
 
 class Router extends Actor{
@@ -16,6 +16,7 @@ class Router extends Actor{
     }
     case Normal => context.become(receive)
     case AwaitCard => context.become(waitingCard(sender))
+    case StopGame => s ! new InterruptedException
     case _ => ()
   }
 
@@ -26,6 +27,7 @@ class Router extends Actor{
     }
     case Normal => context.become(receive)
     case AwaitBid => context.become(waitingBid(sender))
+    case StopGame => s ! new InterruptedException
     case _ => ()
   }
 
