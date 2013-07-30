@@ -35,7 +35,6 @@ class MainController(implicit Partie:Partie) {
         val c = card.find(c => jouables.exists(cc => cc.equals(c)))
         c.getOrElse({Printer.cardUnplayable;getCard(jouables)})
       }
-      case None => jouables(0)
       case e => getCard(jouables)
     }
   }

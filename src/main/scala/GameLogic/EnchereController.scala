@@ -43,7 +43,7 @@ class EnchereController(implicit Partie:Partie){
   def effectuerEnchere():Option[Enchere] = {
     def readMessage:Option[Enchere] = {
       val card = try {Await.result(Router ? AwaitBid,2 minute)}
-                 catch {case t:java.util.concurrent.TimeoutException => Passe(Partie.currentPlayer)}
+                 catch {case t:java.util.concurrent.TimeoutException => None}
       card match {
         case Coinche(j) if coincheValid(j) => Some(enchereCoinche(current.get))
         case SurCoinche(j) if surCoincheValid(j) => Some(enchereSurCoinche(current.get))
