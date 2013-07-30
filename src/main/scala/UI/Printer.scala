@@ -51,6 +51,10 @@ trait Printer {
    */
   def tourJoueurEnchere(implicit joueur:Joueur)
 
+  def cardUnplayable
+
+  def annonceImpossible
+
   /**
    * Affiche "A X de jouer"
    * @param j

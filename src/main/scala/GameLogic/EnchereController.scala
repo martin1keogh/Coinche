@@ -1,13 +1,19 @@
 package GameLogic
 
 import GameLogic.Enchere._
+import akka.pattern.ask
+import UI.Router.{ReturnResults, AwaitSurCoinche, Normal, AwaitBid}
+import scala.concurrent.duration._
+import scala.concurrent.Await
+import akka.util.Timeout
 
 class EnchereController(implicit Partie:Partie){
 
   import UI.Reader._
 
-  var Printer = Partie.Printer
-  var Reader = Partie.Reader
+  implicit val timeout = Timeout(60 seconds)
+
+  val Router = Partie.Reader.router
 
   var listEnchere:List[Enchere] = List()
   var current:Option[Enchere] = None
@@ -19,8 +25,11 @@ class EnchereController(implicit Partie:Partie){
   def coinche = current.getOrElse(enchereNull).coinche
 
   def annonceLegal(j:Joueur,a:Int):Boolean = {
-    val annonceCourante = current.getOrElse(enchereNull).contrat
-    a>annonceCourante && ( a == 250 || a == 400 || (a%10 == 0 && a < 170)) && Partie.currentPlayer == j
+    a>contrat && ( a == 250 || a == 400 || (a%10 == 0 && a < 170)) && Partie.currentPlayer == j && coinche < 2
+  }
+
+  def passeLegal(j:Joueur):Boolean = {
+    Partie.currentPlayer == j && coinche < 2
   }
 
   def coincheValid(j:Joueur) = contrat > 80 && id % 2 != j.id % 2
@@ -32,12 +41,17 @@ class EnchereController(implicit Partie:Partie){
   def enchereSurCoinche(e:Enchere):Enchere = {val ret = e;ret.coinche = 4;ret}
 
   def effectuerEnchere():Option[Enchere] = {
-    def readMessage:Option[Enchere] = Reader.getMessage match {
-      case (j,Coinche()) if coincheValid(j) => Some(enchereCoinche(current.get))
-      case (j,SurCoinche()) if surCoincheValid(j) => Some(enchereSurCoinche(current.get))
-      case (j,Passe()) if (j == Partie.currentPlayer) => None
-      case (j,Bid(couleur,valeur)) if annonceLegal(j,valeur) => Some(new Enchere(couleur,valeur,j.id,j.nom))
-      case _ => readMessage
+    def readMessage:Option[Enchere] = {
+      val card = try {Await.result(Router ? AwaitBid,2 minute)}
+                 catch {case t:java.util.concurrent.TimeoutException => Passe(Partie.currentPlayer)}
+      card match {
+        case Coinche(j) if coincheValid(j) => Some(enchereCoinche(current.get))
+        case SurCoinche(j) if surCoincheValid(j) => Some(enchereSurCoinche(current.get))
+        case Passe(j) if passeLegal(j) => None
+        case Bid(j,couleur,valeur) if annonceLegal(j,valeur) => Some(new Enchere(couleur,valeur,j.id,j.nom))
+        case Bid(j,_,_) if j == Partie.currentPlayer => {Partie.Printer.annonceImpossible;readMessage}
+        case _ => readMessage
+      }
     }
     val ret = readMessage
     if (ret.nonEmpty) listEnchere=ret.get::listEnchere
@@ -45,7 +59,10 @@ class EnchereController(implicit Partie:Partie){
   }
 
   def getSurCoinche():Option[Enchere] = {
-    if (Reader.getSurCoinche.exists(surCoincheValid)) {
+    Router ! AwaitSurCoinche
+    Thread.sleep(5000) // 5 secondes pour surcoincher
+    val listSurCoinche = Await.result((Router ? ReturnResults).mapTo[List[Joueur]], 10 seconds)
+    if (listSurCoinche.exists(surCoincheValid)) {
       val surCoinche = enchereSurCoinche(current.get)
       listEnchere = surCoinche :: listEnchere
       Some(enchereSurCoinche(current.get))
@@ -59,6 +76,8 @@ class EnchereController(implicit Partie:Partie){
    *         coinche : 1 = pas de coinche, 2 = coinché, 4 = contré
    */
   def enchere():Option[Enchere] = {
+
+
     // On reinitialise les variables globales
     current = None
     var nbPasse = 0
@@ -70,11 +89,11 @@ class EnchereController(implicit Partie:Partie){
     while ( (nbPasse < 3)                      // apres 3 passes on finit les encheres
       || (current == None && nbPasse == 3)){   // sauf s'il n'y a pas eu d'annonce,auquel cas on attend le dernier joueur
       if (current.exists(_.coinche > 1)) {
-        Printer.printCoinche()
+        Partie.Printer.printCoinche()
         nbPasse = 4
-        current = getSurCoinche() orElse(current)
+        current = getSurCoinche() orElse current
       } else {
-        Printer.tourJoueurEnchere(Partie.currentPlayer)
+        Partie.Printer.tourJoueurEnchere(Partie.currentPlayer)
         val enchere = effectuerEnchere()
         if (enchere.isEmpty) nbPasse=nbPasse+1
         else {
@@ -85,6 +104,8 @@ class EnchereController(implicit Partie:Partie){
         Partie.currentPlayer = Partie.nextPlayer(Partie.currentPlayer)
       }
     }
+
+    Router ! Normal
     Partie.state = Partie.State.running
 
     current

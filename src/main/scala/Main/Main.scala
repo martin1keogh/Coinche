@@ -1,16 +1,13 @@
 package Main
 
 import GameLogic.Partie
-import UI.Console.{ReaderConsole, PrinterConsole}
+import UI.Console.{PrinterConsole, ReaderConsole}
 
 object Main {
 
   def main(args: Array[String]) {
 
-    val printer = new PrinterConsole
-    val reader = new ReaderConsole(printer)
-    val Partie = new Partie(printer,reader)
-
-    Partie.start()
+    val partie = new Partie(new PrinterConsole,new ReaderConsole)
+    partie.start()
   }
 }

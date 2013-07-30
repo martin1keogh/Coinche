@@ -145,4 +145,8 @@ class PrinterConsole() extends Printer{
     if (first) println(joueur+" annonce Belote.")
     else println(joueur+" annonce rebelote.")
   }
+
+  def cardUnplayable {}
+
+  def annonceImpossible {}
 }
