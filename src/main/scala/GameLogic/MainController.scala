@@ -6,6 +6,7 @@ import akka.pattern.ask
 import UI.Reader.{PlayCard, PlayingMessage}
 import akka.util.Timeout
 import scala.concurrent.duration._
+import scala.language.postfixOps
 
 class MainController(implicit Partie:Partie) {
 

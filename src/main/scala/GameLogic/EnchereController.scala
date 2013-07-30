@@ -6,6 +6,7 @@ import UI.Router.{ReturnResults, AwaitSurCoinche, Normal, AwaitBid}
 import scala.concurrent.duration._
 import scala.concurrent.Await
 import akka.util.Timeout
+import scala.language.postfixOps
 
 class EnchereController(implicit Partie:Partie){
 

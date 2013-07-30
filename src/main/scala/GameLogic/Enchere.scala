@@ -1,6 +1,7 @@
 package GameLogic
 
 import GameLogic.Enchere.Couleur
+import scala.language.implicitConversions
 
 class Enchere(val couleur:Couleur,val contrat:Int,val id:Int,nom:String, var coinche:Int = 1) {
 
