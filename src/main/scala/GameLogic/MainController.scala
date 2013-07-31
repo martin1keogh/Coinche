@@ -33,7 +33,7 @@ class MainController(implicit Partie:Partie) {
                catch {case t:java.util.concurrent.TimeoutException => {Router ! StopWaiting; None}}
     card match {
       case PlayCard(joueur,card) if joueur == currentPlayer => {
-        val c = card.find(c => jouables.exists(cc => cc.equals(c)))
+        val c = jouables.find(c => card.exists(cc => cc.equals(c)))
         c.getOrElse({Printer.cardUnplayable;getCard(jouables)})
       }
       case e => getCard(jouables)
