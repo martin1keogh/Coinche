@@ -28,15 +28,19 @@ class MainController(implicit Partie:Partie) {
     atouts.exists(_.valeur == 4) && atouts.exists(_.valeur == 5)
   }
 
-  def getCard(jouables:List[Card]):Card = {
-    val card = try {Await.result((Router ? AwaitCard).mapTo[PlayingMessage],Duration.Inf)}
-               catch {case t:java.util.concurrent.TimeoutException => {Router ! StopWaiting; None}}
-    card match {
-      case PlayCard(joueur,card) if joueur == currentPlayer => {
-        val c = jouables.find(c => card.exists(cc => cc.equals(c)))
-        c.getOrElse({Printer.cardUnplayable;getCard(jouables)})
+  def getCard(jouables:List[Card],autres:List[Card]):Card = {
+    // play automatically the last card
+    if (jouables.length == 1 && autres.isEmpty) jouables(0)
+    else {
+      val card = try {Await.result((Router ? AwaitCard).mapTo[PlayingMessage],Duration.Inf)}
+                 catch {case t:java.util.concurrent.TimeoutException => {Router ! StopWaiting; None}}
+      card match {
+        case PlayCard(joueur,card) if joueur == currentPlayer => {
+          val c = jouables.find(c => card.exists(cc => cc.equals(c)))
+          c.getOrElse({Printer.cardUnplayable;getCard(jouables,autres)})
+        }
+        case e => getCard(jouables,autres)
       }
-      case e => getCard(jouables)
     }
   }
 
@@ -86,7 +90,7 @@ class MainController(implicit Partie:Partie) {
         // which card he'll play
         state = State.playing
         if (!printOnlyOnce) Printer.printCards(jouables,autres)
-        val carteJoue = getCard(jouables)
+        val carteJoue = getCard(jouables,autres)
         state = State.running
         Printer.joueurAJoue(carteJoue)
         // need to print 'belote' or 'rebelote'
