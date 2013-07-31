@@ -160,7 +160,7 @@ class Partie(val Printer:Printer,val Reader:Reader){
     Printer.printFin(scoreTotalNS,scoreTotalEO)
     init()
     } catch{
-      case e : InterruptedException => ()
+      case e : InterruptedException => init()
     }
   }
 }

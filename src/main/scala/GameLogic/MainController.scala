@@ -3,7 +3,7 @@ package GameLogic
 import scala.concurrent.Await
 import UI.Router.AwaitCard
 import akka.pattern.ask
-import UI.Reader.{PlayCard, PlayingMessage,StopWaiting}
+import UI.Reader.{StopGame, PlayCard, PlayingMessage, StopWaiting}
 import akka.util.Timeout
 import scala.concurrent.duration._
 import scala.language.postfixOps
@@ -39,6 +39,7 @@ class MainController(implicit Partie:Partie) {
           val c = jouables.find(c => card.exists(cc => cc.equals(c)))
           c.getOrElse({Printer.cardUnplayable;getCard(jouables,autres)})
         }
+        case StopGame => throw new InterruptedException
         case e => getCard(jouables,autres)
       }
     }

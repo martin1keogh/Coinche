@@ -51,6 +51,7 @@ class EnchereController(implicit Partie:Partie){
         case Passe(j) if passeLegal(j) => None
         case Bid(j,couleur,valeur) if annonceLegal(j,valeur) => Some(new Enchere(couleur,valeur,j.id,j.nom))
         case Bid(j,_,_) if j == Partie.currentPlayer => {Partie.Printer.annonceImpossible;readMessage}
+        case StopGame => throw new InterruptedException
         case _ => readMessage
       }
     }
