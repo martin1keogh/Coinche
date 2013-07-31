@@ -3,7 +3,7 @@ package GameLogic
 import scala.concurrent.Await
 import UI.Router.AwaitCard
 import akka.pattern.ask
-import UI.Reader.{PlayCard, PlayingMessage}
+import UI.Reader.{PlayCard, PlayingMessage,StopWaiting}
 import akka.util.Timeout
 import scala.concurrent.duration._
 import scala.language.postfixOps
@@ -14,7 +14,7 @@ class MainController(implicit Partie:Partie) {
 
   val Router = Reader.router
 
-  implicit val timeout = new Timeout(1 minute)
+  implicit val timeout = new Timeout(10 minute)
 
   /**
    *
@@ -29,8 +29,8 @@ class MainController(implicit Partie:Partie) {
   }
 
   def getCard(jouables:List[Card]):Card = {
-    val card = try {Await.result((Router ? AwaitCard).mapTo[PlayingMessage],1 minute)}
-               catch {case t:java.util.concurrent.TimeoutException => None}
+    val card = try {Await.result((Router ? AwaitCard).mapTo[PlayingMessage],Duration.Inf)}
+               catch {case t:java.util.concurrent.TimeoutException => {Router ! StopWaiting; None}}
     card match {
       case PlayCard(joueur,card) if joueur == currentPlayer => {
         val c = card.find(c => jouables.exists(cc => cc.equals(c)))

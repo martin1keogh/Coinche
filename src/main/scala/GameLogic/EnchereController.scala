@@ -12,7 +12,7 @@ class EnchereController(implicit Partie:Partie){
 
   import UI.Reader._
 
-  implicit val timeout = Timeout(60 seconds)
+  implicit val timeout = new Timeout(10 minute)
 
   val Router = Partie.Reader.router
 
@@ -43,8 +43,8 @@ class EnchereController(implicit Partie:Partie){
 
   def effectuerEnchere():Option[Enchere] = {
     def readMessage:Option[Enchere] = {
-      val card = try {Await.result(Router ? AwaitBid,2 minute)}
-                 catch {case t:java.util.concurrent.TimeoutException => None}
+      val card = try {Await.result(Router ? AwaitBid,Duration.Inf)}
+                 catch {case t:java.util.concurrent.TimeoutException => {Router ! StopWaiting; None}}
       card match {
         case Coinche(j) if coincheValid(j) => Some(enchereCoinche(current.get))
         case SurCoinche(j) if surCoincheValid(j) => Some(enchereSurCoinche(current.get))
