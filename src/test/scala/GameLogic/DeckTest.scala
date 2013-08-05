@@ -14,7 +14,7 @@ import UI.Console.{ReaderConsole, PrinterConsole}
 class DeckTest extends FlatSpec{
   val Deck = new Deck
   val pr = new PrinterConsole
-  val Partie = new Partie(pr, new ReaderConsole(pr))
+  val Partie = new Partie(pr, new ReaderConsole)
   "A sorted deck" must "have exactly 32 cards" in{
     assert(Deck.sortedDeck.size == 32)
   }
@@ -42,14 +42,5 @@ class DeckTest extends FlatSpec{
   "After cutting a deck, it" should "still have the same number of cards" in {
     val deck = Deck.newShuffledDeck
     assert(Deck.coupe(deck,Random.nextInt(25)+4).get.size == deck.size)
-  }
-  "A complete deck" should " be worth 152 points when playing without trumps" in {
-    assert (Partie.countPoints(5,Deck.newShuffledDeck) == 152)
-  }
-  it should "be worth 152 points when all suits are trumps" in {
-    assert (Partie.countPoints(4,Deck.newShuffledDeck) == 152)
-  }
-  it should "be worth 152 points when there is only one trump suit" in {
-    assert (Partie.countPoints(3,Deck.newShuffledDeck) == 152)
   }
 }
