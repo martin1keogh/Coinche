@@ -50,7 +50,7 @@ class Partie(val Printer:Printer,val Reader:Reader){
   // Does someone has 'belote' ?
   var belote:Option[Joueur] = None
 
-  lazy val enchereController:EnchereController = new EnchereController
+  lazy val enchereController = new EnchereController
   lazy val mainController = new MainController
 
   def nextPlayer(j:Joueur):Joueur = j match {
@@ -86,7 +86,7 @@ class Partie(val Printer:Printer,val Reader:Reader){
       // N/S on pris
       if (contrat == 400) !generalChute
       else if (contrat == 250) !capotChute
-      else score>contrat
+      else score>=contrat
     }
     else {
       if (contrat == 400) generalChute
