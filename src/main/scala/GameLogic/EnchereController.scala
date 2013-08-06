@@ -12,7 +12,7 @@ class EnchereController(implicit Partie:Partie){
 
   import UI.Reader._
 
-  implicit val timeout = new Timeout(10 minute)
+  implicit val timeout = new Timeout(10 minutes)
 
   val Router = Partie.Reader.router
 

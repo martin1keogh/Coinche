@@ -14,7 +14,7 @@ class MainController(implicit Partie:Partie) {
 
   val Router = Reader.router
 
-  implicit val timeout = new Timeout(10 minute)
+  implicit val timeout = new Timeout(10 minutes)
 
   /**
    *
@@ -32,9 +32,9 @@ class MainController(implicit Partie:Partie) {
     // play automatically the last card
     if (jouables.length == 1 && autres.isEmpty) jouables(0)
     else {
-      val card = try {Await.result((Router ? AwaitCard).mapTo[PlayingMessage],Duration.Inf)}
-                 catch {case t:java.util.concurrent.TimeoutException => {Router ! StopWaiting; None}}
-      card match {
+      val cardList = try {Await.result((Router ? AwaitCard).mapTo[PlayingMessage],Duration.Inf)}
+                     catch {case t:java.util.concurrent.TimeoutException => {Router ! StopWaiting; None}}
+      cardList match {
         case PlayCard(joueur,card) if joueur == currentPlayer => {
           val c = jouables.find(c => card.exists(cc => cc.equals(c)))
           c.getOrElse({Printer.cardUnplayable;getCard(jouables,autres)})
