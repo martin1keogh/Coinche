@@ -60,7 +60,7 @@ class EnchereController(implicit Partie:Partie){
     ret
   }
 
-  def getSurCoinche():Option[Enchere] = {
+  def getSurCoinche:Option[Enchere] = {
     Router ! AwaitSurCoinche
     Thread.sleep(5000) // 5 secondes pour surcoincher
     val listSurCoinche = Await.result((Router ? ReturnResults).mapTo[List[Joueur]], 10 seconds)
@@ -93,7 +93,7 @@ class EnchereController(implicit Partie:Partie){
       if (current.exists(_.coinche > 1)) {
         Partie.Printer.printCoinche()
         nbPasse = 4
-        current = getSurCoinche() orElse current
+        current = getSurCoinche orElse current
       } else {
         Partie.Printer.tourJoueurEnchere(Partie.currentPlayer)
         val enchere = effectuerEnchere()

@@ -1,9 +1,9 @@
 package GameLogic
 
 class Card(n:Int) {
-  val famille:Int = (n/8)
+  val famille:Int = n / 8
 
-  val valeur:Int = (n%8)
+  val valeur:Int = n % 8
 
   val pointsToutAtout:Int = valeur match {
     case 0 => 0  // Sept
@@ -73,7 +73,7 @@ class Card(n:Int) {
 
   /**
    *
-   * @param couleurAtout
+   * @param couleurAtout La couleur de l'atout durant cette main
    * @param c la carte a laquelle comparer
    * @return None si les cartes ne sont pas de la meme famille et qu'aucune des deux n'est de l'atout
    *         Some(true) si la carte est plus grande que c, false sinon
@@ -115,7 +115,7 @@ object Card {
     case "DAME" | "D" | "Q" => 4
     case "ROI"  | "R" | "K" => 5
     case "DIX"  | "10" => 6
-    case "AS" => 7
+    case "AS"   | "A"=> 7
     case _ => -1
   }
 

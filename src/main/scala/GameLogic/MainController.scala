@@ -18,7 +18,7 @@ class MainController(implicit Partie:Partie) {
 
   /**
    *
-   * @param couleurAtout
+   * @param couleurAtout couleur de l'atout durant cette main
    * @param joueur
    * @return Returns true if 'joueur' has belote at 'couleurAtout'
    */
@@ -169,11 +169,11 @@ class MainController(implicit Partie:Partie) {
   }
 
   /**
-   * @param main
-   * @param couleurDemandeOption
-   * @param couleurAtout
-   * @param plusFortAtoutOption
-   * @param joueurMaitre
+   * @param main Liste contenant les cartes du joueurs
+   * @param couleurDemandeOption Couleur de la premiere carte joué durant ce pli (None si il n'y a pas encore de carte jouée)
+   * @param couleurAtout Couleur de l'atout durant cette main
+   * @param plusFortAtoutOption Plus fort atout sur la table (None s'il n'y a aucun atout sur la table)
+   * @param joueurMaitre Joueur controllant le pli
    * @return Renvoie une paire de listes
    *         la premiere contient les cartes jouables,
    *         la deuxieme les cartes non-jouables

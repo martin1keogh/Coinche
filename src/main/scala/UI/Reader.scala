@@ -16,10 +16,17 @@ abstract class Reader{
   val router = system.actorOf(Props[Router])
 
 
+  /**
+   * Tries to transform input to List[Card].
+   * (return type is List[Card] if the reader allows the players to enter partial information
+   * (i.e `play king` may translate to List(King of Heart,...,King of Spade))
+   * @param input
+   * @return None if `input` was not recognized, Some(cardList) otherwise.
+   */
   def inputToCard(input:Input):List[Card]
 
   /**
-   * Tries to transform input (type A) to card
+   * Tries to transform input to playingMessage
    * @param joueur player who inputted text
    * @param input
    * @return None if input was not recognized, Some(PlayCard(joueur,inputToCard(input)) otherwise
@@ -32,8 +39,8 @@ abstract class Reader{
 
   /**
    * Tries to transform input to bidding message
-   * @param joueur
-   * @param input
+   * @param joueur Player who sent the message
+   * @param input Message to try and transform
    * @return None if input was not recognized, Some(message:BiddingMessage) otherwise
    */
   implicit def inputToBiddingMessageOption(joueur:Joueur,input:Input):Option[BiddingMessage]
@@ -48,22 +55,6 @@ abstract class Reader{
   def sendMessage(messageOption:Option[Message]) = if (messageOption.isDefined) router ! messageOption.get
 
   def stopGame = router ! StopGame
-
-//  def getMessage:(Joueur,Reader.Message)
-
-  /**
-   *
-   * @return la liste de toutes les personnes qui ont surcoinche durant les 5 secondes
-   */
-//  def getSurCoinche:List[Joueur]
-
-  /**
-   * Renvoie la carte jouée (doit etre dans jouable)
-   * @param jouables les cartes autorisées
-   * @param autres les cartes non jouables
-   * @return la carte jouée
-   */
-//  def getCard(jouables:List[Card],autres:List[Card]):Card
 }
 
 object Reader{

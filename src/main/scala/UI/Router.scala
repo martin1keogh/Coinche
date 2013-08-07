@@ -39,7 +39,7 @@ class Router extends Actor{
     case _ => ()
   }
 
-  def waitingSurCoinche():Receive = {
+  def waitingSurCoinche:Receive = {
     case SurCoinche(j) => listSurCoinche = j :: listSurCoinche
     case ReturnResults => {
       context.become(receive)
