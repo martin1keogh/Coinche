@@ -29,12 +29,12 @@ class Partie(val Printer:Printer,val Reader:Reader){
   var printOnlyOnce = false
 
   // the 4 players
-  val (j1,j2,j3,j4) = (new Joueur(0,"Sud"),
+  var (j1,j2,j3,j4) = (new Joueur(0,"Sud"),
                        new Joueur(1,"Ouest"),
                        new Joueur(2,"Nord"),
                        new Joueur(3,"Est"))
   // just for ease-of-use
-  implicit var listJoueur = List[Joueur](j1,j2,j3,j4)
+  implicit def listJoueur = List[Joueur](j1,j2,j3,j4)
 
   val Deck = new Deck
   var deck = Deck.newShuffledDeck
@@ -53,12 +53,7 @@ class Partie(val Printer:Printer,val Reader:Reader){
   lazy val enchereController = new EnchereController
   lazy val mainController = new MainController
 
-  def nextPlayer(j:Joueur):Joueur = j match {
-    case `j1` => j2
-    case `j2` => j3
-    case `j3` => j4
-    case `j4` => j1
-  }
+  def nextPlayer(j:Joueur):Joueur = listJoueur.find(_.id == (j.id+1)%4).get
 
   def init():Unit = {
     state = State.stopped
@@ -101,9 +96,9 @@ class Partie(val Printer:Printer,val Reader:Reader){
     deck = Deck.newShuffledDeck
     scoreTotalEO = 0;scoreTotalNS = 0
     state = State.running
+    currentPlayer = nextPlayer(dealer)
 
     while (scoreTotalEO < 1001 && scoreTotalNS < 1001){
-
       // on melange le jeu
       deck = Deck.shuffle(deck)
       // nombre de carte coupé > 3 et < 29

@@ -7,6 +7,7 @@ import UI.Reader.{StopGame, PlayCard, PlayingMessage, StopWaiting}
 import akka.util.Timeout
 import scala.concurrent.duration._
 import scala.language.postfixOps
+import GameLogic.Bot.Bot
 
 class MainController(implicit Partie:Partie) {
 
@@ -15,6 +16,11 @@ class MainController(implicit Partie:Partie) {
   val Router = Reader.router
 
   implicit val timeout = new Timeout(10 minutes)
+
+  /**
+   * Contient toutes les cartes deja jouées durant cette main
+   */
+  var cartesJouees:List[Card] = List[Card]()
 
   /**
    *
@@ -68,7 +74,7 @@ class MainController(implicit Partie:Partie) {
     while (tour < 9) {
       currentPlayer = premierJoueur
       // la liste des cartes sur le pli
-      var plis = List[(Joueur,Card)]()
+      var pli = List[(Joueur,Card)]()
       var couleurDemande:Option[Int] = None
       var plusFortAtout:Option[Card] = None
       var joueurMaitre = currentPlayer
@@ -79,7 +85,7 @@ class MainController(implicit Partie:Partie) {
 
 
       // Tant que tout le monde n'a pas joué
-      while (plis.length != 4){
+      while (pli.length != 4){
         val (jouables,autres) = cartesJouables(currentPlayer.main,
           couleurDemande,
           couleurAtout,
@@ -91,7 +97,10 @@ class MainController(implicit Partie:Partie) {
         // which card he'll play
         state = State.playing
         if (!printOnlyOnce) Printer.printCards(jouables,autres)
-        val carteJoue = getCard(jouables,autres)
+        val carteJoue = currentPlayer match {
+          case b:Bot => b.getCard(jouables,autres,pli)
+          case _ => getCard(jouables,autres)
+        }
         state = State.running
         Printer.joueurAJoue(carteJoue)
         // need to print 'belote' or 'rebelote'
@@ -117,11 +126,12 @@ class MainController(implicit Partie:Partie) {
           else if (carteJoue.stronger(couleurAtout,plusFortAtout.get).getOrElse(false)) plusFortAtout = Some(carteJoue)
         }
 
-        plis = (currentPlayer,carteJoue)::plis
+        pli = (currentPlayer,carteJoue)::pli
+        cartesJouees = carteJoue::cartesJouees
         currentPlayer = nextPlayer(currentPlayer)
       }
 
-      premierJoueur = vainqueur(plis.reverse,couleurAtout)
+      premierJoueur = vainqueur(pli.reverse,couleurAtout)
 
       // on regarde si capot/general chute
       if (premierJoueur.id != enchereController.current.get.id) {
@@ -129,8 +139,8 @@ class MainController(implicit Partie:Partie) {
         if (premierJoueur.idPartenaire != enchereController.current.get.id) capotChute = true
       }
 
-      Printer.remporte(premierJoueur,plis.reverse)
-      if (premierJoueur.id%2 == 0) scoreNS = scoreNS + countPoints(couleurAtout,plis.unzip._2)
+      Printer.remporte(premierJoueur,pli.reverse)
+      if (premierJoueur.id%2 == 0) scoreNS = scoreNS + countPoints(couleurAtout,pli.unzip._2)
       tour = tour + 1
     }
     // dix de der
@@ -162,8 +172,7 @@ class MainController(implicit Partie:Partie) {
       // si les deux cartes ne sont pas comparables (stronger renvoie None)
       // bestCard gagne (puisque soit la couleur demande, soit de l'atout)
       if (card.stronger(couleurAtout,bestCard).getOrElse(false)) {bestCard = card;bestPlayer = joueur}
-    }
-    }
+    }}
     )
     bestPlayer
   }

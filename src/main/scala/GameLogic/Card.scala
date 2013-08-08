@@ -1,6 +1,8 @@
 package GameLogic
 
-class Card(n:Int) {
+import GameLogic.Enchere.Couleur
+
+case class Card(n:Int) {
   val famille:Int = n / 8
 
   val valeur:Int = n % 8
@@ -137,4 +139,27 @@ object Card {
     case 7 => "As"
   }
 
+  sealed trait Valeur
+  case object Sept extends Valeur
+  case object Huit extends Valeur
+  case object Neuf extends Valeur
+  case object Dix extends Valeur
+  case object Valet extends Valeur
+  case object Dame extends Valeur
+  case object Roi extends Valeur
+  case object As extends Valeur
+
+  implicit def valeurEtCouleurToCard(v:Valeur,c:Couleur):Card ={
+    val vInt = v match {
+      case Sept => 0
+      case Huit => 1
+      case Neuf => 2
+      case Dix =>6
+      case Valet =>3
+      case Dame => 4
+      case Roi => 5
+      case As => 7
+    }
+    Card(vInt+c*8)
+  }
 }

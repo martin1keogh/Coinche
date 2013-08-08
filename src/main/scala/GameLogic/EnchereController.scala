@@ -7,6 +7,7 @@ import scala.concurrent.duration._
 import scala.concurrent.Await
 import akka.util.Timeout
 import scala.language.postfixOps
+import GameLogic.Bot.Bot
 
 class EnchereController(implicit Partie:Partie){
 
@@ -87,6 +88,7 @@ class EnchereController(implicit Partie:Partie){
 
     Partie.state = Partie.State.bidding
 
+
     // Boucle principale lors des encheres
     while ( (nbPasse < 3)                      // apres 3 passes on finit les encheres
       || (current == None && nbPasse == 3)){   // sauf s'il n'y a pas eu d'annonce,auquel cas on attend le dernier joueur
@@ -96,7 +98,10 @@ class EnchereController(implicit Partie:Partie){
         current = getSurCoinche orElse current
       } else {
         Partie.Printer.tourJoueurEnchere(Partie.currentPlayer)
-        val enchere = effectuerEnchere()
+        val enchere = Partie.currentPlayer match {
+          case b:Bot => {println("waiting for bid");b.effectuerEnchere(listEnchere)}
+          case j:Joueur => {println(j);effectuerEnchere()}
+        }
         if (enchere.isEmpty) nbPasse=nbPasse+1
         else {
           //une enchere a etait faite, on remet le nombre de passe a zero
