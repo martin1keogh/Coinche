@@ -36,6 +36,13 @@ class Partie(val Printer:Printer,val Reader:Reader){
   // just for ease-of-use
   implicit def listJoueur = List[Joueur](j1,j2,j3,j4)
 
+  def updatePlayer(old:Joueur,_new:Joueur):Unit = old match{
+    case j if j == j1 => j1 = _new
+    case j if j == j2 => j2 = _new
+    case j if j == j3 => j3 = _new
+    case j if j == j4 => j4 = _new
+  }
+
   val Deck = new Deck
   var deck = Deck.newShuffledDeck
 
