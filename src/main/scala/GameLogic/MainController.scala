@@ -32,7 +32,7 @@ class MainController(implicit Partie:Partie) {
     // play automatically the last card
     if (jouables.length == 1 && autres.isEmpty) jouables(0)
     else {
-      val cardList = try {Await.result((Router ? AwaitCard).mapTo[PlayingMessage],Duration.Inf)}
+      val cardList = try {Await.result(Router ? AwaitCard,Duration.Inf)}
                      catch {case t:java.util.concurrent.TimeoutException => {Router ! StopWaiting; None}}
       cardList match {
         case PlayCard(joueur,card) if joueur == currentPlayer => {
