@@ -56,9 +56,7 @@ class EnchereController(implicit Partie:Partie){
         case _ => readMessage
       }
     }
-    val ret = readMessage
-    if (ret.nonEmpty) listEnchere=ret.get::listEnchere
-    ret
+    readMessage
   }
 
   def getSurCoinche:Option[Enchere] = {
@@ -106,6 +104,7 @@ class EnchereController(implicit Partie:Partie){
         else {
           //une enchere a etait faite, on remet le nombre de passe a zero
           nbPasse=0
+          listEnchere = enchere.get :: listEnchere
           current = enchere
         }
         Partie.currentPlayer = Partie.nextPlayer(Partie.currentPlayer)
