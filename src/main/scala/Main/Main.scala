@@ -12,7 +12,6 @@ object Main {
     import scala.concurrent.ExecutionContext.Implicits.global
 
     val partie = new Partie(new PrinterConsole,new ReaderConsole)
-    partie.j1 = new DumBot(partie,0,"Bot1")
     partie.j2 = new DumBot(partie,1,"Bot2")
     partie.j3 = new DumBot(partie,2,"Bot3")
     partie.j4 = new DumBot(partie,3,"Bot4")

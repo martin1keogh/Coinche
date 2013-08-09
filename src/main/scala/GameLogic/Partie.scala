@@ -2,6 +2,7 @@ package GameLogic
 
 import scala.util.Random
 import UI.{Reader, Printer}
+import GameLogic.Bot.Bot
 
 
 class Partie(val Printer:Printer,val Reader:Reader){
@@ -36,11 +37,25 @@ class Partie(val Printer:Printer,val Reader:Reader){
   // just for ease-of-use
   implicit def listJoueur = List[Joueur](j1,j2,j3,j4)
 
-  def updatePlayer(old:Joueur,_new:Joueur):Unit = old match{
+  def playerToBot(old:Joueur,_new:Joueur):Unit = old match{
     case j if j == j1 => j1 = _new
     case j if j == j2 => j2 = _new
     case j if j == j3 => j3 = _new
     case j if j == j4 => j4 = _new
+  }
+
+  def botToPlayer(old:Joueur): Unit = {
+    def createPlayer(b:Joueur) = {
+      val j = new Joueur(b.id,b.nom)
+      j.main = b.main
+      j
+    }
+    old match {
+      case j if j == j1 => j1 = createPlayer(j)
+      case j if j == j2 => j2 = createPlayer(j)
+      case j if j == j3 => j3 = createPlayer(j)
+      case j if j == j4 => j4 = createPlayer(j)
+    }
   }
 
   val Deck = new Deck

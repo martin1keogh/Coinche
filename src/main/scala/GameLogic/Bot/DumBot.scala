@@ -27,9 +27,10 @@ class DumBot(partie:Partie,id:Int,nom:String) extends Bot(partie,id,nom){
 }
 
 object DumBot {
-  def createFromPlayer(partie:Partie,joueur:Joueur) = {
+  def createFromPlayer(partie:Partie,joueur:Joueur): DumBot = {
     val bot = new DumBot(partie,joueur.id,joueur.nom)
     bot.main = joueur.main
     bot.rename(joueur.nom+"DumBot") // default name
+    bot
   }
 }
