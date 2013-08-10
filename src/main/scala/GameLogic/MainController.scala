@@ -73,6 +73,7 @@ class MainController(implicit Partie:Partie) {
     var scoreNS = 0
     capotChute = false; generalChute = false
 
+    cartesJoueesWithPlayer = List()
     belote = listJoueur.find(hasBelote(couleurAtout,_))
 
     if (printOnlyOnce) Printer.printCardsToAll(couleurAtout)
