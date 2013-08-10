@@ -20,7 +20,7 @@ class EnchereController(implicit Partie:Partie){
   val Router = Partie.Reader.router
 
   var listEnchere:List[Enchere] = List()
-  var current:Option[Enchere] = None
+  def current:Option[Enchere] = listEnchere.headOption
 
   val enchereNull = new Enchere(Undef,70,-1,"",-1)
   def couleur = current.getOrElse(enchereNull).couleur
@@ -28,16 +28,46 @@ class EnchereController(implicit Partie:Partie){
   def id = current.getOrElse(enchereNull).id
   def coinche = current.getOrElse(enchereNull).coinche
 
-  def annonceLegal(j:Joueur,a:Int):Boolean = {
-    a>contrat && ( a == 250 || a == 400 || (a%10 == 0 && a < 170)) && Partie.currentPlayer == j && coinche < 2
+  /**
+   *
+   * @param joueur Joueur qui a annoncé
+   * @param valeur Valeur de l'annonce
+   * @return true si : c'est a joueur de parler
+   *                   valeur est superieur a l'enchere courante
+   *                   valeur est legal (80,...,160,250 ou 400)
+   *                   l'enchere courante n'est pas coinché
+   *         false sinon
+   */
+  def annonceLegal(joueur:Joueur,valeur:Int):Boolean = {
+    valeur>contrat && ( valeur== 250 || valeur== 400 || (valeur%10 == 0 && valeur< 170 && valeur > 70)) &&
+    Partie.currentPlayer == joueur && coinche < 2
   }
 
+  /**
+   *
+   * @param j le joueur qui passe
+   * @return true si : c'est a j de parler
+   *                   l'enchere courante n'est pas coinche
+   */
   def passeLegal(j:Joueur):Boolean = {
     Partie.currentPlayer == j && coinche < 2
   }
 
-  def coincheValid(j:Joueur) = contrat > 80 && id % 2 != j.id % 2
+  /**
+   *
+   * @param j le joueur qui a coinché
+   * @return true si : j n'est pas dans l'equipe qui tient l'enchere courante
+   *                   l'enchere courante est superieur a 80
+   *                   l'enchere courante n'a pas deja ete coinche
+   */
+  def coincheValid(j:Joueur) = contrat > 80 && id % 2 != j.id % 2 && coinche == 1
 
+  /**
+   *
+   * @param j le joueur qui a surcoinche
+   * @return true si : j est dans l'equipe de l'enchere courante
+   *                   l'enchere courante a etait coinche
+   */
   def surCoincheValid(j:Joueur) = coinche == 2 && id % 2 == j.id % 2
 
   def enchereCoinche(e:Enchere):Enchere = {val ret = e;ret.coinche = 2;ret}
@@ -83,7 +113,6 @@ class EnchereController(implicit Partie:Partie){
 
 
     // On reinitialise les variables globales
-    current = None
     var nbPasse = 0
     listEnchere = List()
 
@@ -96,7 +125,6 @@ class EnchereController(implicit Partie:Partie){
       if (current.exists(_.coinche > 1)) {
         Partie.Printer.printCoinche()
         nbPasse = 4
-        current = getSurCoinche orElse current
       } else {
         Partie.Printer.tourJoueurEnchere(Partie.currentPlayer)
         // Receiving a PlayerTypeChangeException means a human player was replaced by a bot
@@ -113,7 +141,6 @@ class EnchereController(implicit Partie:Partie){
           //une enchere a etait faite, on remet le nombre de passe a zero
           nbPasse=0
           listEnchere = enchere.get :: listEnchere
-          current = enchere
         }
         Partie.Printer.printEnchere(enchere)
         Partie.currentPlayer = Partie.nextPlayer(Partie.currentPlayer)

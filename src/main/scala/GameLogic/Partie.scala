@@ -99,6 +99,29 @@ class Partie(val Printer:Printer,val Reader:Reader){
     listJoueur.zip(List[String]("Sud","Ouest","Nord","Est")).foreach({case (j:Joueur,s:String) => j.rename(s)})
   }
 
+  def distribute (deck:List[Card]) : Unit = {
+    val mainList = Deck.distribution(deck).map(Deck.trierMain)
+    nextPlayer(currentPlayer).main = mainList(0)
+    nextPlayer(nextPlayer(currentPlayer)).main = mainList(1)
+    nextPlayer(nextPlayer(nextPlayer(currentPlayer))).main = mainList(2)
+    currentPlayer.main = mainList(3)
+  }
+
+  // boucle sur les encheres tant qu'il n'y en a pas
+  def getEnchere():Enchere = {
+    Printer.printCardsToAll
+    val e: Option[Enchere] = enchereController.enchere()
+    if (e.isEmpty) {
+      Printer.pasDePrise()
+      deck = Deck.shuffle(deck)
+      deck = Deck.coupe(deck,Random.nextInt(25)+4).getOrElse(deck)
+      distribute(deck)
+      getEnchere()
+    }
+    else e.get
+  }
+
+
   // checks if someone asked for the game to be stopped
   def checkStop() : Boolean = state == State.stopped
 
@@ -140,30 +163,9 @@ class Partie(val Printer:Printer,val Reader:Reader){
       deck = Deck.coupe(deck,Random.nextInt(25)+4).getOrElse(deck)
 
       //distribution
-      def distribute (deck:List[Card]) : Unit = {
-        val mainList = Deck.distribution(deck).map(Deck.trierMain)
-        nextPlayer(currentPlayer).main = mainList(0)
-        nextPlayer(nextPlayer(currentPlayer)).main = mainList(1)
-        nextPlayer(nextPlayer(nextPlayer(currentPlayer))).main = mainList(2)
-        currentPlayer.main = mainList(3)
-      }
-
       distribute(deck)
 
-      // boucle sur les encheres tant qu'il n'y en a pas
-      def boucleEnchere():Enchere = {
-        Printer.printCardsToAll
-        val e: Option[Enchere] = enchereController.enchere()
-        if (e.isEmpty) {
-          Printer.pasDePrise()
-          deck=Deck.shuffle(deck)
-          deck = Deck.coupe(deck,Random.nextInt(25)+4).getOrElse(deck)
-          distribute(deck)
-          boucleEnchere()
-        }
-        else e.get
-      }
-      val enchere = boucleEnchere()
+      val enchere = getEnchere()
 
       //Les encheres sont finies, la main commence
       Printer.enchereFinie(enchere)

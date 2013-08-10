@@ -43,7 +43,7 @@ class MainController(implicit Partie:Partie) {
     // play automatically the last card
     if (jouables.length == 1 && autres.isEmpty) jouables(0)
     else {
-      val cardList = try {Await.result((Router ? AwaitCard),Duration.Inf)}
+      val cardList = try {Await.result(Router ? AwaitCard,Duration.Inf)}
                      catch {case t:java.util.concurrent.TimeoutException => {Router ! StopWaiting; None}}
       cardList match {
         case PlayCard(joueur,card) if joueur == currentPlayer => {
@@ -66,8 +66,7 @@ class MainController(implicit Partie:Partie) {
     // La variable currentPlayer a ete modifie pendant les encheres
     // La variable dealer ne l'a pas ete
     // Sur generale, le joueur prend la main
-    var premierJoueur = if (enchereController.contrat == 400) listJoueur.find(_.id == enchereController.id).get
-    else nextPlayer(dealer)
+    var premierJoueur = if (enchereController.contrat == 400) listJoueur.find(_.id == enchereController.id).get else nextPlayer(dealer)
     var tour = 1
     var scoreNS = 0
     capotChute = false; generalChute = false
@@ -92,26 +91,24 @@ class MainController(implicit Partie:Partie) {
 
       // Tant que tout le monde n'a pas joué
       while (pli.length != 4){
-        val (jouables,autres) = cartesJouables(currentPlayer.main,
-          couleurDemande,
-          couleurAtout,
-          plusFortAtout,
-          joueurMaitre)
+        val (jouables,autres) = cartesJouables(currentPlayer.main,couleurDemande,couleurAtout,plusFortAtout,joueurMaitre)
 
         Printer.tourJoueur(currentPlayer)
-        // state change before printCards, as the player may already know
-        // which card he'll play
         state = State.playing
         if (!printOnlyOnce) Printer.printCards(jouables,autres)
+
         def getCarteJoue: Card = try {
           currentPlayer match {
             case b:BotTrait => b.getCard(jouables,autres,pli)
             case j:Joueur => getCard(jouables,autres)
           }
         } catch {case `PlayerTypeChangeException` => getCarteJoue}
+
         val carteJoue = getCarteJoue
+
         state = State.running
         Printer.joueurAJoue(carteJoue)
+
         // need to print 'belote' or 'rebelote'
         if (belote.exists(j => j.id == currentPlayer.id && j.id % 2 == enchereController.id % 2) // player has belote and his team won the bidding
           && carteJoue.famille == couleurAtout                                       // he plays a trump card
