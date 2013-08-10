@@ -1,11 +1,18 @@
 package GameLogic
 
-class Card(n:Int) {
+import GameLogic.Enchere.Couleur
+import GameLogic.Card.Valeur
+
+case class Card(n:Int) {
   val famille:Int = n / 8
 
-  val valeur:Int = n % 8
+  @deprecated(message = "Card.valeur should now be used")
+  val v:Int = n % 8
 
-  val pointsToutAtout:Int = valeur match {
+  val couleur = Enchere.intToCouleur(famille)
+  val valeur:Valeur = Card.valeurToInt(n%8)
+
+  val pointsToutAtout:Int = v match {
     case 0 => 0  // Sept
     case 1 => 0  // Huit
     case 2 => 9  // Neuf
@@ -17,7 +24,7 @@ class Card(n:Int) {
 
   }
 
-  val pointsSansAtout:Int = valeur match {
+  val pointsSansAtout:Int = v match {
     case 0 => 0   // Sept
     case 1 => 0   // Huit
     case 2 => 0   // Neuf
@@ -28,7 +35,7 @@ class Card(n:Int) {
     case 7 => 19  // As
   }
 
-  val pointsClassique:Int = valeur match {
+  val pointsClassique:Int = v match {
     case 0 => 0   // Sept
     case 1 => 0   // Huit
     case 2 => 0   // Neuf
@@ -40,7 +47,7 @@ class Card(n:Int) {
   }
 
 
-  val pointsAtout:Int = valeur match {
+  val pointsAtout:Int = v match {
     case 0 => 0   // Sept
     case 1 => 0   // Huit
     case 2 => 14   // Neuf
@@ -51,7 +58,7 @@ class Card(n:Int) {
     case 7 => 11  // As
   }
 
-  val ordreAtout:Int = valeur match {
+  val ordreAtout:Int = v match {
     case 0 => 0   // Sept
     case 1 => 1   // Huit
     case 2 => 6   // Neuf
@@ -62,14 +69,12 @@ class Card(n:Int) {
     case 7 => 5  // As
   }
 
-  val ordreClassique:Int = valeur
+  val ordreClassique:Int = v
 
-  val valeurToString:String = Card.valeurToString(valeur)
+  val valeurToString:String = Card.valeurToString(v)
   val familleToString:String = Card.familleToString(famille)
 
-  def equals(c: Card): Boolean = {
-    c.valeur == valeur && c.famille == famille
-  }
+  def equals(c: Card): Boolean = c.valeur == valeur && c.famille == famille
 
   /**
    *
@@ -137,4 +142,37 @@ object Card {
     case 7 => "As"
   }
 
+  sealed trait Valeur
+  case object Sept extends Valeur
+  case object Huit extends Valeur
+  case object Neuf extends Valeur
+  case object Dix extends Valeur
+  case object Valet extends Valeur
+  case object Dame extends Valeur
+  case object Roi extends Valeur
+  case object As extends Valeur
+
+  implicit def valeurToInt(v:Valeur):Int = v match {
+    case Sept => 0
+    case Huit => 1
+    case Neuf => 2
+    case Dix =>6
+    case Valet =>3
+    case Dame => 4
+    case Roi => 5
+    case As => 7
+  }
+
+  implicit def intToValeur(i:Int):Valeur = i match {
+    case 0 => Sept
+    case 1 => Huit
+    case 2 => Neuf
+    case 6 => Dix
+    case 3 => Valet
+    case 4 => Dame
+    case 5 => Roi
+    case 7 => As
+  }
+
+  implicit def valeurEtCouleurToCard(v:Valeur,c:Couleur):Card = Card(v+c*8)
 }

@@ -3,10 +3,14 @@ package GameLogic
 import scala.concurrent.Await
 import UI.Router.AwaitCard
 import akka.pattern.ask
-import UI.Reader.{StopGame, PlayCard, PlayingMessage, StopWaiting}
+import UI.Reader._
 import akka.util.Timeout
 import scala.concurrent.duration._
 import scala.language.postfixOps
+import GameLogic.Bot.BotTrait
+import GameLogic.Card.{Roi, Dame}
+import scala.Some
+import UI.Reader.PlayCard
 
 class MainController(implicit Partie:Partie) {
 
@@ -15,6 +19,15 @@ class MainController(implicit Partie:Partie) {
   val Router = Reader.router
 
   implicit val timeout = new Timeout(10 minutes)
+
+  val PlayerTypeChangeException = new Exception
+
+  var cartesJoueesWithPlayer:List[(Joueur,Card)] = List()
+
+  /**
+   * Contient toutes les cartes deja jouées durant cette main
+   */
+  def cartesJouees:List[Card] = cartesJoueesWithPlayer.map(_._2)
 
   /**
    *
@@ -25,7 +38,7 @@ class MainController(implicit Partie:Partie) {
   def hasBelote(couleurAtout:Int,joueur:Joueur):Boolean = {
     val atouts = joueur.main.filter(_.famille == couleurAtout)
     // Has the queen               // Has the king
-    atouts.exists(_.valeur == 4) && atouts.exists(_.valeur == 5)
+    atouts.exists(_.valeur == Dame) && atouts.exists(_.valeur == Roi)
   }
 
   def getCard(jouables:List[Card],autres:List[Card]):Card = {
@@ -40,6 +53,7 @@ class MainController(implicit Partie:Partie) {
           c.getOrElse({Printer.cardUnplayable;getCard(jouables,autres)})
         }
         case StopGame => throw new InterruptedException
+        case PlayerTypeChange => throw PlayerTypeChangeException
         case e => getCard(jouables,autres)
       }
     }
@@ -54,8 +68,7 @@ class MainController(implicit Partie:Partie) {
     // La variable currentPlayer a ete modifie pendant les encheres
     // La variable dealer ne l'a pas ete
     // Sur generale, le joueur prend la main
-    var premierJoueur = if (enchereController.contrat == 400) listJoueur.find(_.id == enchereController.id).get
-    else nextPlayer(dealer)
+    var premierJoueur = if (enchereController.contrat == 400) listJoueur.find(_.id == enchereController.id).get else nextPlayer(dealer)
     var tour = 1
     var scoreNS = 0
     capotChute = false; generalChute = false
@@ -68,7 +81,7 @@ class MainController(implicit Partie:Partie) {
     while (tour < 9) {
       currentPlayer = premierJoueur
       // la liste des cartes sur le pli
-      var plis = List[(Joueur,Card)]()
+      var pli = List[(Joueur,Card)]()
       var couleurDemande:Option[Int] = None
       var plusFortAtout:Option[Card] = None
       var joueurMaitre = currentPlayer
@@ -79,26 +92,30 @@ class MainController(implicit Partie:Partie) {
 
 
       // Tant que tout le monde n'a pas joué
-      while (plis.length != 4){
-        val (jouables,autres) = cartesJouables(currentPlayer.main,
-          couleurDemande,
-          couleurAtout,
-          plusFortAtout,
-          joueurMaitre)
+      while (pli.length != 4){
+        val (jouables,autres) = cartesJouables(currentPlayer.main,couleurDemande,couleurAtout,plusFortAtout,joueurMaitre)
 
         Printer.tourJoueur(currentPlayer)
-        // state change before printCards, as the player may already know
-        // which card he'll play
         state = State.playing
         if (!printOnlyOnce) Printer.printCards(jouables,autres)
-        val carteJoue = getCard(jouables,autres)
+
+        def getCarteJoue: Card = try {
+          currentPlayer match {
+            case b:BotTrait => b.getCard(jouables,autres,pli)
+            case j:Joueur => getCard(jouables,autres)
+          }
+        } catch {case `PlayerTypeChangeException` => getCarteJoue}
+
+        val carteJoue = getCarteJoue
+
         state = State.running
         Printer.joueurAJoue(carteJoue)
+
         // need to print 'belote' or 'rebelote'
         if (belote.exists(j => j.id == currentPlayer.id && j.id % 2 == enchereController.id % 2) // player has belote and his team won the bidding
           && carteJoue.famille == couleurAtout                                       // he plays a trump card
-          && (carteJoue.valeur == 4 || carteJoue.valeur == 5)) {                     // which is the queen or the king
-          Printer.annonceBelote(currentPlayer.main.filter(_.famille == couleurAtout).count(c => c.valeur == 4 || c.valeur == 5) == 2)
+          && (carteJoue.valeur == Dame || carteJoue.valeur == Roi)) {                     // which is the queen or the king
+          Printer.annonceBelote(currentPlayer.main.filter(_.famille == couleurAtout).count(c => c.valeur == Dame || c.valeur == Roi) == 2)
         }
 
         currentPlayer.main = currentPlayer.main diff List(carteJoue)
@@ -117,11 +134,13 @@ class MainController(implicit Partie:Partie) {
           else if (carteJoue.stronger(couleurAtout,plusFortAtout.get).getOrElse(false)) plusFortAtout = Some(carteJoue)
         }
 
-        plis = (currentPlayer,carteJoue)::plis
+        pli = (currentPlayer,carteJoue)::pli
         currentPlayer = nextPlayer(currentPlayer)
       }
 
-      premierJoueur = vainqueur(plis.reverse,couleurAtout)
+      cartesJoueesWithPlayer = pli ::: cartesJoueesWithPlayer
+
+      premierJoueur = vainqueur(pli.reverse,couleurAtout)
 
       // on regarde si capot/general chute
       if (premierJoueur.id != enchereController.current.get.id) {
@@ -129,8 +148,8 @@ class MainController(implicit Partie:Partie) {
         if (premierJoueur.idPartenaire != enchereController.current.get.id) capotChute = true
       }
 
-      Printer.remporte(premierJoueur,plis.reverse)
-      if (premierJoueur.id%2 == 0) scoreNS = scoreNS + countPoints(couleurAtout,plis.unzip._2)
+      Printer.remporte(premierJoueur,pli.reverse)
+      if (premierJoueur.id%2 == 0) scoreNS = scoreNS + countPoints(couleurAtout,pli.unzip._2)
       tour = tour + 1
     }
     // dix de der
@@ -152,21 +171,16 @@ class MainController(implicit Partie:Partie) {
     else card.pointsClassique}).sum
   }
 
-  def vainqueur(plis:List[(Joueur,Card)],couleurAtout:Int):Joueur = {
-    // at first, the best card/player is the one who opened
-    var bestCard = plis.head._2
-    var bestPlayer = plis.head._1
-
-    plis.foreach({elem => {
-      val (joueur,card) = elem
-      // si les deux cartes ne sont pas comparables (stronger renvoie None)
-      // bestCard gagne (puisque soit la couleur demande, soit de l'atout)
-      if (card.stronger(couleurAtout,bestCard).getOrElse(false)) {bestCard = card;bestPlayer = joueur}
-    }
-    }
-    )
-    bestPlayer
-  }
+  /**
+   *
+   * @param pli liste de couple (joueur,carte) du pli, dans l'ordre joue (1er carte joue en premiere position)
+   * @param couleurAtout couleur de l'atout durant la main
+   * @return Joueur ayant remporte le pli
+   */
+  def vainqueur(pli:List[(Joueur,Card)],couleurAtout:Int):Joueur =
+    pli.reduceLeft[(Joueur,Card)]({case ((j1,c1),(j2,c2)) =>
+      if (c2.stronger(couleurAtout,c1).getOrElse(false)) (j2,c2) else (j1,c1)
+    })._1
 
   /**
    * @param main Liste contenant les cartes du joueurs

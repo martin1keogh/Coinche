@@ -1,6 +1,6 @@
 package GameLogic
 
-import GameLogic.Enchere.Couleur
+import GameLogic.Enchere.{Pique, Couleur}
 import scala.language.implicitConversions
 
 class Enchere(val couleur:Couleur,val contrat:Int,val id:Int,nom:String, var coinche:Int = 1) {
@@ -25,32 +25,33 @@ class Enchere(val couleur:Couleur,val contrat:Int,val id:Int,nom:String, var coi
 }
 
 object Enchere {
-  sealed abstract class Couleur
-  case class Pique() extends Couleur
-  case class Coeur() extends Couleur
-  case class Carreau() extends Couleur
-  case class Trefle() extends Couleur
-  case class ToutAtout() extends Couleur
-  case class SansAtout() extends Couleur
-  case class Undef() extends Couleur
+
+  sealed trait Couleur
+  case object Pique extends Couleur
+  case object Coeur extends Couleur
+  case object Carreau extends Couleur
+  case object Trefle extends Couleur
+  case object ToutAtout extends Couleur
+  case object SansAtout extends Couleur
+  case object Undef extends Couleur
 
   implicit def couleurToInt(c:Couleur):Int = c match{
-    case Pique() => 0
-    case Carreau() => 1
-    case Trefle() => 2
-    case Coeur() => 3
-    case ToutAtout() => 4
-    case SansAtout() => 5
-    case Undef() => -1
+    case Pique => 0
+    case Carreau => 1
+    case Trefle => 2
+    case Coeur => 3
+    case ToutAtout => 4
+    case SansAtout => 5
+    case Undef => -1
   }
 
   implicit def intToCouleur(i:Int):Couleur = i match {
-    case 0 => Pique()
-    case 1 => Carreau()
-    case 2 => Trefle()
-    case 3 => Coeur()
-    case 4 => ToutAtout()
-    case 5 => SansAtout()
-    case _ => Undef()
+    case 0 => Pique
+    case 1 => Carreau
+    case 2 => Trefle
+    case 3 => Coeur
+    case 4 => ToutAtout
+    case 5 => SansAtout
+    case _ => Undef
   }
 }

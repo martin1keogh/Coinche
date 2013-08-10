@@ -9,6 +9,8 @@ trait Printer {
 
   def printCards(couleurAtout:Int)(implicit joueur:Joueur)
 
+  def printEnchere(enchere:Option[Enchere])
+
   /**
    * Affiche toutes les encheres effectuees durant ce tour d'annonces
    */

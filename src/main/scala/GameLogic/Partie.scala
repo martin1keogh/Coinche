@@ -2,6 +2,7 @@ package GameLogic
 
 import scala.util.Random
 import UI.{Reader, Printer}
+import UI.Reader.PlayerTypeChange
 
 
 class Partie(val Printer:Printer,val Reader:Reader){
@@ -29,12 +30,46 @@ class Partie(val Printer:Printer,val Reader:Reader){
   var printOnlyOnce = false
 
   // the 4 players
-  val (j1,j2,j3,j4) = (new Joueur(0,"Sud"),
+  var (j1,j2,j3,j4) = (new Joueur(0,"Sud"),
                        new Joueur(1,"Ouest"),
                        new Joueur(2,"Nord"),
                        new Joueur(3,"Est"))
   // just for ease-of-use
-  implicit var listJoueur = List[Joueur](j1,j2,j3,j4)
+  implicit def listJoueur = List[Joueur](j1,j2,j3,j4)
+
+  def updateRef(old:Joueur,_new:Joueur):Unit = {
+    if (currentPlayer == old) currentPlayer = _new
+    if (dealer == old) dealer = _new
+  }
+
+  def playerToBot(old:Joueur,_new:Joueur):Unit = {
+    old match{
+      case j if j == j1 => j1 = _new
+      case j if j == j2 => j2 = _new
+      case j if j == j3 => j3 = _new
+      case j if j == j4 => j4 = _new
+    }
+    _new.main = old.main
+    updateRef(old,_new)
+    Reader.router ! PlayerTypeChange
+  }
+
+  def botToPlayer(old:Joueur): Unit = {
+    def createPlayer(b:Joueur) = {
+      val j = new Joueur(b.id,b.nom)
+      j.main = b.main
+      j
+    }
+    val _new = createPlayer(old)
+    old match {
+      case j if j == j1 => j1 = _new
+      case j if j == j2 => j2 = _new
+      case j if j == j3 => j3 = _new
+      case j if j == j4 => j4 = _new
+    }
+    updateRef(old,_new)
+    Reader.router ! PlayerTypeChange
+  }
 
   val Deck = new Deck
   var deck = Deck.newShuffledDeck
@@ -53,12 +88,7 @@ class Partie(val Printer:Printer,val Reader:Reader){
   lazy val enchereController = new EnchereController
   lazy val mainController = new MainController
 
-  def nextPlayer(j:Joueur):Joueur = j match {
-    case `j1` => j2
-    case `j2` => j3
-    case `j3` => j4
-    case `j4` => j1
-  }
+  def nextPlayer(j:Joueur):Joueur = listJoueur.find(_.id == (j.id+1)%4).get
 
   def init():Unit = {
     state = State.stopped
@@ -68,6 +98,29 @@ class Partie(val Printer:Printer,val Reader:Reader){
     scoreTotalNS = 0
     listJoueur.zip(List[String]("Sud","Ouest","Nord","Est")).foreach({case (j:Joueur,s:String) => j.rename(s)})
   }
+
+  def distribute (deck:List[Card]) : Unit = {
+    val mainList = Deck.distribution(deck).map(Deck.trierMain)
+    nextPlayer(currentPlayer).main = mainList(0)
+    nextPlayer(nextPlayer(currentPlayer)).main = mainList(1)
+    nextPlayer(nextPlayer(nextPlayer(currentPlayer))).main = mainList(2)
+    currentPlayer.main = mainList(3)
+  }
+
+  // boucle sur les encheres tant qu'il n'y en a pas
+  def getEnchere():Enchere = {
+    Printer.printCardsToAll
+    val e: Option[Enchere] = enchereController.enchere()
+    if (e.isEmpty) {
+      Printer.pasDePrise()
+      deck = Deck.shuffle(deck)
+      deck = Deck.coupe(deck,Random.nextInt(25)+4).getOrElse(deck)
+      distribute(deck)
+      getEnchere()
+    }
+    else e.get
+  }
+
 
   // checks if someone asked for the game to be stopped
   def checkStop() : Boolean = state == State.stopped
@@ -101,39 +154,18 @@ class Partie(val Printer:Printer,val Reader:Reader){
     deck = Deck.newShuffledDeck
     scoreTotalEO = 0;scoreTotalNS = 0
     state = State.running
+    currentPlayer = nextPlayer(dealer)
 
     while (scoreTotalEO < 1001 && scoreTotalNS < 1001){
-
       // on melange le jeu
       deck = Deck.shuffle(deck)
       // nombre de carte coupé > 3 et < 29
       deck = Deck.coupe(deck,Random.nextInt(25)+4).getOrElse(deck)
 
       //distribution
-      def distribute (deck:List[Card]) : Unit = {
-        val mainList = Deck.distribution(deck).map(Deck.trierMain)
-        nextPlayer(currentPlayer).main = mainList(0)
-        nextPlayer(nextPlayer(currentPlayer)).main = mainList(1)
-        nextPlayer(nextPlayer(nextPlayer(currentPlayer))).main = mainList(2)
-        currentPlayer.main = mainList(3)
-      }
-
       distribute(deck)
 
-      // boucle sur les encheres tant qu'il n'y en a pas
-      def boucleEnchere():Enchere = {
-        Printer.printCardsToAll
-        val e: Option[Enchere] = enchereController.enchere()
-        if (e.isEmpty) {
-          Printer.pasDePrise()
-          deck=Deck.shuffle(deck)
-          deck = Deck.coupe(deck,Random.nextInt(25)+4).getOrElse(deck)
-          distribute(deck)
-          boucleEnchere()
-        }
-        else e.get
-      }
-      val enchere = boucleEnchere()
+      val enchere = getEnchere()
 
       //Les encheres sont finies, la main commence
       Printer.enchereFinie(enchere)

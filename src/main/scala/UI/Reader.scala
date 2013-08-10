@@ -64,6 +64,7 @@ object Reader{
 
   case object StopGame extends Message
   case object StopWaiting extends Message
+  case object PlayerTypeChange extends Message
 
   case class Bid(joueur:Joueur,couleur:Couleur,valeur:Int) extends BiddingMessage
   case class Coinche(joueur:Joueur) extends BiddingMessage
