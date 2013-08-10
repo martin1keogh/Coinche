@@ -2,7 +2,7 @@ package GameLogic
 
 import scala.util.Random
 import UI.{Reader, Printer}
-import GameLogic.Bot.Bot
+import GameLogic.Bot.BotTrait
 
 
 class Partie(val Printer:Printer,val Reader:Reader){
@@ -37,11 +37,15 @@ class Partie(val Printer:Printer,val Reader:Reader){
   // just for ease-of-use
   implicit def listJoueur = List[Joueur](j1,j2,j3,j4)
 
-  def playerToBot(old:Joueur,_new:Joueur):Unit = old match{
-    case j if j == j1 => j1 = _new
-    case j if j == j2 => j2 = _new
-    case j if j == j3 => j3 = _new
-    case j if j == j4 => j4 = _new
+  def playerToBot(old:Joueur,_new:Joueur):Unit = {
+    old match{
+      case j if j == j1 => j1 = _new
+      case j if j == j2 => j2 = _new
+      case j if j == j3 => j3 = _new
+      case j if j == j4 => j4 = _new
+    }
+    if (currentPlayer == old) currentPlayer = _new
+    if (dealer == old) dealer = _new
   }
 
   def botToPlayer(old:Joueur): Unit = {
@@ -50,12 +54,15 @@ class Partie(val Printer:Printer,val Reader:Reader){
       j.main = b.main
       j
     }
+    val _new = createPlayer(old)
     old match {
-      case j if j == j1 => j1 = createPlayer(j)
-      case j if j == j2 => j2 = createPlayer(j)
-      case j if j == j3 => j3 = createPlayer(j)
-      case j if j == j4 => j4 = createPlayer(j)
+      case j if j == j1 => j1 = _new
+      case j if j == j2 => j2 = _new
+      case j if j == j3 => j3 = _new
+      case j if j == j4 => j4 = _new
     }
+    if (currentPlayer == old) currentPlayer = _new
+    if (dealer == old) dealer = _new
   }
 
   val Deck = new Deck

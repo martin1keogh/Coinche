@@ -33,7 +33,7 @@ class Deck {
    *         l'ordre dans une famille est sans-atout
    */
   def trierMain(main:List[Card]):List[Card] = {
-    main.sortBy({card => (card.famille,-card.valeur)})
+    main.sortBy({card => (card.famille,-card.ordreClassique)})
   }
 
   def trierMain(main:List[Card],couleurAtout:Int):List[Card] = couleurAtout match{

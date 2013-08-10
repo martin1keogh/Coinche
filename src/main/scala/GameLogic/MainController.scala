@@ -7,7 +7,8 @@ import UI.Reader.{StopGame, PlayCard, PlayingMessage, StopWaiting}
 import akka.util.Timeout
 import scala.concurrent.duration._
 import scala.language.postfixOps
-import GameLogic.Bot.Bot
+import GameLogic.Bot.BotTrait
+import GameLogic.Card.{Roi, Dame}
 
 class MainController(implicit Partie:Partie) {
 
@@ -31,7 +32,7 @@ class MainController(implicit Partie:Partie) {
   def hasBelote(couleurAtout:Int,joueur:Joueur):Boolean = {
     val atouts = joueur.main.filter(_.famille == couleurAtout)
     // Has the queen               // Has the king
-    atouts.exists(_.valeur == 4) && atouts.exists(_.valeur == 5)
+    atouts.exists(_.valeur == Dame) && atouts.exists(_.valeur == Roi)
   }
 
   def getCard(jouables:List[Card],autres:List[Card]):Card = {
@@ -98,7 +99,7 @@ class MainController(implicit Partie:Partie) {
         state = State.playing
         if (!printOnlyOnce) Printer.printCards(jouables,autres)
         val carteJoue = currentPlayer match {
-          case b:Bot => b.getCard(jouables,autres,pli)
+          case b:BotTrait => b.getCard(jouables,autres,pli)
           case _ => getCard(jouables,autres)
         }
         state = State.running
@@ -106,8 +107,8 @@ class MainController(implicit Partie:Partie) {
         // need to print 'belote' or 'rebelote'
         if (belote.exists(j => j.id == currentPlayer.id && j.id % 2 == enchereController.id % 2) // player has belote and his team won the bidding
           && carteJoue.famille == couleurAtout                                       // he plays a trump card
-          && (carteJoue.valeur == 4 || carteJoue.valeur == 5)) {                     // which is the queen or the king
-          Printer.annonceBelote(currentPlayer.main.filter(_.famille == couleurAtout).count(c => c.valeur == 4 || c.valeur == 5) == 2)
+          && (carteJoue.valeur == Dame || carteJoue.valeur == Roi)) {                     // which is the queen or the king
+          Printer.annonceBelote(currentPlayer.main.filter(_.famille == couleurAtout).count(c => c.valeur == Dame || c.valeur == Roi) == 2)
         }
 
         currentPlayer.main = currentPlayer.main diff List(carteJoue)

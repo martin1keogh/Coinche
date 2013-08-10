@@ -7,7 +7,7 @@ import scala.concurrent.duration._
 import scala.concurrent.Await
 import akka.util.Timeout
 import scala.language.postfixOps
-import GameLogic.Bot.Bot
+import GameLogic.Bot.BotTrait
 
 class EnchereController(implicit Partie:Partie){
 
@@ -20,7 +20,7 @@ class EnchereController(implicit Partie:Partie){
   var listEnchere:List[Enchere] = List()
   var current:Option[Enchere] = None
 
-  val enchereNull = new Enchere(Undef(),70,-1,"",-1)
+  val enchereNull = new Enchere(Undef,70,-1,"",-1)
   def couleur = current.getOrElse(enchereNull).couleur
   def contrat = current.getOrElse(enchereNull).contrat
   def id = current.getOrElse(enchereNull).id
@@ -97,8 +97,8 @@ class EnchereController(implicit Partie:Partie){
       } else {
         Partie.Printer.tourJoueurEnchere(Partie.currentPlayer)
         val enchere = Partie.currentPlayer match {
-          case b:Bot => {println("waiting for bid");b.effectuerEnchere(listEnchere)}
-          case j:Joueur => {println(j);effectuerEnchere()}
+          case b:BotTrait => b.effectuerEnchere(listEnchere)
+          case j:Joueur => effectuerEnchere()
         }
         if (enchere.isEmpty) nbPasse=nbPasse+1
         else {
@@ -107,6 +107,7 @@ class EnchereController(implicit Partie:Partie){
           listEnchere = enchere.get :: listEnchere
           current = enchere
         }
+        Partie.Printer.printEnchere(enchere)
         Partie.currentPlayer = Partie.nextPlayer(Partie.currentPlayer)
       }
     }
