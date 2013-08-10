@@ -168,20 +168,10 @@ class MainController(implicit Partie:Partie) {
     else card.pointsClassique}).sum
   }
 
-  def vainqueur(plis:List[(Joueur,Card)],couleurAtout:Int):Joueur = {
-    // at first, the best card/player is the one who opened
-    var bestCard = plis.head._2
-    var bestPlayer = plis.head._1
-
-    plis.foreach({elem => {
-      val (joueur,card) = elem
-      // si les deux cartes ne sont pas comparables (stronger renvoie None)
-      // bestCard gagne (puisque soit la couleur demande, soit de l'atout)
-      if (card.stronger(couleurAtout,bestCard).getOrElse(false)) {bestCard = card;bestPlayer = joueur}
-    }}
-    )
-    bestPlayer
-  }
+  def vainqueur(pli:List[(Joueur,Card)],couleurAtout:Int):Joueur =
+    pli.reduceLeft[(Joueur,Card)]({case ((j1,c1),(j2,c2)) =>
+      if (c2.stronger(couleurAtout,c1).getOrElse(false)) (j2,c2) else (j1,c1)
+    })._1
 
   /**
    * @param main Liste contenant les cartes du joueurs
