@@ -22,10 +22,12 @@ class MainController(implicit Partie:Partie) {
 
   val PlayerTypeChangeException = new Exception
 
+  var cartesJoueesWithPlayer:List[(Joueur,Card)] = List()
+
   /**
    * Contient toutes les cartes deja jouées durant cette main
    */
-  var cartesJouees:List[Card] = List[Card]()
+  def cartesJouees:List[Card] = cartesJoueesWithPlayer.map(_._2)
 
   /**
    *
@@ -133,9 +135,10 @@ class MainController(implicit Partie:Partie) {
         }
 
         pli = (currentPlayer,carteJoue)::pli
-        cartesJouees = carteJoue::cartesJouees
         currentPlayer = nextPlayer(currentPlayer)
       }
+
+      cartesJoueesWithPlayer = pli ::: cartesJoueesWithPlayer
 
       premierJoueur = vainqueur(pli.reverse,couleurAtout)
 
@@ -168,6 +171,12 @@ class MainController(implicit Partie:Partie) {
     else card.pointsClassique}).sum
   }
 
+  /**
+   *
+   * @param pli liste de couple (joueur,carte) du pli, dans l'ordre joue (1er carte joue en premiere position)
+   * @param couleurAtout couleur de l'atout durant la main
+   * @return Joueur ayant remporte le pli
+   */
   def vainqueur(pli:List[(Joueur,Card)],couleurAtout:Int):Joueur =
     pli.reduceLeft[(Joueur,Card)]({case ((j1,c1),(j2,c2)) =>
       if (c2.stronger(couleurAtout,c1).getOrElse(false)) (j2,c2) else (j1,c1)
