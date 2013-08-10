@@ -6,6 +6,7 @@ import GameLogic.Card.Valeur
 case class Card(n:Int) {
   val famille:Int = n / 8
 
+  @deprecated(message = "Card.valeur should now be used")
   val v:Int = n % 8
 
   val couleur = Enchere.intToCouleur(famille)
