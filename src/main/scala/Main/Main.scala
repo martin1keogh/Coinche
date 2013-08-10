@@ -21,6 +21,7 @@ object Main {
     while (true) {
       val read = readLine()
       partie.Reader.sendMessage(partie.currentPlayer,read.asInstanceOf[partie.Reader.Input])
+      if (read == "toBot") partie.playerToBot(partie.j1,new DumBot(partie,0,"fu"))
     }
   }
 }

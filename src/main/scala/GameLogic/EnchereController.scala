@@ -15,6 +15,8 @@ class EnchereController(implicit Partie:Partie){
 
   implicit val timeout = new Timeout(10 minutes)
 
+  val PlayerTypeChangeException:Exception = new Exception
+
   val Router = Partie.Reader.router
 
   var listEnchere:List[Enchere] = List()
@@ -53,6 +55,7 @@ class EnchereController(implicit Partie:Partie){
         case Bid(j,couleur,valeur) if annonceLegal(j,valeur) => Some(new Enchere(couleur,valeur,j.id,j.nom))
         case Bid(j,_,_) if j == Partie.currentPlayer => {Partie.Printer.annonceImpossible;readMessage}
         case StopGame => throw new InterruptedException
+        case PlayerTypeChange => throw PlayerTypeChangeException
         case _ => readMessage
       }
     }
@@ -96,10 +99,15 @@ class EnchereController(implicit Partie:Partie){
         current = getSurCoinche orElse current
       } else {
         Partie.Printer.tourJoueurEnchere(Partie.currentPlayer)
-        val enchere = Partie.currentPlayer match {
-          case b:BotTrait => b.effectuerEnchere(listEnchere)
-          case j:Joueur => effectuerEnchere()
-        }
+        // Receiving a PlayerTypeChangeException means a human player was replaced by a bot
+        // We stop waiting for input and then asks the bot for a bid
+        def getEnchere: Option[Enchere] = try {
+          Partie.currentPlayer match {
+            case b:BotTrait => b.effectuerEnchere(listEnchere)
+            case j:Joueur => effectuerEnchere()
+          }
+        } catch {case `PlayerTypeChangeException` => getEnchere}
+        val enchere = getEnchere
         if (enchere.isEmpty) nbPasse=nbPasse+1
         else {
           //une enchere a etait faite, on remet le nombre de passe a zero

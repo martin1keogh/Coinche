@@ -3,12 +3,14 @@ package GameLogic
 import scala.concurrent.Await
 import UI.Router.AwaitCard
 import akka.pattern.ask
-import UI.Reader.{StopGame, PlayCard, PlayingMessage, StopWaiting}
+import UI.Reader._
 import akka.util.Timeout
 import scala.concurrent.duration._
 import scala.language.postfixOps
 import GameLogic.Bot.BotTrait
 import GameLogic.Card.{Roi, Dame}
+import scala.Some
+import UI.Reader.PlayCard
 
 class MainController(implicit Partie:Partie) {
 
@@ -17,6 +19,8 @@ class MainController(implicit Partie:Partie) {
   val Router = Reader.router
 
   implicit val timeout = new Timeout(10 minutes)
+
+  val PlayerTypeChangeException = new Exception
 
   /**
    * Contient toutes les cartes deja jouées durant cette main
@@ -39,7 +43,7 @@ class MainController(implicit Partie:Partie) {
     // play automatically the last card
     if (jouables.length == 1 && autres.isEmpty) jouables(0)
     else {
-      val cardList = try {Await.result((Router ? AwaitCard).mapTo[PlayingMessage],Duration.Inf)}
+      val cardList = try {Await.result((Router ? AwaitCard),Duration.Inf)}
                      catch {case t:java.util.concurrent.TimeoutException => {Router ! StopWaiting; None}}
       cardList match {
         case PlayCard(joueur,card) if joueur == currentPlayer => {
@@ -47,6 +51,7 @@ class MainController(implicit Partie:Partie) {
           c.getOrElse({Printer.cardUnplayable;getCard(jouables,autres)})
         }
         case StopGame => throw new InterruptedException
+        case PlayerTypeChange => throw PlayerTypeChangeException
         case e => getCard(jouables,autres)
       }
     }
@@ -98,10 +103,13 @@ class MainController(implicit Partie:Partie) {
         // which card he'll play
         state = State.playing
         if (!printOnlyOnce) Printer.printCards(jouables,autres)
-        val carteJoue = currentPlayer match {
-          case b:BotTrait => b.getCard(jouables,autres,pli)
-          case _ => getCard(jouables,autres)
-        }
+        def getCarteJoue: Card = try {
+          currentPlayer match {
+            case b:BotTrait => b.getCard(jouables,autres,pli)
+            case j:Joueur => getCard(jouables,autres)
+          }
+        } catch {case `PlayerTypeChangeException` => getCarteJoue}
+        val carteJoue = getCarteJoue
         state = State.running
         Printer.joueurAJoue(carteJoue)
         // need to print 'belote' or 'rebelote'

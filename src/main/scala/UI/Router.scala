@@ -16,6 +16,10 @@ class Router extends Actor{
     }
     case Normal => context.become(receive)
     case AwaitCard => context.become(waitingCard(sender))
+    case PlayerTypeChange => {
+      context.become(receive)
+      s forward PlayerTypeChange
+    }
     case StopWaiting => context.become(receive)
     case StopGame => {
       context.become(receive)
@@ -32,6 +36,10 @@ class Router extends Actor{
     case Normal => context.become(receive)
     case AwaitBid => context.become(waitingBid(sender))
     case StopWaiting => context.become(receive)
+    case PlayerTypeChange => {
+      context.become(receive)
+      s forward PlayerTypeChange
+    }
     case StopGame => {
       context.become(receive)
       s forward StopGame
