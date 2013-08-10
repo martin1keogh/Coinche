@@ -1,13 +1,11 @@
 Coinche
 ======
 
-Very basic implementation of coinche.
-Currently only implements core rules, no AI, no GUI, etc.
+Very basic implementation of card game coinche.
 
 Use sbt to build.
 
 **TODO**
 - GUI
-- AI
 - Documentation
-- Implement all rules (annulation de partie)
+- Implement all rules (contract cancelling, 'annonces' (four of a kind, etc..))
