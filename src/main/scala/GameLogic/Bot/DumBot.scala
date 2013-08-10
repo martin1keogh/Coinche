@@ -139,11 +139,7 @@ class DumBot(val partie:Partie,id:Int,nom:String) extends Joueur(id,nom) with Bo
     // si la couleur demande est l'atout
     if (couleurDemande == couleurAtout) {
       // si on en a
-      if (!atout.isEmpty)  {
-        // on joue le meilleur non-maitre
-        if (atout(0) == getCarteMaitreACouleur(couleurAtout).get && atout.length > 1) atout(1)
-        else atout(0)
-      }
+      if (!atout.isEmpty)  atout.last
       // sinon on fait un appel, si on peut
       else {
         // une couleur ou on a la carte maitre, et ou on a au moins deux cartes
@@ -160,7 +156,8 @@ class DumBot(val partie:Partie,id:Int,nom:String) extends Joueur(id,nom) with Bo
     else {
       // si on a une carte maitre, on la joue
       val carteMaitreOption = pasAtout.find(card => card == getCarteMaitreACouleur(couleurDemande).get)
-      if (carteMaitreOption.isDefined) carteMaitreOption.get
+      // si ca n'a pas ete coupe
+      if (carteMaitreOption.isDefined && pli.exists(_._2.couleur == couleurAtout)) carteMaitreOption.get
       // sinon, on joue autre chose que de l'atout, tant qu'on peut
       else pasAtout.sortBy(-_.ordreClassique).lastOption.getOrElse(atout.last)
     }
@@ -184,7 +181,8 @@ class DumBot(val partie:Partie,id:Int,nom:String) extends Joueur(id,nom) with Bo
     val (atout,pasAtout) = jouables.partition(_.couleur == couleurAtout)
     // si on a une carte maitre, on la joue
     val carteMaitreOption = pasAtout.find(card => card == getCarteMaitreACouleur(couleurDemande).get)
-    if (carteMaitreOption.isDefined) carteMaitreOption.get
+    // si ca n'a pas ete coupe
+    if (carteMaitreOption.isDefined && pli.exists(_._2.couleur == couleurAtout)) carteMaitreOption.get
     // sinon, on joue tout sauf de l'atout
     else pasAtout.sortBy(-_.ordreClassique).lastOption.getOrElse(atout.last)
   }
