@@ -8,7 +8,7 @@ import UI.Reader.SurCoinche
 import UI.Reader.Coinche
 import scala.Some
 
-abstract class Bot(partie:Partie,id:Int,nom:String) extends Joueur(id,nom){
+abstract class BotTrait(partie:Partie,id:Int,nom:String) extends Joueur(id,nom){
 
   val Router = partie.Reader.router
 
@@ -38,11 +38,18 @@ abstract class Bot(partie:Partie,id:Int,nom:String) extends Joueur(id,nom){
 
   /**
    *
+   * @return None si le partenaire n'a pas encore fait d'encheres (ou a passé), Some(meilleurEncherePart) sinon
+   */
+  def encherePart(listEnchere:List[Enchere]):Option[Enchere] = listEnchere.find(_.id == idPartenaire)
+
+  /**
+   *
    * @param listEnchere Liste des encheres annoncées
    * @return None si Passe, Some(Enchere) sinon
    */
   def effectuerEnchere(listEnchere:List[Enchere]):Option[Enchere] = {
-    getCouleurEtContrat(listEnchere).map({case (couleur,contrat) => new Enchere(couleur,contrat,id,nom)})
+    val annonce = getCouleurEtContrat(listEnchere).map({case (couleur,contrat) => new Enchere(couleur,contrat,id,nom)})
+    if (annonce.exists(e => partie.enchereController.annonceLegal(this,e.contrat))) annonce else None
   }
 
 
