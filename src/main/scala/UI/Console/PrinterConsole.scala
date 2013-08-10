@@ -94,6 +94,10 @@ class PrinterConsole() extends Printer{
     else println("Est/Ouest gagnent !")
   }
 
+  def printEnchere(e:Option[Enchere]) = {
+    if (e.isDefined) println(e.get) else println("Passe")
+  }
+
   def pasDePrise() {
     println("Pas de Prise !")
     println()
