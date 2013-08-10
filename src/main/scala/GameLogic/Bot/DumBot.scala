@@ -18,7 +18,7 @@ object DumBot {
   }
 }
 
-class DumBot(partie:Partie,id:Int,nom:String) extends BotTrait(partie,id,nom){
+class DumBot(val partie:Partie,id:Int,nom:String) extends Joueur(id,nom) with BotTrait{
 
   // Bidding //
 
@@ -130,7 +130,7 @@ class DumBot(partie:Partie,id:Int,nom:String) extends BotTrait(partie,id,nom){
     val appel = trouverAppel(idPartenaire)
     if (appel.isDefined) pasAtout.find(_.couleur == appel.get).getOrElse(jouables.last)
     // sinon, on joue autre chose que de l'atout, tant qu'on peut
-    pasAtout.sortBy(-_.ordreClassique).lastOption.getOrElse(atout.last)
+    else pasAtout.sortBy(-_.ordreClassique).lastOption.getOrElse(atout.last)
   }
 
   def strategieAttaque(jouables:List[Card],pli:List[(Joueur,Card)],couleurDemande:Couleur):Card = {
@@ -160,9 +160,9 @@ class DumBot(partie:Partie,id:Int,nom:String) extends BotTrait(partie,id,nom){
     else {
       // si on a une carte maitre, on la joue
       val carteMaitreOption = pasAtout.find(card => card == getCarteMaitreACouleur(couleurDemande).get)
-      if (carteMaitreOption.isDefined) return carteMaitreOption.get
+      if (carteMaitreOption.isDefined) carteMaitreOption.get
       // sinon, on joue autre chose que de l'atout, tant qu'on peut
-      pasAtout.sortBy(-_.ordreClassique).lastOption.getOrElse(atout.last)
+      else pasAtout.sortBy(-_.ordreClassique).lastOption.getOrElse(atout.last)
     }
   }
 
@@ -176,7 +176,7 @@ class DumBot(partie:Partie,id:Int,nom:String) extends BotTrait(partie,id,nom){
     val appel = trouverAppel(idPartenaire)
     if (appel.isDefined) pasAtout.find(_.couleur == appel.get).getOrElse(jouables.last)
     // sinon, on joue autre chose que de l'atout, tant qu'on peut
-    pasAtout.sortBy(-_.ordreClassique).lastOption.getOrElse(atout.last)
+    else pasAtout.sortBy(-_.ordreClassique).lastOption.getOrElse(atout.last)
   }
 
   def strategieDefense(jouables:List[Card],pli:List[(Joueur,Card)],couleurDemande:Couleur):Card = {
@@ -184,9 +184,9 @@ class DumBot(partie:Partie,id:Int,nom:String) extends BotTrait(partie,id,nom){
     val (atout,pasAtout) = jouables.partition(_.couleur == couleurAtout)
     // si on a une carte maitre, on la joue
     val carteMaitreOption = pasAtout.find(card => card == getCarteMaitreACouleur(couleurDemande).get)
-    if (carteMaitreOption.isDefined) return carteMaitreOption.get
+    if (carteMaitreOption.isDefined) carteMaitreOption.get
     // sinon, on joue tout sauf de l'atout
-    pasAtout.sortBy(-_.ordreClassique).lastOption.getOrElse(atout.last)
+    else pasAtout.sortBy(-_.ordreClassique).lastOption.getOrElse(atout.last)
   }
 
   /**

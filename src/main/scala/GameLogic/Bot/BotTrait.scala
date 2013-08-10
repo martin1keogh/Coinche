@@ -8,7 +8,9 @@ import UI.Reader.SurCoinche
 import UI.Reader.Coinche
 import scala.Some
 
-abstract class BotTrait(partie:Partie,id:Int,nom:String) extends Joueur(id,nom){
+trait BotTrait extends Joueur{
+
+  val partie:Partie
 
   val Router = partie.Reader.router
   val mainController = partie.mainController
