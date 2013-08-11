@@ -39,10 +39,12 @@ trait BotTrait extends Joueur{
   def couleurAtout:Couleur = partie.enchereController.couleur
 
   /**
-   *
+   * @param listEnchere La liste des encheres parmi lesquelles chercher
    * @return None si le partenaire n'a pas encore fait d'encheres (ou a passé), Some(meilleurEncherePart) sinon
    */
   def encherePart(listEnchere:List[Enchere]):Option[Enchere] = listEnchere.find(_.id == idPartenaire)
+
+  def encherePart:Option[Enchere] = partie.enchereController.listEnchere.find(_.id == idPartenaire)
 
   /**
    *
@@ -107,12 +109,13 @@ trait BotTrait extends Joueur{
   /**
    *
    * @param pli Liste des cartes sur la table
+   * @param couleurDemande couleur de la carte ayant ouvert le pli
    * @return Option sur le Couple (joueur,carte) maitre
    */
-  def carteMaitre(pli:List[(Joueur,Card)])(implicit couleurDemande:Couleur):Option[(Joueur,Card)] = {
+  def carteMaitre(pli:List[(Joueur,Card)],couleurDemande:Option[Couleur]):Option[(Joueur,Card)] = {
     val atouts = pli.filter(_._2.famille == Enchere.couleurToInt(couleurAtout))
     if (!atouts.isEmpty) atouts.sortBy(-_._2.ordreAtout).headOption
-    else pli.filter(_._2.famille == Enchere.couleurToInt(couleurDemande)).sortBy(-_._2.ordreClassique).headOption
+    else pli.filter(_._2.famille == Enchere.couleurToInt(couleurDemande.get)).sortBy(-_._2.ordreClassique).headOption
   }
 
   def nbAtoutsJouees:Int = mainController.cartesJouees.count(_.couleur == couleurAtout)
