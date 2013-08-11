@@ -1,12 +1,10 @@
 package GameLogic.Bot
 
 import GameLogic._
-import UI.Reader.{Coinche, SurCoinche}
-import GameLogic.Enchere.{Pique, Undef, Couleur}
-import GameLogic.Joueur
+import GameLogic.Enchere._
 import UI.Reader.SurCoinche
+import GameLogic.Joueur
 import UI.Reader.Coinche
-import scala.Some
 
 trait BotTrait extends Joueur{
 
@@ -92,8 +90,9 @@ trait BotTrait extends Joueur{
    * @return false si ON SAIT qu'il n'a plus d'atout, true s'il lui en reste ou si l'on ne sait pas
    */
   def possedeAtout(joueur:Joueur):Boolean = {
-    if (joueur == this) return main.exists(_.couleur == couleurAtout)
-    if (nbAtoutsRestants == main.count(_.couleur == couleurAtout)) false
+    if (couleurAtout == ToutAtout || couleurAtout == SansAtout) false // personne n'a d'atout a ToutAtout/SansAtout
+    else if (joueur == this) main.exists(_.couleur == couleurAtout)
+    else if (nbAtoutsRestants == main.count(_.couleur == couleurAtout)) false // si on a tous les atouts restants, `joueur` n'en a pas
     else possedeAtoutsSansCompte(joueur)
   }
 
@@ -142,7 +141,7 @@ trait BotTrait extends Joueur{
    */
   def getCarteMaitreACouleur(couleur:Couleur):Option[Card] = {
     deck.sortedDeck.diff(mainController.cartesJouees).filter(_.couleur == couleur).sortBy(card =>
-      if (couleur == couleurAtout) -card.ordreAtout
+      if (couleurAtout == ToutAtout || couleur == couleurAtout) -card.ordreAtout
       else -card.ordreClassique
     ).headOption
   }

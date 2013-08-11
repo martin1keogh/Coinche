@@ -1,7 +1,7 @@
 package GameLogic.Bot
 
 import GameLogic.{Enchere, Joueur, Card, Partie}
-import GameLogic.Enchere.{Pique, ToutAtout, SansAtout, Couleur}
+import GameLogic.Enchere.{ToutAtout, SansAtout, Couleur}
 import GameLogic.Card._
 
 object DumBot {
@@ -103,7 +103,7 @@ class DumBot(val partie:Partie,id:Int,nom:String) extends Joueur(id,nom) with Bo
 
   def trouverAppel(id:Int):Option[Couleur] = {
     mainController.cartesJoueesWithPlayer.find({case (joueur,card) =>
-      joueur.id == id && card.valeur != valeurFaible(card.couleur)
+      joueur.id == id && card.valeur != valeurFaible(card.couleur) && card.couleur != couleurAtout
     }).map(_._2.couleur)
   }
 
@@ -157,7 +157,7 @@ class DumBot(val partie:Partie,id:Int,nom:String) extends Joueur(id,nom) with Bo
       // si on a une carte maitre, on la joue
       val carteMaitreOption = pasAtout.find(card => card == getCarteMaitreACouleur(couleurDemande).get)
       // si ca n'a pas ete coupe
-      if (carteMaitreOption.isDefined && pli.exists(_._2.couleur == couleurAtout)) carteMaitreOption.get
+      if (carteMaitreOption.isDefined && !pli.exists(_._2.couleur == couleurAtout)) carteMaitreOption.get
       // sinon, on joue autre chose que de l'atout, tant qu'on peut
       else pasAtout.sortBy(-_.ordreClassique).lastOption.getOrElse(atout.last)
     }
@@ -182,7 +182,7 @@ class DumBot(val partie:Partie,id:Int,nom:String) extends Joueur(id,nom) with Bo
     // si on a une carte maitre, on la joue
     val carteMaitreOption = pasAtout.find(card => card == getCarteMaitreACouleur(couleurDemande).get)
     // si ca n'a pas ete coupe
-    if (carteMaitreOption.isDefined && pli.exists(_._2.couleur == couleurAtout)) carteMaitreOption.get
+    if (carteMaitreOption.isDefined && !pli.exists(_._2.couleur == couleurAtout)) carteMaitreOption.get
     // sinon, on joue tout sauf de l'atout
     else pasAtout.sortBy(-_.ordreClassique).lastOption.getOrElse(atout.last)
   }
