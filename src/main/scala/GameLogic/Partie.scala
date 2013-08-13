@@ -3,6 +3,7 @@ package GameLogic
 import scala.util.Random
 import UI.{Reader, Printer}
 import UI.Reader.PlayerTypeChange
+import GameLogic.Bot.BotTrait
 
 
 class Partie(val Printer:Printer,val Reader:Reader){
@@ -97,6 +98,8 @@ class Partie(val Printer:Printer,val Reader:Reader){
     scoreTotalEO = 0
     scoreTotalNS = 0
     listJoueur.zip(List[String]("Sud","Ouest","Nord","Est")).foreach({case (j:Joueur,s:String) => j.rename(s)})
+    // remove all bots
+    listJoueur.foreach({case b:BotTrait => botToPlayer(b);case _:Joueur => ()})
   }
 
   def distribute (deck:List[Card]) : Unit = {
