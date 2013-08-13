@@ -133,9 +133,23 @@ trait BotTrait extends Joueur{
    *
    * @param pli Liste des cartes sur la table
    * @param couleurDemande
-   * @return true si le partenaire est maitre, false sinon OU SI il n'y a aucune carte sur la table
+   * @return true si le partenaire est maitre, false sinon OU SI le part n'a pas joué
    */
-  def isPartMaitre(pli:List[(Joueur,Card)])(implicit couleurDemande:Couleur):Boolean = carteMaitre(pli).exists(_._1.id == idPartenaire)
+  def isPartMaitre(pli:List[(Joueur,Card)],couleurDemande:Option[Couleur]):Boolean =
+    carteMaitre(pli,couleurDemande).exists(_._1.id == idPartenaire)
+
+  /**
+   *
+   * @param pli Liste des cartes sur la table
+   * @param couleurDemande
+   * @return true si le partenaire est maitre ET le restera sauf en cas de coupe, false si non ou si le part n'a pas joue
+   */
+  def partGagnePliSaufCoupe(pli:List[(Joueur,Card)],couleurDemande:Couleur):Boolean ={
+    val cartePart = pli.find(_._1.id == idPartenaire)
+    if (cartePart.isEmpty) false
+    else getCarteMaitreACouleur(couleurDemande).get == cartePart.get._2
+  }
+
 
   /**
    *
@@ -144,6 +158,19 @@ trait BotTrait extends Joueur{
    */
   def getCarteMaitreACouleur(couleur:Couleur):Option[Card] = {
     deck.sortedDeck.diff(mainController.cartesJouees).filter(_.couleur == couleur).sortBy(card =>
+      if (couleurAtout == ToutAtout || couleur == couleurAtout) -card.ordreAtout
+      else -card.ordreClassique
+    ).headOption
+  }
+
+  /**
+   *
+   * @param couleur La couleur dont on veut connaitre la carte maitre
+   * @param pli Liste de cartes a rajouter dans les cartes jouées
+   * @return None si toutes les cartes de al couleur sont deja tombees, Some(meilleurCarte) sinon
+   */
+  def getCarteMaitreACouleurApresPli(couleur:Couleur,pli:List[Card]):Option[Card] = {
+    deck.sortedDeck.diff(mainController.cartesJouees).diff(pli).filter(_.couleur == couleur).sortBy(card =>
       if (couleurAtout == ToutAtout || couleur == couleurAtout) -card.ordreAtout
       else -card.ordreClassique
     ).headOption
