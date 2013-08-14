@@ -93,6 +93,7 @@ class EnchereController(implicit Partie:Partie){
   }
 
   def getSurCoinche:Option[Enchere] = {
+    Partie.Printer.printCoinche()
     Router ! AwaitSurCoinche
     Thread.sleep(5000) // 5 secondes pour surcoincher
     val listSurCoinche = Await.result((Router ? ReturnResults).mapTo[List[Joueur]], 10 seconds)
@@ -122,10 +123,8 @@ class EnchereController(implicit Partie:Partie){
     // Boucle principale lors des encheres
     while ( (nbPasse < 3)                      // apres 3 passes on finit les encheres
       || (current == None && nbPasse == 3)){   // sauf s'il n'y a pas eu d'annonce,auquel cas on attend le dernier joueur
-      if (current.exists(_.coinche > 1)) {
-        Partie.Printer.printCoinche()
-        nbPasse = 4
-      } else {
+      if (current.exists(_.coinche > 1)) {getSurCoinche; nbPasse = 4}
+      else {
         Partie.Printer.tourJoueurEnchere(Partie.currentPlayer)
         // Receiving a PlayerTypeChangeException means a human player was replaced by a bot
         // We stop waiting for input and then asks the bot for a bid
