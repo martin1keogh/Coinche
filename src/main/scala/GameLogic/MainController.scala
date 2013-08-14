@@ -139,7 +139,7 @@ class MainController(implicit Partie:Partie) {
         currentPlayer = nextPlayer(currentPlayer)
       }
 
-      cartesJoueesWithPlayer = pli ::: cartesJoueesWithPlayer
+      cartesJoueesWithPlayer = cartesJoueesWithPlayer ::: pli
 
       premierJoueur = vainqueur(pli.reverse,couleurAtout)
 

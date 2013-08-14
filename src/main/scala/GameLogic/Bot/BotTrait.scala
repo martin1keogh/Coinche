@@ -5,6 +5,7 @@ import GameLogic.Enchere._
 import UI.Reader.SurCoinche
 import GameLogic.Joueur
 import UI.Reader.Coinche
+import GameLogic.Card.Valeur
 
 trait BotTrait extends Joueur{
 
@@ -65,17 +66,20 @@ trait BotTrait extends Joueur{
   private def possedeAtoutsSansCompte(joueur:Joueur):Boolean = {
     if (joueur == this) return main.exists(_.couleur == couleurAtout)
     val listePlis = mainController.cartesJoueesWithPlayer.grouped(4).toList.filter(_.exists(_._1.id == joueur.id)).map(_.reverse)
+
     val aPisserSurTourAtout =
       listePlis.filter(_.head._2.couleur == couleurAtout) // tous les tours d'atouts
                //have to check ids (and not Joueur instances) in case joueur changed during the game
                .exists(_.exists({case (j,c) => j.id == joueur.id && c.couleur != couleurAtout}))
-    if (aPisserSurTourAtout) {println("a pisser sur tour atout");return false}
+    if (aPisserSurTourAtout) return false
+
     val aPisserQuandPartPasMaitre =
       listePlis.filter(l => l.head._2.couleur != l.find(_._1.id == joueur.id).map(_._2.couleur).getOrElse(l.head._2.couleur)) // Il n'a pas joue couleur demande
                .map(l=>l.take(l.indexWhere(_._1.id == joueur.id)+1)) // on retire les cartes jouées apres le joueur
                .filter(mainController.vainqueur(_,couleurAtout).Equipe != joueur.Equipe)
                .exists(_.exists({case (j,c) => j.id == joueur.id && c.couleur != couleurAtout}))
-    if (aPisserQuandPartPasMaitre) {println("a pisser part maitre");return false}
+    if (aPisserQuandPartPasMaitre) return false
+
     def meilleurAtoutPli(l:List[(Joueur,Card)],c:Couleur):Card = l.reduceLeft[(Joueur,Card)]({case ((j1,c1),(j2,c2)) =>
       if (c2.stronger(c,c1).getOrElse(false)) (j2,c2) else (j1,c2)
     })._2
@@ -112,10 +116,16 @@ trait BotTrait extends Joueur{
    * @param couleurDemande couleur de la carte ayant ouvert le pli
    * @return Option sur le Couple (joueur,carte) maitre
    */
-  def carteMaitre(pli:List[(Joueur,Card)],couleurDemande:Option[Couleur]):Option[(Joueur,Card)] = {
+  def carteEtJoueurMaitre(pli:List[(Joueur,Card)],couleurDemande:Option[Couleur]):Option[(Joueur,Card)] = {
     val atouts = pli.filter(_._2.famille == Enchere.couleurToInt(couleurAtout))
     if (!atouts.isEmpty) atouts.sortBy(-_._2.ordreAtout).headOption
     else pli.filter(_._2.famille == Enchere.couleurToInt(couleurDemande.get)).sortBy(-_._2.ordreClassique).headOption
+  }
+
+  def carteMaitre(pli:List[Card],couleurDemande:Option[Couleur]):Option[Card] = {
+    val atouts = pli.filter(_.famille == Enchere.couleurToInt(couleurAtout))
+    if (!atouts.isEmpty) atouts.sortBy(-_.ordreAtout).headOption
+    else pli.filter(_.famille == Enchere.couleurToInt(couleurDemande.get)).sortBy(-_.ordreClassique).headOption
   }
 
   def nbAtoutsJouees:Int = mainController.cartesJouees.count(_.couleur == couleurAtout)
@@ -136,7 +146,7 @@ trait BotTrait extends Joueur{
    * @return true si le partenaire est maitre, false sinon OU SI le part n'a pas joué
    */
   def isPartMaitre(pli:List[(Joueur,Card)],couleurDemande:Option[Couleur]):Boolean =
-    carteMaitre(pli,couleurDemande).exists(_._1.id == idPartenaire)
+    carteEtJoueurMaitre(pli,couleurDemande).exists(_._1.id == idPartenaire)
 
   /**
    *
@@ -147,33 +157,33 @@ trait BotTrait extends Joueur{
   def partGagnePliSaufCoupe(pli:List[(Joueur,Card)],couleurDemande:Couleur):Boolean ={
     val cartePart = pli.find(_._1.id == idPartenaire)
     if (cartePart.isEmpty) false
-    else getCarteMaitreACouleur(couleurDemande).get == cartePart.get._2
+    else getValeurMaitreACouleur(couleurDemande).get == cartePart.get._2.valeur
   }
 
 
   /**
    *
    * @param couleur La couleur dont on veut connaitre la carte maitre
-   * @return None si toutes les cartes de cette couleur sont deja tombees, Some(meilleurCarte) sinon
+   * @return None si toutes les cartes de cette couleur sont deja tombees, Some(meilleurValeur) sinon
    */
-  def getCarteMaitreACouleur(couleur:Couleur):Option[Card] = {
+  def getValeurMaitreACouleur(couleur:Couleur):Option[Valeur] = {
     deck.sortedDeck.diff(mainController.cartesJouees).filter(_.couleur == couleur).sortBy(card =>
       if (couleurAtout == ToutAtout || couleur == couleurAtout) -card.ordreAtout
       else -card.ordreClassique
-    ).headOption
+    ).headOption.map(_.valeur)
   }
 
   /**
    *
    * @param couleur La couleur dont on veut connaitre la carte maitre
    * @param pli Liste de cartes a rajouter dans les cartes jouées
-   * @return None si toutes les cartes de al couleur sont deja tombees, Some(meilleurCarte) sinon
+   * @return None si toutes les cartes de la couleur sont deja tombees, Some(meilleurValeur) sinon
    */
-  def getCarteMaitreACouleurApresPli(couleur:Couleur,pli:List[Card]):Option[Card] = {
+  def getValeurMaitreACouleurApresPli(couleur:Couleur,pli:List[Card]):Option[Valeur] = {
     deck.sortedDeck.diff(mainController.cartesJouees).diff(pli).filter(_.couleur == couleur).sortBy(card =>
       if (couleurAtout == ToutAtout || couleur == couleurAtout) -card.ordreAtout
       else -card.ordreClassique
-    ).headOption
+    ).headOption.map(_.valeur)
   }
 
 }

@@ -104,6 +104,19 @@ class EnchereController(implicit Partie:Partie){
     } else None
   }
 
+  // Receiving a PlayerTypeChangeException means a human player was replaced by a bot
+  // We stop waiting for input and then asks the bot for a bid
+  def getEnchere: Option[Enchere] = {
+    Partie.Printer.tourJoueurEnchere(Partie.currentPlayer)
+    def aux:Option[Enchere] = try{
+      Partie.currentPlayer match {
+        case b:BotTrait => b.effectuerEnchere(listEnchere)
+        case j:Joueur => effectuerEnchere()
+      }
+    } catch {case `PlayerTypeChangeException` => aux}
+    aux
+  }
+
   /**
    *
    * @return Option sur enchere : (couleur,contrat,id,coinche)
@@ -125,15 +138,6 @@ class EnchereController(implicit Partie:Partie){
       || (current == None && nbPasse == 3)){   // sauf s'il n'y a pas eu d'annonce,auquel cas on attend le dernier joueur
       if (current.exists(_.coinche > 1)) {getSurCoinche; nbPasse = 4}
       else {
-        Partie.Printer.tourJoueurEnchere(Partie.currentPlayer)
-        // Receiving a PlayerTypeChangeException means a human player was replaced by a bot
-        // We stop waiting for input and then asks the bot for a bid
-        def getEnchere: Option[Enchere] = try {
-          Partie.currentPlayer match {
-            case b:BotTrait => b.effectuerEnchere(listEnchere)
-            case j:Joueur => effectuerEnchere()
-          }
-        } catch {case `PlayerTypeChangeException` => getEnchere}
         val enchere = getEnchere
         if (enchere.isEmpty) nbPasse=nbPasse+1
         else {

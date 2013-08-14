@@ -1,7 +1,7 @@
 package GameLogic.Bot
 
 import GameLogic.{Enchere, Joueur, Card, Partie}
-import GameLogic.Enchere.{ToutAtout, SansAtout, Couleur}
+import GameLogic.Enchere.{Undef, ToutAtout, SansAtout, Couleur}
 import GameLogic.Card._
 
 object DumBot {
@@ -102,101 +102,141 @@ class DumBot(val partie:Partie,id:Int,nom:String) extends Joueur(id,nom) with Bo
   }
 
   def trouverAppel:Option[Couleur] = {
-    mainController.cartesJoueesWithPlayer.find({case (joueur,card) =>
-      joueur.id == idPartenaire && card.valeur != valeurFaible(card.couleur) && card.couleur != couleurAtout
-    }).map(_._2.couleur)
+    val listePlis = mainController.cartesJoueesWithPlayer.grouped(4).toList
+    listePlis.find({case l:List[(Joueur,Card)] => {
+      l.find(_._1.id == idPartenaire).exists({case (_,card) =>
+        card.valeur != valeurFaible(card.couleur) && card.couleur != couleurAtout && card.couleur != l.head._2.couleur
+      })
+    }}).getOrElse(List[(Joueur,Card)]()).find(_._1.id == idPartenaire).map(_._2.couleur)
+  }
+
+  /**
+   *
+   * @param cards la liste des cartes parmi lesquels chercher une carte maitre
+   * @param couleurDemande la couleur a laquelle chercher une carte maitre
+   * @return Some(card) si card est la carte maitre a `couleurDemande`, None sinon
+   */
+  def getCarteMaitreOption(cards:List[Card],couleurDemande:Couleur):Option[Card] = {
+    val valeurMaitre = getValeurMaitreACouleur(couleurDemande)
+    if (valeurMaitre.isDefined) cards.filter(_.couleur == couleurDemande).find(_.valeur == valeurMaitre.get)
+    else None
+  }
+
+  /**
+   *
+   * @param cards
+   * @return Some(card) si card est la carte maitre a sa couleur, None si aucune card n'est maitre a sa couleur
+   */
+  def getCarteMaitreOption(cards:List[Card]):Option[Card] =
+    cards.find(card => card.valeur == getValeurMaitreACouleur(card.couleur).get)
+
+  def repondreAppel(cards:List[Card]):Option[Card] = {
+    val appel = trouverAppel
+    println(appel)
+    if (appel.isEmpty) None
+    else cards.filter(_.couleur == appel.get).lastOption
+  }
+
+  // si le joueur ou le part est SUR d'etre maitre, sauve les 10 secs
+  // essaie aussi de sauver le neuf sec d'atout, etc...
+  def sauverPoints(jouables:List[Card],pli:List[(Joueur,Card)],couleurDemande:Couleur):Option[Card] = {
+    val (atout,pasAtout) = jouables.partition(_.couleur == couleurAtout)
+    // Si on a le neuf, l'as ou le dix d'atout, sec, et que le valet n'est pas tombe
+    if (atout.length == 1 && atout.exists(c => (c.valeur == Neuf || c.valeur == Dix || c.valeur == As) &&
+        c.valeur != getValeurMaitreACouleur(couleurAtout).get)) atout.headOption
+    else {
+      val sansCartesMaitres = pasAtout.filterNot(c => c.valeur == getValeurMaitreACouleurApresPli(c.couleur,pli.map(_._2)).get)
+      // on pisse si le part est maitre
+      if (partGagnePliSaufCoupe(pli,couleurDemande))
+        sansCartesMaitres.find(card => card == valeurFaible(card.couleur) && pasAtout.count(c => c.couleur == card.couleur) == 1)
+      else if (pli.length == 3) { //si on est le dernier a jouer
+        pasAtout.find(card => card == carteMaitre(card::pli.map(_._2),Some(couleurDemande)).get)
+      } else None
+    }
+  }
+
+  def pisser(pasAtout:List[Card],pli:List[(Joueur,Card)],couleurDemande:Couleur):Option[Card] = {
+    val sansCartesMaitre = pasAtout.filterNot(c => c.valeur == getValeurMaitreACouleurApresPli(c.couleur,pli.map(_._2)).get)
+    val trieParPointCroissant = sansCartesMaitre.sortBy(_.ordreClassique)
+    val sansMaitre = if (partGagnePliSaufCoupe(pli,couleurDemande)) trieParPointCroissant.lastOption
+    else trieParPointCroissant.headOption
+    // on essaie d'abord de pisser des cartes qui ne sont pas maitres
+    sansMaitre orElse pasAtout.lastOption
+  }
+
+  def lancerAppel(pasAtout:List[Card]):Option[Card] = {
+    // une couleur ou on a la carte maitre, et ou on a au moins deux cartes
+    val couleurAvecCarteMaitre = pasAtout.groupBy(_.couleur).filter(_._2.exists(
+      card => card.valeur == getValeurMaitreACouleur(card.couleur).get)).find(_._2.length > 1)
+    if (couleurAvecCarteMaitre.isDefined) {
+      val (couleur,cartes) = couleurAvecCarteMaitre.get
+      // ne pas lancer le dix si on a As-Dix...
+      if (cartes.last.valeur == valeurFaible(couleur)) cartes.headOption else cartes.lastOption
+    }
+    else None
+  }
+
+  // renvoie la Couleur la plus jouée pour l'instant, ou None si aucune carte n'a ete jouee
+  def couleurLaPlusJoueOption:Option[Couleur] = {
+    if (mainController.cartesJouees.isEmpty) None
+    else Some(mainController.cartesJouees.groupBy(_.couleur).maxBy(_._2.length)._1)
   }
 
   def strategieAttaqueOuverture(jouables:List[Card],pli:List[(Joueur,Card)]):Card = {
-    if (jouables.length == 1) return jouables(0)
     val adversaires = partie.listJoueur.filter(_.Equipe != Equipe)
     val (atout,pasAtout) = jouables.partition(_.couleur == couleurAtout)
     // si un des adversaires a de l'atout, on le fait tomber
     if (adversaires.exists(possedeAtout)) {
-      // si on a plus d'atout, on essaye de faire couper
-      if (atout.isEmpty) {
-        val couleurLaPlusTombee = mainController.cartesJouees.groupBy(_.couleur).maxBy(_._2.length)._1
-        return pasAtout.filter(_.couleur == couleurLaPlusTombee).lastOption.getOrElse(jouables.last)
-      }
-      // si notre atout le plus fort est maitre, on le joue
-      if (atout.contains(getCarteMaitreACouleur(couleurAtout).get)) return atout(0) // les cartes sont triees par ordre decroissant
-      // sinon on joue le plus faible
-      else return atout.last
+      (getCarteMaitreOption(atout) orElse  // on joue l'atout maitre
+        atout.lastOption orElse // ou alors son atout le plus faible
+        pasAtout.filter(_.couleur == couleurLaPlusJoueOption.getOrElse(Undef)).lastOption orElse  // ou la couleur la plus joue
+        pasAtout.sortBy(_.pointsClassique).headOption).get
     }
-    // si on a une carte maitre, on la joue
-    val carteMaitreOption = pasAtout.find(card => card == getCarteMaitreACouleur(card.couleur).get)
-    if (carteMaitreOption.isDefined) return carteMaitreOption.get
-    // si il y a eu un appel, on essaie de jouer dans cette couleur
-    val appel = trouverAppel
-    if (appel.isDefined) pasAtout.find(_.couleur == appel.get).orElse(pasAtout.lastOption).getOrElse(atout.last)
-    // sinon, on joue autre chose que de l'atout, tant qu'on peut
-    else pasAtout.sortBy(-_.ordreClassique).lastOption.getOrElse(atout.last)
+    else
+      (getCarteMaitreOption(pasAtout) orElse // on joue ses plis maitres
+        repondreAppel(pasAtout) orElse // on essaie de repondre a un appel
+        pasAtout.sortBy(_.pointsClassique).headOption orElse // sinon , on joue en priorite les cartes autres que l'atout
+        atout.lastOption).get
   }
 
   def strategieAttaque(jouables:List[Card],pli:List[(Joueur,Card)],couleurDemande:Couleur):Card = {
-    if (jouables.length == 1) return jouables(0)
     val (atout,pasAtout) = jouables.partition(_.couleur == couleurAtout)
-    // si la couleur demande est l'atout
-    if (couleurDemande == couleurAtout) {
-      // si on en a
-      if (!atout.isEmpty) {
-        // si on a l'atout maitre, on le joue
-        val atoutMaitreOption = atout.find(_ == getCarteMaitreACouleur(couleurAtout).get)
-        if (atoutMaitreOption.isDefined) return atoutMaitreOption.get
-        // si le part est maitre, on joue l'atout le plus fort qui ne sera pas maitre au prochain tour
-        if (partGagnePliSaufCoupe(pli,couleurDemande))
-          atout.find(_ != getCarteMaitreACouleurApresPli(couleurDemande,pli.map(_._2)).get).getOrElse(atout(0))
-        // si le part n'est pas maitre, on joue l'atout le plus faible possible
-        else atout.last
-      }
-      // sinon on fait un appel, si on peut
-      else {
-        // une couleur ou on a la carte maitre, et ou on a au moins deux cartes
-        val couleurAvecCarteMaitre = pasAtout.groupBy(_.couleur).filter(_._2.exists(
-          card => card == getCarteMaitreACouleur(card.couleur).get)).find(_._2.length > 1)
-        if (couleurAvecCarteMaitre.isDefined) {
-          val (couleur,cartes) = couleurAvecCarteMaitre.get
-          if (cartes.last == valeurFaible(couleur)) cartes(0) else cartes.last
-        }
-        // sinon, on ne joue pas une carte maitre
-        else {
-          pasAtout.find(card => card != getCarteMaitreACouleur(card.couleur).get).getOrElse(pasAtout.last)
-        }
-      }
-    }
-    // la couleur demande n'est pas l'atout
-    else {
-      val carteMaitreOption = pasAtout.find(card => card == getCarteMaitreACouleur(couleurDemande).get)
-      // si on a une carte maitre, on la joue
-      // si ca n'a pas ete coupe
-      if (carteMaitreOption.isDefined && !pli.exists(_._2.couleur == couleurAtout)) carteMaitreOption.get
-      // sinon, on joue autre chose que de l'atout, tant qu'on peut
-      else pasAtout.sortBy(-_.ordreClassique).lastOption.getOrElse(atout.last)
-    }
+    (getCarteMaitreOption(jouables,couleurDemande) orElse // on joue la carte maitre a la couleur demande
+      sauverPoints(jouables,pli,couleurDemande) orElse // sinon on pisse des points o/
+      lancerAppel(pasAtout) orElse // on fait un appel
+      pisser(pasAtout,pli,couleurDemande) orElse
+      atout.lastOption).get // sinon on coupe avec son atout le plus faible
+  }
+
+  def strategiePartGeneral(jouables:List[Card],pli:List[(Joueur,Card)],couleurDemande:Couleur):Card = {
+    val (atout,pasAtout) = jouables.partition(_.couleur == couleurAtout)
+    (atout.headOption orElse pasAtout.sortBy(_.ordreClassique).lastOption).get
   }
 
   def strategieDefenseOuverture(jouables:List[Card],pli:List[(Joueur,Card)]):Card = {
-    if (jouables.length == 1) return jouables(0)
+    val adversaires = partie.listJoueur.filter(_.Equipe != Equipe)
     val (atout,pasAtout) = jouables.partition(_.couleur == couleurAtout)
-    // si on a une carte maitre, on la joue
-    val carteMaitreOption = pasAtout.find(card => card == getCarteMaitreACouleur(card.couleur).get)
-    if (carteMaitreOption.isDefined) return carteMaitreOption.get
-    // si il y a eu un appel, on essaie de jouer dans cette couleur
-    val appel = trouverAppel
-    if (appel.isDefined) pasAtout.find(_.couleur == appel.get).getOrElse(pasAtout.last)
-    // sinon, on joue autre chose que de l'atout, tant qu'on peut
-    else pasAtout.sortBy(-_.ordreClassique).lastOption.getOrElse(atout.last)
+    // on essaie d'abord de faire couper
+    if (adversaires.exists(possedeAtout)) {
+      (pasAtout.filter(_.couleur == couleurLaPlusJoueOption.getOrElse(Undef)).lastOption orElse // on joue la couleur la plus joue
+        getCarteMaitreOption(pasAtout) orElse
+        pasAtout.sortBy(_.pointsClassique).headOption orElse
+        atout.lastOption).get
+    }
+    else
+      (getCarteMaitreOption(pasAtout) orElse // on joue ses plis maitres
+        repondreAppel(pasAtout) orElse // on essaie de repondre a un appel
+        pasAtout.sortBy(_.pointsClassique).headOption orElse // sinon , on joue en priorite les cartes autres que l'atout
+        atout.lastOption).get
   }
 
   def strategieDefense(jouables:List[Card],pli:List[(Joueur,Card)],couleurDemande:Couleur):Card = {
-    if (jouables.length == 1) return jouables(0)
     val (atout,pasAtout) = jouables.partition(_.couleur == couleurAtout)
-    val carteMaitreOption = pasAtout.find(card => card == getCarteMaitreACouleur(couleurDemande).get)
-    // si on a une carte maitre, on la joue
-    // si ca n'a pas ete coupe
-    if (carteMaitreOption.isDefined && !pli.exists(_._2.couleur == couleurAtout)) carteMaitreOption.get
-    // sinon, on joue tout sauf de l'atout
-    else pasAtout.sortBy(-_.ordreClassique).lastOption.getOrElse(atout.last)
+    (getCarteMaitreOption(jouables,couleurDemande) orElse // on joue la carte maitre a la couleur demande
+      sauverPoints(jouables,pli,couleurDemande) orElse // sinon on pisse des points o/
+      lancerAppel(pasAtout) orElse // on fait un appel
+      pisser(pasAtout,pli,couleurDemande) orElse
+      atout.lastOption).get // sinon on coupe avec son atout le plus faible
   }
 
   /**
@@ -208,14 +248,19 @@ class DumBot(val partie:Partie,id:Int,nom:String) extends Joueur(id,nom) with Bo
    */
   def getCard(jouables: List[Card], autres: List[Card], pli: List[(Joueur, Card)])
              (implicit couleurDemande: Option[Couleur]): Card = {
+    try {
     // si on a pris
     if (partie.enchereController.id % 2 == id % 2) {
       if (pli.isEmpty) strategieAttaqueOuverture(jouables,pli)
+      else if (partie.enchereController.contrat == 400) strategiePartGeneral(jouables,pli,couleurDemande.get)
       else strategieAttaque(jouables,pli,couleurDemande.get)
     }
     else {
       if (pli.isEmpty) strategieDefenseOuverture(jouables,pli)
       else strategieDefense(jouables,pli,couleurDemande.get)
+    }
+    } catch {
+      case e:Throwable => println(s"$e pour jouables: $jouables - autres : $autres - pli: $pli");throw e
     }
   }
 }
