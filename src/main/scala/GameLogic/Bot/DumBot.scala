@@ -153,12 +153,15 @@ class DumBot(val partie:Partie,id:Int,nom:String) extends Joueur(id,nom) with Bo
       else {
         // une couleur ou on a la carte maitre, et ou on a au moins deux cartes
         val couleurAvecCarteMaitre = pasAtout.groupBy(_.couleur).filter(_._2.exists(
-          card => card == getCarteMaitreACouleur(card.couleur).get)).find(_._2.length != 1)
+          card => card == getCarteMaitreACouleur(card.couleur).get)).find(_._2.length > 1)
         if (couleurAvecCarteMaitre.isDefined) {
           val (couleur,cartes) = couleurAvecCarteMaitre.get
           if (cartes.last == valeurFaible(couleur)) cartes(0) else cartes.last
         }
-        else pasAtout.last
+        // sinon, on ne joue pas une carte maitre
+        else {
+          pasAtout.find(card => card != getCarteMaitreACouleur(card.couleur).get).getOrElse(pasAtout.last)
+        }
       }
     }
     // la couleur demande n'est pas l'atout
