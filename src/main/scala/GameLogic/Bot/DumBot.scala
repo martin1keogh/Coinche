@@ -105,7 +105,7 @@ class DumBot(val partie:Partie,id:Int,nom:String) extends Joueur(id,nom) with Bo
     val listePlis = mainController.cartesJoueesWithPlayer.grouped(4).toList
     listePlis.find({case l:List[(Joueur,Card)] => {
       l.find(_._1.id == idPartenaire).exists({case (_,card) =>
-        card.valeur != valeurFaible(card.couleur) && card.couleur != couleurAtout && card.couleur != l.head._2.couleur
+        card.valeur != valeurFaible(card.couleur) && card.couleur != couleurAtout && card.couleur != l.last._2.couleur
       })
     }}).getOrElse(List[(Joueur,Card)]()).find(_._1.id == idPartenaire).map(_._2.couleur)
   }
@@ -114,12 +114,16 @@ class DumBot(val partie:Partie,id:Int,nom:String) extends Joueur(id,nom) with Bo
    *
    * @param cards la liste des cartes parmi lesquels chercher une carte maitre
    * @param couleurDemande la couleur a laquelle chercher une carte maitre
-   * @return Some(card) si card est la carte maitre a `couleurDemande`, None sinon
+   * @return Some(card) si card est la carte maitre a `couleurDemande` ET si le pli n'a pas ete coupe,
+   *         None sinon
    */
-  def getCarteMaitreOption(cards:List[Card],couleurDemande:Couleur):Option[Card] = {
-    val valeurMaitre = getValeurMaitreACouleur(couleurDemande)
-    if (valeurMaitre.isDefined) cards.filter(_.couleur == couleurDemande).find(_.valeur == valeurMaitre.get)
-    else None
+  def getCarteMaitreOption(pli:List[(Joueur,Card)],cards:List[Card],couleurDemande:Couleur):Option[Card] = {
+    if (pli.exists(_._2.couleur == couleurAtout) && couleurDemande != couleurAtout) None
+    else {
+      val valeurMaitre = getValeurMaitreACouleur(couleurDemande)
+      if (valeurMaitre.isDefined) cards.filter(_.couleur == couleurDemande).find(_.valeur == valeurMaitre.get)
+      else None
+    }
   }
 
   /**
@@ -132,7 +136,6 @@ class DumBot(val partie:Partie,id:Int,nom:String) extends Joueur(id,nom) with Bo
 
   def repondreAppel(cards:List[Card]):Option[Card] = {
     val appel = trouverAppel
-    println(appel)
     if (appel.isEmpty) None
     else cards.filter(_.couleur == appel.get).lastOption
   }
@@ -201,7 +204,7 @@ class DumBot(val partie:Partie,id:Int,nom:String) extends Joueur(id,nom) with Bo
 
   def strategieAttaque(jouables:List[Card],pli:List[(Joueur,Card)],couleurDemande:Couleur):Card = {
     val (atout,pasAtout) = jouables.partition(_.couleur == couleurAtout)
-    (getCarteMaitreOption(jouables,couleurDemande) orElse // on joue la carte maitre a la couleur demande
+    (getCarteMaitreOption(pli,jouables,couleurDemande) orElse // on joue la carte maitre a la couleur demande
       sauverPoints(jouables,pli,couleurDemande) orElse // sinon on pisse des points o/
       lancerAppel(pasAtout) orElse // on fait un appel
       pisser(pasAtout,pli,couleurDemande) orElse
@@ -232,7 +235,7 @@ class DumBot(val partie:Partie,id:Int,nom:String) extends Joueur(id,nom) with Bo
 
   def strategieDefense(jouables:List[Card],pli:List[(Joueur,Card)],couleurDemande:Couleur):Card = {
     val (atout,pasAtout) = jouables.partition(_.couleur == couleurAtout)
-    (getCarteMaitreOption(jouables,couleurDemande) orElse // on joue la carte maitre a la couleur demande
+    (getCarteMaitreOption(pli,jouables,couleurDemande) orElse // on joue la carte maitre a la couleur demande
       sauverPoints(jouables,pli,couleurDemande) orElse // sinon on pisse des points o/
       lancerAppel(pasAtout) orElse // on fait un appel
       pisser(pasAtout,pli,couleurDemande) orElse
