@@ -70,9 +70,9 @@ class EnchereController(implicit Partie:Partie){
    */
   def surCoincheValid(j:Joueur) = coinche == 2 && id % 2 == j.id % 2
 
-  def enchereCoinche(e:Enchere):Enchere = {val ret = e;ret.coinche = 2;ret}
+  def enchereCoinche(e:Enchere):Enchere = e.copy(coinche = 2)
 
-  def enchereSurCoinche(e:Enchere):Enchere = {val ret = e;ret.coinche = 4;ret}
+  def enchereSurCoinche(e:Enchere):Enchere = e.copy(coinche = 4)
 
   def effectuerEnchere():Option[Enchere] = {
     def readMessage:Option[Enchere] = {
