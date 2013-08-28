@@ -3,7 +3,7 @@ package GameLogic
 import GameLogic.Enchere.Couleur
 import scala.language.implicitConversions
 
-class Enchere(val couleur:Couleur,val contrat:Int,val id:Int,nom:String, var coinche:Int = 1) {
+case class Enchere(val couleur:Couleur,val contrat:Int,val id:Int,nom:String, var coinche:Int = 1) {
 
   def couleurToString: String = Enchere.couleurToInt(couleur) match {
     case 0 => "Pique"
