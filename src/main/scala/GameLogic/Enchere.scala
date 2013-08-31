@@ -1,9 +1,9 @@
 package GameLogic
 
-import GameLogic.Enchere.Couleur
+import GameLogic.Enchere._
 import scala.language.implicitConversions
 
-case class Enchere(val couleur:Couleur,val contrat:Int,val id:Int,nom:String, var coinche:Int = 1) {
+case class Enchere(couleur:Couleur, contrat:Int, id:Joueur.Position,nom:String, var coinche:Coinche = Normal) {
 
   def couleurToString: String = Enchere.couleurToInt(couleur) match {
     case 0 => "Pique"
@@ -15,9 +15,9 @@ case class Enchere(val couleur:Couleur,val contrat:Int,val id:Int,nom:String, va
   }
 
   def coincheToString:String = coinche match {
-    case 1 => "."
-    case 2 => ", coinche!"
-    case 4 => ", coinche/sur-coinche!!"
+    case Normal => "."
+    case Coinche => ", coinche!"
+    case SurCoinche => ", coinche/sur-coinche!!"
   }
 
   override def toString = contrat+" a "+couleurToString+" par "+nom+coincheToString
@@ -34,6 +34,17 @@ object Enchere {
   case object ToutAtout extends Couleur
   case object SansAtout extends Couleur
   case object Undef extends Couleur
+
+  sealed trait Coinche
+  case object Normal extends Coinche
+  case object Coinche extends Coinche
+  case object SurCoinche extends Coinche
+
+  implicit def coincheToInt(c:Coinche):Int = c match {
+    case Normal => 1
+    case Coinche => 2
+    case SurCoinche => 4
+  }
 
   implicit def couleurToInt(c:Couleur):Int = c match{
     case Pique => 0

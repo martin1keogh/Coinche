@@ -2,7 +2,7 @@ package GameLogic
 
 import GameLogic.Enchere._
 import akka.pattern.ask
-import UI.Router.{ReturnResults, AwaitSurCoinche, Normal, AwaitBid}
+import UI.Router.{ReturnResults, AwaitSurCoinche, AwaitBid}
 import scala.concurrent.duration._
 import scala.concurrent.Await
 import akka.util.Timeout
@@ -10,8 +10,6 @@ import scala.language.postfixOps
 import GameLogic.Bot.BotTrait
 
 class EnchereController(implicit Partie:Partie){
-
-  import UI.Reader._
 
   implicit val timeout = new Timeout(10 minutes)
 
@@ -22,11 +20,10 @@ class EnchereController(implicit Partie:Partie){
   var listEnchere:List[Enchere] = List()
   def current:Option[Enchere] = listEnchere.headOption
 
-  val enchereNull = new Enchere(Undef,70,-1,"",-1)
-  def couleur = current.getOrElse(enchereNull).couleur
-  def contrat = current.getOrElse(enchereNull).contrat
-  def id = current.getOrElse(enchereNull).id
-  def coinche = current.getOrElse(enchereNull).coinche
+  def couleur = current.fold(Undef:Couleur)(_.couleur)
+  def contrat = current.fold(70)(_.contrat)
+  def id = current.fold(Joueur.Undef:Joueur.Position)(_.id)
+  def coinche = current.fold(Normal:Enchere.Coinche)(_.coinche)
 
   /**
    *
@@ -70,11 +67,12 @@ class EnchereController(implicit Partie:Partie){
    */
   def surCoincheValid(j:Joueur) = coinche == 2 && id % 2 == j.id % 2
 
-  def enchereCoinche(e:Enchere):Enchere = e.copy(coinche = 2)
+  def enchereCoinche(e:Enchere):Enchere = e.copy(coinche = Coinche)
 
-  def enchereSurCoinche(e:Enchere):Enchere = e.copy(coinche = 4)
+  def enchereSurCoinche(e:Enchere):Enchere = e.copy(coinche = SurCoinche)
 
   def effectuerEnchere():Option[Enchere] = {
+    import UI.Reader._
     def readMessage:Option[Enchere] = {
       val card = try {Await.result(Router ? AwaitBid,Duration.Inf)}
                  catch {case t:java.util.concurrent.TimeoutException => {Router ! StopWaiting; None}}
@@ -150,7 +148,7 @@ class EnchereController(implicit Partie:Partie){
       }
     }
 
-    Router ! Normal
+    Router ! UI.Router.Normal
     Partie.state = Partie.State.running
 
     current

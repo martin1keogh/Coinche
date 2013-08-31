@@ -12,16 +12,16 @@ object Main {
     import scala.concurrent.ExecutionContext.Implicits.global
 
     val partie = new Partie(new PrinterConsole,new ReaderConsole)
-    partie.j2 = new DumBot(partie,1,"Bot2")
-    partie.j3 = new DumBot(partie,2,"Bot3")
-    partie.j4 = new DumBot(partie,3,"Bot4")
+    partie.playerToBot(partie.j2,DumBot.createFromPlayer(partie,partie.j2))
+    partie.playerToBot(partie.j3,DumBot.createFromPlayer(partie,partie.j3))
+    partie.playerToBot(partie.j4,DumBot.createFromPlayer(partie,partie.j4))
 
     Future{partie.start()}
 
     while (true) {
       val read = readLine()
       partie.Reader.sendMessage(partie.currentPlayer,read.asInstanceOf[partie.Reader.Input])
-      if (read == "toBot") partie.playerToBot(partie.j1,new DumBot(partie,0,"fu"))
+      if (read == "toBot") partie.playerToBot(partie.j1,DumBot.createFromPlayer(partie,partie.j1,"Bot"))
     }
   }
 }

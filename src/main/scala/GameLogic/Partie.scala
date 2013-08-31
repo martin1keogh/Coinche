@@ -4,6 +4,7 @@ import scala.util.Random
 import UI.{Reader, Printer}
 import UI.Reader.PlayerTypeChange
 import GameLogic.Bot.BotTrait
+import Joueur._
 
 
 class Partie(val Printer:Printer,val Reader:Reader){
@@ -31,10 +32,10 @@ class Partie(val Printer:Printer,val Reader:Reader){
   var printOnlyOnce = false
 
   // the 4 players
-  var (j1,j2,j3,j4) = (new Joueur(0,"Sud"),
-                       new Joueur(1,"Ouest"),
-                       new Joueur(2,"Nord"),
-                       new Joueur(3,"Est"))
+  var (j1,j2,j3,j4) = (new Joueur(Sud,"Sud"),
+                       new Joueur(Ouest,"Ouest"),
+                       new Joueur(Nord,"Nord"),
+                       new Joueur(Est,"Est"))
   // just for ease-of-use
   implicit def listJoueur = List[Joueur](j1,j2,j3,j4)
 
@@ -43,7 +44,7 @@ class Partie(val Printer:Printer,val Reader:Reader){
     if (dealer == old) dealer = _new
   }
 
-  def playerToBot(old:Joueur,_new:Joueur):Unit = {
+  def playerToBot(old:Joueur,_new:BotTrait):Unit = {
     old match{
       case j if j == j1 => j1 = _new
       case j if j == j2 => j2 = _new
@@ -55,7 +56,7 @@ class Partie(val Printer:Printer,val Reader:Reader){
     Reader.router ! PlayerTypeChange
   }
 
-  def botToPlayer(old:Joueur): Unit = {
+  def botToPlayer(old:BotTrait): Unit = {
     def createPlayer(b:Joueur) = {
       val j = new Joueur(b.id,b.nom)
       j.main = b.main
@@ -89,7 +90,12 @@ class Partie(val Printer:Printer,val Reader:Reader){
   lazy val enchereController = new EnchereController
   lazy val mainController = new MainController
 
-  def nextPlayer(j:Joueur):Joueur = listJoueur.find(_.id == (j.id+1)%4).get
+  def nextPlayer(j:Joueur):Joueur = listJoueur.find(next => next.id == (j.id match {
+    case Sud => Ouest
+    case Ouest => Nord
+    case Nord => Est
+    case Est => Sud
+  })).get
 
   def init():Unit = {
     state = State.stopped

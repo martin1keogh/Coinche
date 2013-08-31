@@ -60,6 +60,10 @@ trait BotTrait extends Joueur{
   /**
    * Cette function ne renvoie faux que si on est SUR que le joueur n'a plus d'atout
    * (eg, si un joueur met le 9 sous le valet, on ne sait pas s'il ne lui reste pas de l'atout)
+   *
+   * Cette fonction ne devrait certainement pas etre appelé : elle ne tient pas compte des atouts dans la main du bot.
+   * Utiliser possedeAtouts(joueur) plutot.
+   *
    * @param joueur Le joueur dont on veut savoir s'il lui reste de l'atout
    * @return false si ON SAIT qu'il n'a plus d'atout, true s'il lui en reste ou si l'on ne sait pas
    */
@@ -127,6 +131,8 @@ trait BotTrait extends Joueur{
     if (!atouts.isEmpty) atouts.sortBy(-_.ordreAtout).headOption
     else pli.filter(_.famille == Enchere.couleurToInt(couleurDemande.get)).sortBy(-_.ordreClassique).headOption
   }
+
+  def carteMaitre:Option[Card] = carteMaitre(mainController.pli.map(_._2),couleurDemande(mainController.pli.map(_._2)))
 
   def nbAtoutsJouees:Int = mainController.cartesJouees.count(_.couleur == couleurAtout)
   def nbAtoutsRestants:Int = 8 - nbAtoutsJouees

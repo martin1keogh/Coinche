@@ -3,6 +3,7 @@ package GameLogic.Bot
 import GameLogic.{Enchere, Joueur, Card, Partie}
 import GameLogic.Enchere.{Undef, ToutAtout, SansAtout, Couleur}
 import GameLogic.Card._
+import GameLogic.Joueur.Position
 
 object DumBot {
   def createFromPlayer(partie:Partie,joueur:Joueur): DumBot = {
@@ -11,14 +12,14 @@ object DumBot {
     bot.rename(joueur.nom+"DumBot") // default name
     bot
   }
-  def createFromPlayerWithNewName(partie:Partie,joueur:Joueur,name:String) : DumBot = {
+  def createFromPlayer(partie:Partie,joueur:Joueur,name:String) : DumBot = {
     val b = createFromPlayer(partie,joueur)
     b.rename(name)
     b
   }
 }
 
-class DumBot(val partie:Partie,id:Int,nom:String) extends Joueur(id,nom) with BotTrait{
+class DumBot(val partie:Partie,id:Position,nom:String) extends Joueur(id,nom) with BotTrait{
 
   // Bidding //
 
@@ -167,7 +168,7 @@ class DumBot(val partie:Partie,id:Int,nom:String) extends Joueur(id,nom) with Bo
       if (partGagnePliSaufCoupe(pli,couleurDemande))
         sansCartesMaitres.find(card => card == valeurFaible(card.couleur) && pasAtout.count(c => c.couleur == card.couleur) == 1)
       else if (pli.length == 3) { //si on est le dernier a jouer
-        pasAtout.find(card => card == carteMaitre(card::pli.map(_._2),Some(couleurDemande)).get)
+        pasAtout.find(card => card == carteMaitre.get)
       } else None
     }
   }

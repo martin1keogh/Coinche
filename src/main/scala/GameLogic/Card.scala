@@ -1,6 +1,7 @@
 package GameLogic
 
-import GameLogic.Enchere.Couleur
+import GameLogic.Enchere.{Pique, Couleur}
+import scala.language.implicitConversions
 import GameLogic.Card.Valeur
 
 case class Card(n:Int) {
@@ -142,7 +143,7 @@ object Card {
     case 7 => "As"
   }
 
-  sealed trait Valeur
+  sealed trait Valeur {def de(c:Couleur) = Card(this+c*8)}
   case object Sept extends Valeur
   case object Huit extends Valeur
   case object Neuf extends Valeur
@@ -174,5 +175,5 @@ object Card {
     case 7 => As
   }
 
-  implicit def valeurEtCouleurToCard(v:Valeur,c:Couleur):Card = Card(v+c*8)
+//  implicit def valeurEtCouleurToCard(couple:(Valeur,Couleur)):Card = Card(couple._1+couple._2*8)
 }

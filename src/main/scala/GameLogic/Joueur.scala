@@ -1,11 +1,39 @@
 package GameLogic
 
-case class Joueur(id:Int, var nom:String) {
+import scala.language.implicitConversions
 
-  val idPartenaire = (id+2)%4
+object Joueur {
+  sealed trait Position
+  case object Sud extends Position
+  case object Ouest extends Position
+  case object Nord extends Position
+  case object Est extends Position
+  case object Undef extends Position
 
-  val Equipe = {
-    if (id%2==0) 'NS
+  // legacy
+  implicit def idToInt(id:Position):Int = id match {
+    case Sud => 0
+    case Ouest => 1
+    case Nord => 2
+    case Est => 3
+    case Undef => {println("Called idToInt(Undef) !"); -1}
+  }
+}
+
+import Joueur._
+
+case class Joueur(id:Position, var nom:String) {
+
+  def idPartenaire:Position = id match {
+    case Sud => Nord
+    case Ouest => Est
+    case Nord => Sud
+    case Est => Ouest
+    case Undef => {println("Called idPartenaire for Joueur(Undef) !"); Undef}
+  }
+
+  def Equipe = {
+    if (id%2 == 0) 'NS
     else 'EO
   }
 

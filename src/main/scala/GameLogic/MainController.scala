@@ -22,12 +22,14 @@ class MainController(implicit Partie:Partie) {
 
   val PlayerTypeChangeException = new Exception
 
-  var cartesJoueesWithPlayer:List[(Joueur,Card)] = List()
+  var pli:List[(Joueur,Card)] = Nil
 
   /**
    * Contient toutes les cartes deja jouées durant cette main
+   * Ne contient pas les cartes du pli en train d'etre joué !
    */
   def cartesJouees:List[Card] = cartesJoueesWithPlayer.map(_._2)
+  var cartesJoueesWithPlayer:List[(Joueur,Card)] = List()
 
   /**
    *
@@ -82,7 +84,7 @@ class MainController(implicit Partie:Partie) {
     while (tour < 9) {
       currentPlayer = premierJoueur
       // la liste des cartes sur le pli
-      var pli = List[(Joueur,Card)]()
+      pli = List[(Joueur,Card)]()
       var couleurDemande:Option[Int] = None
       var plusFortAtout:Option[Card] = None
       var joueurMaitre = currentPlayer
