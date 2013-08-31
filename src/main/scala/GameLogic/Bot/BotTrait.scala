@@ -57,6 +57,11 @@ trait BotTrait extends Joueur{
     if (annonce.exists(e => partie.enchereController.annonceLegal(this,e.contrat))) annonce else None
   }
 
+  def meilleurAtoutPli(pli:List[(Joueur,Card)]):Option[Card] =
+    pli.reduceLeftOption[(Joueur,Card)]({case ((j1,c1),(j2,c2)) =>
+      if (c2.stronger(couleurAtout,c1).getOrElse(false)) (j2,c2) else (j1,c1)
+    }).map(_._2).filter(_.couleur == couleurAtout)
+
   /**
    * Cette function ne renvoie faux que si on est SUR que le joueur n'a plus d'atout
    * (eg, si un joueur met le 9 sous le valet, on ne sait pas s'il ne lui reste pas de l'atout)
@@ -84,14 +89,11 @@ trait BotTrait extends Joueur{
                .exists(_.exists({case (j,c) => j.id == joueur.id && c.couleur != couleurAtout}))
     if (aPisserQuandPartPasMaitre) return false
 
-    def meilleurAtoutPli(l:List[(Joueur,Card)],c:Couleur):Card = l.reduceLeft[(Joueur,Card)]({case ((j1,c1),(j2,c2)) =>
-      if (c2.stronger(c,c1).getOrElse(false)) (j2,c2) else (j1,c2)
-    })._2
     val aSousCoupeAvecUniqueAtoutPlusFaible =
       listePlis.filter(_.exists({case (j,c) => j.id == joueur.id && c.couleur == couleurAtout})) // tours ou il a joue de l'atout
                .map(l=>l.take(l.indexWhere(_._1.id == joueur.id)+1)) // on retire les cartes jouées apres le joueur
                .filter(mainController.vainqueur(_,couleurAtout).id != joueur.id) // il a sous coupe
-               .exists(l=>listAtoutsRestants.count(_.ordreAtout < meilleurAtoutPli(l, couleurAtout).ordreAtout) == 1)
+               .exists(l=> listAtoutsRestants.find(_.ordreAtout < meilleurAtoutPli(l).get.ordreAtout).isEmpty)
     !aSousCoupeAvecUniqueAtoutPlusFaible
   }
 
@@ -136,7 +138,7 @@ trait BotTrait extends Joueur{
 
   def nbAtoutsJouees:Int = mainController.cartesJouees.count(_.couleur == couleurAtout)
   def nbAtoutsRestants:Int = 8 - nbAtoutsJouees
-  def listAtoutsRestants = deck.sortedDeck diff mainController.cartesJouees.filter(_.couleur == couleurAtout)
+  def listAtoutsRestants = (deck.sortedDeck filter (_.couleur == couleurAtout)) diff mainController.cartesJouees.filter(_.couleur == couleurAtout)
 
   /**
    *
