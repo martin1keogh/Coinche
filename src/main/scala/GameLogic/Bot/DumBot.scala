@@ -211,7 +211,8 @@ class DumBot(val partie:Partie,id:Position,nom:String) extends Joueur(id,nom) wi
       sauverPoints(jouables,pli,couleurDemande) orElse // sinon on pisse des points o/
       lancerAppel(pli,pasAtout,couleurDemande) orElse // on fait un appel
       pisser(pasAtout,pli,couleurDemande) orElse
-      atout.lastOption).get // sinon on coupe avec son atout le plus faible
+      atout.find(c => c != getValeurMaitreACouleurApresPli(couleurAtout, pli.map(_._2)))
+      ).get
   }
 
   def strategiePartGeneral(jouables:List[Card],pli:List[(Joueur,Card)],couleurDemande:Couleur):Card = {
@@ -255,16 +256,16 @@ class DumBot(val partie:Partie,id:Position,nom:String) extends Joueur(id,nom) wi
   def getCard(jouables: List[Card], autres: List[Card], pli: List[(Joueur, Card)])
              (implicit couleurDemande: Option[Couleur]): Card = {
     try {
-    // si on a pris
-    if (partie.enchereController.id % 2 == id % 2) {
-      if (pli.isEmpty) strategieAttaqueOuverture(jouables,pli)
-      else if (partie.enchereController.contrat == 400) strategiePartGeneral(jouables,pli,couleurDemande.get)
-      else strategieAttaque(jouables,pli,couleurDemande.get)
-    }
-    else {
-      if (pli.isEmpty) strategieDefenseOuverture(jouables,pli)
-      else strategieDefense(jouables,pli,couleurDemande.get)
-    }
+      // si on a pris
+      if (partie.enchereController.id % 2 == id % 2) {
+        if (pli.isEmpty) strategieAttaqueOuverture(jouables,pli)
+        else if (partie.enchereController.contrat == 400) strategiePartGeneral(jouables,pli,couleurDemande.get)
+        else strategieAttaque(jouables,pli,couleurDemande.get)
+      }
+      else {
+        if (pli.isEmpty) strategieDefenseOuverture(jouables,pli)
+        else strategieDefense(jouables,pli,couleurDemande.get)
+      }
     } catch {
       case e:Throwable => println(s"$e pour jouables: $jouables - autres : $autres - pli: $pli");throw e
     }
