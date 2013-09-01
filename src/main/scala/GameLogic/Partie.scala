@@ -34,10 +34,10 @@ class Partie(val Printer:Printer,val Reader:Reader){
   var starMap = collection.mutable.Map[Joueur,Int]().withDefault(s => 0)
 
   // the 4 players
-  var (j1,j2,j3,j4) = (new Joueur(Sud,"Sud"),
-                       new Joueur(Ouest,"Ouest"),
-                       new Joueur(Nord,"Nord"),
-                       new Joueur(Est,"Est"))
+  var (j1,j2,j3,j4) = (Joueur(Sud,"Sud"),
+                       Joueur(Ouest,"Ouest"),
+                       Joueur(Nord,"Nord"),
+                       Joueur(Est,"Est"))
   // just for ease-of-use
   implicit def listJoueur = List[Joueur](j1,j2,j3,j4)
 
@@ -92,13 +92,7 @@ class Partie(val Printer:Printer,val Reader:Reader){
   lazy val enchereController = new EnchereController
   lazy val mainController = new MainController
 
-  def nextPlayer(j:Joueur):Joueur = listJoueur.find(next => next.id == (j.id match {
-    case Sud => Ouest
-    case Ouest => Nord
-    case Nord => Est
-    case Est => Sud
-    case Undef => {println("called nextPlayer(Undef)!"); Undef}
-  })).get
+  def nextPlayer(j:Joueur):Joueur = listJoueur.find(_.id == j.nextPosition).get
 
   def init():Unit = {
     state = State.stopped
@@ -143,12 +137,10 @@ class Partie(val Printer:Printer,val Reader:Reader){
    *
    * @param contrat Le contrat a realise
    * @param score Le score fait par Nord/Sud
-   * @param id 0 ou 2 si le contrat appartient a Nord/Sud, 1 ou 3 sinon
    * @return vrai si les points sont pour NS, faux sinon
    */
-  def pointsPourNS(contrat: Int,score: Int, id: Int): Boolean = {
-    if (id%2==0) {
-      // N/S on pris
+  def pointsPourNS(contrat: Int,score: Int, id: Position): Boolean = {
+    if (id == Nord || id == Sud) {
       if (contrat == 400) !generalChute
       else if (contrat == 250) !capotChute
       else score>=contrat

@@ -4,6 +4,7 @@ import GameLogic._
 import scala.collection.immutable.SortedMap
 import UI.Printer
 import GameLogic.Joueur
+import GameLogic.Joueur.{Sud, Nord}
 
 class PrinterConsole() extends Printer{
   def printFamille(famille:List[Card]) {
@@ -118,7 +119,7 @@ class PrinterConsole() extends Printer{
    */
   def printScoreMain(scoreNS: Int, enchere: Enchere,capotChute:Boolean,generaleChute:Boolean) {
     println("Contrat : "+enchere.toString)
-    if (enchere.id % 2 == 0) {
+    if (enchere.id == Sud || enchere.id == Nord) {
       if (scoreNS >= enchere.contrat) {println("Passe de "+(scoreNS - enchere.contrat))}
       else {println("Chute de "+(enchere.contrat - scoreNS))}
     } else {

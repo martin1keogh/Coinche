@@ -190,7 +190,7 @@ class DumBot(val partie:Partie,id:Position,nom:String) extends Joueur(id,nom) wi
   }
 
   def strategieAttaqueOuverture(jouables:List[Card],pli:List[(Joueur,Card)]):Card = {
-    val adversaires = partie.listJoueur.filter(_.Equipe != Equipe)
+    val adversaires = partie.listJoueur.filter(_.equipe != equipe)
     val (atout,pasAtout) = jouables.partition(_.couleur == couleurAtout)
     // si un des adversaires a de l'atout, on le fait tomber
     if (adversaires.exists(possedeAtout)) {
@@ -222,7 +222,7 @@ class DumBot(val partie:Partie,id:Position,nom:String) extends Joueur(id,nom) wi
   }
 
   def strategieDefenseOuverture(jouables:List[Card],pli:List[(Joueur,Card)]):Card = {
-    val adversaires = partie.listJoueur.filter(_.Equipe != Equipe)
+    val adversaires = partie.listJoueur.filter(_.equipe != equipe)
     val (atout,pasAtout) = jouables.partition(_.couleur == couleurAtout)
     // on essaie d'abord de faire couper
     if (adversaires.exists(possedeAtout)) {
@@ -258,7 +258,7 @@ class DumBot(val partie:Partie,id:Position,nom:String) extends Joueur(id,nom) wi
              (implicit couleurDemande: Option[Couleur]): Card = {
     try {
       // si on a pris
-      if (partie.enchereController.id % 2 == id % 2) {
+      if (partie.enchereController.id == id || partie.enchereController.id == idPartenaire) {
         if (pli.isEmpty) strategieAttaqueOuverture(jouables,pli)
         else if (partie.enchereController.contrat == 400) strategiePartGeneral(jouables,pli,couleurDemande.get)
         else strategieAttaque(jouables,pli,couleurDemande.get)

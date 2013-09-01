@@ -8,6 +8,7 @@ import scala.concurrent.Await
 import akka.util.Timeout
 import scala.language.postfixOps
 import GameLogic.Bot.BotTrait
+import GameLogic.Joueur.{Nord,Sud,Est,Ouest,NordSud,EstOuest}
 
 class EnchereController(implicit Partie:Partie){
 
@@ -24,6 +25,11 @@ class EnchereController(implicit Partie:Partie){
   def contrat = current.fold(70)(_.contrat)
   def id = current.fold(Joueur.Undef:Joueur.Position)(_.id)
   def coinche = current.fold(Normal:Enchere.Coinche)(_.coinche)
+  def equipe = id match {
+    case Nord | Sud => NordSud
+    case Est | Ouest => EstOuest
+    case Joueur.Undef => 'Undef
+  }
 
   /**
    *
@@ -57,7 +63,7 @@ class EnchereController(implicit Partie:Partie){
    *                   l'enchere courante est superieur a 80
    *                   l'enchere courante n'a pas deja ete coinche
    */
-  def coincheValid(j:Joueur) = contrat > 80 && (id != j.id && id != j.idPartenaire) && coinche == Normal
+  def coincheValid(j:Joueur) = contrat > 80 && equipe != j.equipe && coinche == Normal
 
   /**
    *
@@ -65,7 +71,7 @@ class EnchereController(implicit Partie:Partie){
    * @return true si : j est dans l'equipe de l'enchere courante
    *                   l'enchere courante a etait coinche
    */
-  def surCoincheValid(j:Joueur) = coinche == Coinche && id % 2 == j.id % 2
+  def surCoincheValid(j:Joueur) = coinche == Coinche && equipe == j.equipe
 
   def enchereCoinche(e:Enchere):Enchere = e.copy(coinche = Coinche)
 

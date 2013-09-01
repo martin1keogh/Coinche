@@ -12,6 +12,7 @@ import GameLogic.Card.{Roi, Dame}
 import scala.Some
 import UI.Reader.PlayCard
 import GameLogic.Enchere.Normal
+import GameLogic.Joueur.NordSud
 
 class MainController(implicit Partie:Partie) {
 
@@ -116,7 +117,7 @@ class MainController(implicit Partie:Partie) {
         Printer.joueurAJoue(carteJoue)
 
         // need to print 'belote' or 'rebelote'
-        if (belote.exists(j => j.id == currentPlayer.id && j.id % 2 == enchereController.id % 2) // player has belote and his team won the bidding
+        if (belote.exists(j => j.id == currentPlayer.id && j.equipe == enchereController.equipe) // player has belote and his team won the bidding
           && carteJoue.famille == couleurAtout                                       // he plays a trump card
           && (carteJoue.valeur == Dame || carteJoue.valeur == Roi)) {                     // which is the queen or the king
           Printer.annonceBelote(currentPlayer.main.filter(_.famille == couleurAtout).count(c => c.valeur == Dame || c.valeur == Roi) == 2)
@@ -153,15 +154,15 @@ class MainController(implicit Partie:Partie) {
       }
 
       Printer.remporte(premierJoueur,pli.reverse)
-      if (premierJoueur.id%2 == 0) scoreNS = scoreNS + countPoints(couleurAtout,pli.unzip._2)
+      if (premierJoueur.equipe == NordSud) scoreNS = scoreNS + countPoints(couleurAtout,pli.unzip._2)
       tour = tour + 1
     }
     // dix de der
-    if (premierJoueur.id%2 == 0) scoreNS+=10
+    if (premierJoueur.equipe == NordSud) scoreNS+=10
 
     // belote
-    if (belote.exists(_.id % 2 == enchereController.id % 2)) {
-      if (enchereController.id % 2 == 0) scoreNS+=20 else scoreNS-=20
+    if (belote.exists(_.equipe == enchereController.equipe)) {
+      if (enchereController.equipe == NordSud) scoreNS+=20 else scoreNS-=20
     }
 
     // etoiles

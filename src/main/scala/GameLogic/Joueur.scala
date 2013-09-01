@@ -10,21 +10,17 @@ object Joueur {
   case object Est extends Position
   case object Undef extends Position
 
-  // legacy
-  implicit def idToInt(id:Position):Int = id match {
-    case Sud => 0
-    case Ouest => 1
-    case Nord => 2
-    case Est => 3
-    case Undef => {println("Called idToInt(Undef) !"); -1}
-  }
+  sealed trait Equipe
+  case object NordSud extends Equipe
+  case object EstOuest extends Equipe
+  case object UndefEquipe extends Equipe
 }
 
 import Joueur._
 
 case class Joueur(id:Position, var nom:String) {
 
-  def idPartenaire:Position = id match {
+  lazy val idPartenaire:Position = id match {
     case Sud => Nord
     case Ouest => Est
     case Nord => Sud
@@ -32,9 +28,18 @@ case class Joueur(id:Position, var nom:String) {
     case Undef => {println("Called idPartenaire for Joueur(Undef) !"); Undef}
   }
 
-  def Equipe = {
-    if (id%2 == 0) 'NS
-    else 'EO
+  val equipe = id match {
+    case Sud | Nord => NordSud
+    case Est | Ouest => EstOuest
+    case Undef => UndefEquipe
+  }
+
+  lazy val nextPosition:Position = id match {
+    case Sud => Ouest
+    case Ouest => Nord
+    case Nord => Est
+    case Est => Sud
+    case Undef => {println("called nextPlayer(Undef)!"); Undef}
   }
 
   var main = List[Card]()

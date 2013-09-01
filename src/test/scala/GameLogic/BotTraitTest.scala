@@ -14,7 +14,7 @@ class BotTraitTest extends FlatSpec{
   val enchereController = partie.enchereController
   val mainController = partie.mainController
   val bot = DumBot.createFromPlayer(partie,partie.j1)
-  val adversaire = partie.listJoueur.find(_.Equipe != bot.Equipe).get
+  val adversaire = partie.listJoueur.find(_.equipe != bot.equipe).get
 
   "A Bot" should "be able to get the partner's current bid" in {
     enchereController.listEnchere = List()

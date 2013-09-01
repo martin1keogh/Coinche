@@ -85,7 +85,7 @@ trait BotTrait extends Joueur{
     val aPisserQuandPartPasMaitre =
       listePlis.filter(l => l.head._2.couleur != l.find(_._1.id == joueur.id).map(_._2.couleur).getOrElse(l.head._2.couleur)) // Il n'a pas joue couleur demande
                .map(l=>l.take(l.indexWhere(_._1.id == joueur.id)+1)) // on retire les cartes jouées apres le joueur
-               .filter(mainController.vainqueur(_,couleurAtout).Equipe != joueur.Equipe)
+               .filter(mainController.vainqueur(_,couleurAtout).equipe != joueur.equipe)
                .exists(_.exists({case (j,c) => j.id == joueur.id && c.couleur != couleurAtout}))
     if (aPisserQuandPartPasMaitre) return false
 
