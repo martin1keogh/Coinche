@@ -11,6 +11,7 @@ import GameLogic.Bot.BotTrait
 import GameLogic.Card.{Roi, Dame}
 import scala.Some
 import UI.Reader.PlayCard
+import GameLogic.Enchere.Normal
 
 class MainController(implicit Partie:Partie) {
 
@@ -161,6 +162,14 @@ class MainController(implicit Partie:Partie) {
     // belote
     if (belote.exists(_.id % 2 == enchereController.id % 2)) {
       if (enchereController.id % 2 == 0) scoreNS+=20 else scoreNS-=20
+    }
+
+    // etoiles
+    if (enchereController.contrat < 250 && enchereController.coinche == Normal) {
+      val preneur = partie.listJoueur.find(_.id == enchereController.id).get
+      val part = partie.listJoueur.find(_.id == preneur.idPartenaire).get
+      if (!capotChute && generalChute) partie.starList += (preneur -> (partie.starList(preneur)+1), part -> (partie.starList(part)+1))
+      if (!generalChute) partie.starList += (premierJoueur -> (partie.starList(premierJoueur)+1))
     }
 
     Printer.printScoreMain(scoreNS,enchereController.current.get,capotChute,generalChute)

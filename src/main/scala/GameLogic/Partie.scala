@@ -31,6 +31,8 @@ class Partie(val Printer:Printer,val Reader:Reader){
   // Useful when I/O is a problem (IRC bot)
   var printOnlyOnce = false
 
+  var starList = collection.mutable.Map[Joueur,Int]().withDefault(s => 0)
+
   // the 4 players
   var (j1,j2,j3,j4) = (new Joueur(Sud,"Sud"),
                        new Joueur(Ouest,"Ouest"),

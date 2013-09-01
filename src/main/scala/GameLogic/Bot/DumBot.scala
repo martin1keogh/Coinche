@@ -24,7 +24,8 @@ class DumBot(val partie:Partie,id:Position,nom:String) extends Joueur(id,nom) wi
   // Bidding //
 
   def intToValidBid(i:Int):Int = i match {
-    case x if x <= 180 => x // this value is arbitrary...
+    case x if x < 80 => 0
+    case x if x <= 180 => x.min(160) // this value is arbitrary...
     case x if x > 400 => 400
     case _ => 250
   }
@@ -49,7 +50,7 @@ class DumBot(val partie:Partie,id:Position,nom:String) extends Joueur(id,nom) wi
     val pointsDixSec = autres.groupBy(_.couleur).count({case (_,cards) => cards.length == 1 && cards.exists(_.valeur == Dix)}) * 10
     val pointsPourCoupe = if (cartesACouleur.length>3) (3 - autres.groupBy(_.couleur).size) * 10  else 0
     val sum = pointsAs + pointsPour9Second + pointsPourValet + pointsPourNombreAtouts + pointsPourBelote - pointsDixSec + pointsPourCoupe
-    if (sum >= 80) intToValidBid(sum) else 0
+    intToValidBid(sum)
   }
 
   // Really Basic...
@@ -145,8 +146,8 @@ class DumBot(val partie:Partie,id:Position,nom:String) extends Joueur(id,nom) wi
 
   def lancerAppel(pli:List[(Joueur,Card)],pasAtout:List[Card],couleurDemande:Couleur):Option[Card] = {
     // une couleur ou on a la carte maitre, et ou on a au moins deux cartes
-    val couleurAvecCarteMaitre = pasAtout.groupBy(_.couleur).filter(_._2.exists(
-      card => card.valeur == getValeurMaitreACouleur(card.couleur).get)).find(_._2.length > 1)
+    val couleurAvecCarteMaitre = pasAtout.groupBy(_.couleur).filter(_._2.exists(card =>
+      card.valeur == getValeurMaitreACouleur(card.couleur).get)).find(_._2.length > 1)
     if (couleurAvecCarteMaitre.isDefined && partGagnePliSaufCoupe(pli,couleurDemande)) {
       val (couleur,cartes) = couleurAvecCarteMaitre.get
       // ne pas lancer le dix si on a As-Dix...
