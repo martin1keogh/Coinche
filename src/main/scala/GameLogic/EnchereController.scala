@@ -37,7 +37,7 @@ class EnchereController(implicit Partie:Partie){
    */
   def annonceLegal(joueur:Joueur,valeur:Int):Boolean = {
     valeur>contrat && ( valeur== 250 || valeur== 400 || (valeur%10 == 0 && valeur< 170 && valeur > 70)) &&
-    Partie.currentPlayer == joueur && coinche < 2
+    Partie.currentPlayer == joueur && coinche == Normal
   }
 
   /**
@@ -47,7 +47,7 @@ class EnchereController(implicit Partie:Partie){
    *                   l'enchere courante n'est pas coinche
    */
   def passeLegal(j:Joueur):Boolean = {
-    Partie.currentPlayer == j && coinche < 2
+    Partie.currentPlayer == j && coinche == Normal
   }
 
   /**
@@ -57,7 +57,7 @@ class EnchereController(implicit Partie:Partie){
    *                   l'enchere courante est superieur a 80
    *                   l'enchere courante n'a pas deja ete coinche
    */
-  def coincheValid(j:Joueur) = contrat > 80 && id % 2 != j.id % 2 && coinche == 1
+  def coincheValid(j:Joueur) = contrat > 80 && (id != j.id && id != j.idPartenaire) && coinche == Normal
 
   /**
    *
@@ -65,7 +65,7 @@ class EnchereController(implicit Partie:Partie){
    * @return true si : j est dans l'equipe de l'enchere courante
    *                   l'enchere courante a etait coinche
    */
-  def surCoincheValid(j:Joueur) = coinche == 2 && id % 2 == j.id % 2
+  def surCoincheValid(j:Joueur) = coinche == Coinche && id % 2 == j.id % 2
 
   def enchereCoinche(e:Enchere):Enchere = e.copy(coinche = Coinche)
 

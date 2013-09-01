@@ -97,6 +97,7 @@ class Partie(val Printer:Printer,val Reader:Reader){
     case Ouest => Nord
     case Nord => Est
     case Est => Sud
+    case Undef => {println("called nextPlayer(Undef)!"); Undef}
   })).get
 
   def init():Unit = {

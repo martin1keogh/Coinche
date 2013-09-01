@@ -2,13 +2,15 @@ package GameLogic
 
 import org.scalatest.FlatSpec
 import UI.Console.{ReaderConsole, PrinterConsole}
-import GameLogic.Enchere.Pique
+import GameLogic.Enchere.{Coinche, Normal, ToutAtout, Pique}
 
 class EnchereControllerTest extends FlatSpec{
   val pr = new PrinterConsole
   implicit val p = new Partie(pr,new ReaderConsole)
   val enchereController = new EnchereController
   val joueur = p.currentPlayer
+  val partner = p.listJoueur.find(_.id == joueur.idPartenaire).get
+  val adversaire = p.listJoueur.find(_ == p.nextPlayer(joueur)).get
  "A legal bid" must "be positive" in {
    assert(!enchereController.annonceLegal(joueur,-10))
  }
@@ -31,5 +33,33 @@ class EnchereControllerTest extends FlatSpec{
     assert(enchereController.annonceLegal(joueur,80))
     assert(!enchereController.annonceLegal(joueur,70))
     assert(enchereController.annonceLegal(joueur,110))
+  }
+  "A player" should "not be able to 'coinche' if  he or his partner are currently winning the bids" in {
+    enchereController.listEnchere = List(Enchere(Pique,90,joueur.id,joueur.nom))
+    assert(!enchereController.coincheValid(joueur))
+    assert(!enchereController.coincheValid(partner))
+  }
+  it should "not be able to coinche a '80" in {
+    enchereController.listEnchere = List(Enchere(ToutAtout,80,adversaire.id,adversaire.nom))
+    assert(!enchereController.coincheValid(joueur))
+  }
+  it should "not be able to 'surcoinche a bid that hasn't been coinche" in {
+    enchereController.listEnchere = List(Enchere(Pique,100,joueur.id,joueur.nom,Normal))
+    assert(!enchereController.surCoincheValid(joueur))
+  }
+  it should "not be able to surcoinche a bid that was made by the other team" in {
+    enchereController.listEnchere = List(Enchere(Pique,100,adversaire.id,adversaire.nom,Coinche))
+    assert(!enchereController.surCoincheValid(joueur))
+    assert(!enchereController.surCoincheValid(partner))
+  }
+  it should "be able to coinche if the last bid was by the other team, hasn't been coinche yet and wasn't a 80" in {
+    enchereController.listEnchere = List(Enchere(Pique,110, adversaire.id,adversaire.nom, Normal))
+    assert(enchereController.coincheValid(joueur))
+    assert(enchereController.coincheValid(partner))
+  }
+  it should "be able to coinche a bid by his own team which was coinche" in {
+    enchereController.listEnchere = List(Enchere(Pique,100, partner.id,partner.nom, Coinche))
+    assert(enchereController.surCoincheValid(partner))
+    assert(enchereController.surCoincheValid(joueur))
   }
 }
