@@ -168,8 +168,8 @@ class MainController(implicit Partie:Partie) {
     if (enchereController.contrat < 250 && enchereController.coinche == Normal) {
       val preneur = partie.listJoueur.find(_.id == enchereController.id).get
       val part = partie.listJoueur.find(_.id == preneur.idPartenaire).get
-      if (!capotChute && generalChute) partie.starList += (preneur -> (partie.starList(preneur)+1), part -> (partie.starList(part)+1))
-      if (!generalChute) partie.starList += (premierJoueur -> (partie.starList(premierJoueur)+1))
+      if (!capotChute && generalChute) partie.starMap += (preneur -> (partie.starMap(preneur)+1), part -> (partie.starMap(part)+1))
+      if (!generalChute) partie.starMap += (premierJoueur -> (partie.starMap(premierJoueur)+1))
     }
 
     Printer.printScoreMain(scoreNS,enchereController.current.get,capotChute,generalChute)

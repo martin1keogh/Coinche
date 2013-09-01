@@ -87,7 +87,7 @@ class PrinterConsole() extends Printer{
     println()
   }
 
-  def printFin(NS:Int,EO:Int)(implicit listJoueur:List[Joueur]){
+  def printFin(NS:Int,EO:Int,m:collection.mutable.Map[Joueur,Int])(implicit listJoueur:List[Joueur]){
     println("Score de Nord/Sud : "+NS)
     println("Score de ESt/Ouest : "+EO)
     if (NS>EO) println("Nord/Sud gagnent !")

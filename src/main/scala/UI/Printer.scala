@@ -82,7 +82,7 @@ trait Printer {
    * @param NS score Nord/Sud
    * @param EO score Est/Ouest
    */
-  def printFin(NS:Int,EO:Int)(implicit listJoueur:List[Joueur])
+  def printFin(NS:Int,EO:Int,mapEtoiles:collection.mutable.Map[Joueur,Int])(implicit listJoueur:List[Joueur])
 
   /**
    * Affiche "pas de prise"
