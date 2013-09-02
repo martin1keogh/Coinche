@@ -212,7 +212,7 @@ class DumBot(val partie:Partie,id:Position,nom:String) extends Joueur(id,nom) wi
       sauverPoints(jouables,pli,couleurDemande) orElse // sinon on pisse des points o/
       lancerAppel(pli,pasAtout,couleurDemande) orElse // on fait un appel
       pisser(pasAtout,pli,couleurDemande) orElse
-      atout.find(c => c != getValeurMaitreACouleurApresPli(couleurAtout, pli.map(_._2)).get) orElse
+      atout.find(c => c.valeur != getValeurMaitreACouleurApresPli(couleurAtout, pli.map(_._2)).get) orElse
       atout.headOption
       ).get
   }

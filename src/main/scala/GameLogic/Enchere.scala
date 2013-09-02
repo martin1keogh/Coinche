@@ -22,6 +22,10 @@ case class Enchere(couleur:Couleur, contrat:Int, id:Joueur.Position,nom:String, 
 
   override def toString = contrat+" a "+couleurToString+" par "+nom+coincheToString
 
+  val coincheTimeout = EnchereController.coincheTimeout.fromNow // 5 seconds
+  val surCoincheTimeout = EnchereController.surCoincheTimeout.fromNow // 5 seconds
+  def coinchable : Boolean = coinche == Normal && coincheTimeout.hasTimeLeft()
+  def surCoinchable : Boolean = coinche == Coinche && surCoincheTimeout.hasTimeLeft()
 }
 
 object Enchere {

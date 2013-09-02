@@ -4,20 +4,28 @@ import GameLogic.Enchere._
 import akka.pattern.ask
 import UI.Router.{ReturnResults, AwaitSurCoinche, AwaitBid}
 import scala.concurrent.duration._
-import scala.concurrent.Await
+import scala.concurrent.{future,Future, Await}
 import akka.util.Timeout
 import scala.language.postfixOps
 import GameLogic.Bot.BotTrait
-import GameLogic.Joueur.{Nord,Sud,Est,Ouest,NordSud,EstOuest}
+import GameLogic.Joueur._
+import scala.Some
+import GameLogic.Enchere.Undef
+
+object EnchereController{
+  val PlayerTypeChangeException:Exception = new Exception
+  var coincheTimeout = Duration(5,SECONDS)
+  var surCoincheTimeout = Duration(5,SECONDS)
+}
 
 class EnchereController(implicit Partie:Partie){
+  import EnchereController._
 
   implicit val timeout = new Timeout(10 minutes)
 
-  val PlayerTypeChangeException:Exception = new Exception
-
   val Router = Partie.Reader.router
 
+  var nbPasse = 0
   var listEnchere:List[Enchere] = List()
   def current:Option[Enchere] = listEnchere.headOption
 
@@ -28,7 +36,7 @@ class EnchereController(implicit Partie:Partie){
   def equipe = id match {
     case Nord | Sud => NordSud
     case Est | Ouest => EstOuest
-    case Joueur.Undef => 'Undef
+    case Joueur.Undef => UndefEquipe
   }
 
   /**
@@ -53,6 +61,7 @@ class EnchereController(implicit Partie:Partie){
    *                   l'enchere courante n'est pas coinche
    */
   def passeLegal(j:Joueur):Boolean = {
+    println(s"passe de $j pour $current")
     Partie.currentPlayer == j && coinche == Normal
   }
 
@@ -63,7 +72,9 @@ class EnchereController(implicit Partie:Partie){
    *                   l'enchere courante est superieur a 80
    *                   l'enchere courante n'a pas deja ete coinche
    */
-  def coincheValid(j:Joueur) = contrat > 80 && equipe != j.equipe && coinche == Normal
+  def coincheValid(j:Joueur) = {
+    contrat > 80 && equipe != j.equipe && current.exists(_.coinchable) && nbPasse == 0
+  }
 
   /**
    *
@@ -71,7 +82,7 @@ class EnchereController(implicit Partie:Partie){
    * @return true si : j est dans l'equipe de l'enchere courante
    *                   l'enchere courante a etait coinche
    */
-  def surCoincheValid(j:Joueur) = coinche == Coinche && equipe == j.equipe
+  def surCoincheValid(j:Joueur) = current.exists(_.surCoinchable) && equipe == j.equipe
 
   def enchereCoinche(e:Enchere):Enchere = e.copy(coinche = Coinche)
 
@@ -96,10 +107,10 @@ class EnchereController(implicit Partie:Partie){
     readMessage
   }
 
-  def getSurCoinche:Option[Enchere] = {
+  def surCoinche:Option[Enchere] = {
     Partie.Printer.printCoinche()
     Router ! AwaitSurCoinche
-    Thread.sleep(5000) // 5 secondes pour surcoincher
+    Thread.sleep(EnchereController.surCoincheTimeout.toMillis) // X secondes pour surcoincher
     val listSurCoinche = Await.result((Router ? ReturnResults).mapTo[List[Joueur]], 10 seconds)
     if (listSurCoinche.exists(surCoincheValid)) {
       val surCoinche = enchereSurCoinche(current.get)
@@ -131,7 +142,7 @@ class EnchereController(implicit Partie:Partie){
 
 
     // On reinitialise les variables globales
-    var nbPasse = 0
+    nbPasse = 0
     listEnchere = List()
 
     Partie.state = Partie.State.bidding
@@ -140,8 +151,10 @@ class EnchereController(implicit Partie:Partie){
     // Boucle principale lors des encheres
     while ( (nbPasse < 3)                      // apres 3 passes on finit les encheres
       || (current == None && nbPasse == 3)){   // sauf s'il n'y a pas eu d'annonce,auquel cas on attend le dernier joueur
-      if (current.exists(_.coinche > 1)) {getSurCoinche; nbPasse = 4}
-      else {
+      if (current.exists(_.coinche == Coinche)) {
+        surCoinche
+        nbPasse = 4
+      } else {
         val enchere = getEnchere
         if (enchere.isEmpty) nbPasse=nbPasse+1
         else {
