@@ -1,6 +1,7 @@
 package GameLogic
 
 import scala.util.Random
+import Enchere._
 
 class Deck {
   val sortedDeck:List[Card] = List.tabulate(32){new Card(_)}
@@ -33,14 +34,14 @@ class Deck {
    *         l'ordre dans une famille est sans-atout
    */
   def trierMain(main:List[Card]):List[Card] = {
-    main.sortBy({card => (card.famille,-card.ordreClassique)})
+    main.sortBy({card => (card.couleur,-card.ordreClassique)})
   }
 
-  def trierMain(main:List[Card],couleurAtout:Int):List[Card] = couleurAtout match{
-    case 5 => trierMain(main)
-    case 4 => main.sortBy({card => (card.famille,-card.pointsToutAtout)})
-    case c => main.sortBy({card => if (card.famille == c) (card.famille,-card.pointsAtout)
-                                   else (card.famille,-card.pointsClassique) })
+  def trierMain(main:List[Card],couleurAtout:Couleur):List[Card] = couleurAtout match{
+    case SansAtout => trierMain(main)
+    case ToutAtout => main.sortBy({card => (card.couleur,-card.pointsToutAtout)})
+    case c:Couleur => main.sortBy({card => if (card.couleur == c) (card.couleur,-card.pointsAtout)
+                                   else (card.couleur,-card.pointsClassique) })
   }
 
   /**

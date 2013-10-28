@@ -123,15 +123,15 @@ trait BotTrait extends Joueur{
    * @return Option sur le Couple (joueur,carte) maitre
    */
   def carteEtJoueurMaitre(pli:List[(Joueur,Card)],couleurDemande:Option[Couleur]):Option[(Joueur,Card)] = {
-    val atouts = pli.filter(_._2.famille == Enchere.couleurToInt(couleurAtout))
+    val atouts = pli.filter(_._2.couleur == couleurAtout)
     if (!atouts.isEmpty) atouts.sortBy(-_._2.ordreAtout).headOption
-    else pli.filter(_._2.famille == Enchere.couleurToInt(couleurDemande.get)).sortBy(-_._2.ordreClassique).headOption
+    else pli.filter(_._2.couleur == couleurDemande.get).sortBy(-_._2.ordreClassique).headOption
   }
 
   def carteMaitre(pli:List[Card],couleurDemande:Option[Couleur]):Option[Card] = {
-    val atouts = pli.filter(_.famille == Enchere.couleurToInt(couleurAtout))
+    val atouts = pli.filter(_.couleur == couleurAtout)
     if (!atouts.isEmpty) atouts.sortBy(-_.ordreAtout).headOption
-    else pli.filter(_.famille == Enchere.couleurToInt(couleurDemande.get)).sortBy(-_.ordreClassique).headOption
+    else pli.filter(_.couleur == couleurDemande.get).sortBy(-_.ordreClassique).headOption
   }
 
   def carteMaitre:Option[Card] = carteMaitre(mainController.pli.map(_._2),couleurDemande(mainController.pli.map(_._2)))

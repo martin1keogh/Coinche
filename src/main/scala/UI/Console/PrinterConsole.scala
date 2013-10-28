@@ -5,6 +5,7 @@ import scala.collection.immutable.SortedMap
 import UI.Printer
 import GameLogic.Joueur
 import GameLogic.Joueur.{Sud, Nord}
+import Enchere._
 
 class PrinterConsole() extends Printer{
   def printFamille(famille:List[Card]) {
@@ -15,16 +16,16 @@ class PrinterConsole() extends Printer{
 
   def printCards(implicit joueur:Joueur) {
     println("----------------------------------")
-    val listCartesParFamille = joueur.main.groupBy(_.famille)
+    val listCartesParFamille = joueur.main.groupBy(_.couleur)
     listCartesParFamille.foreach({case (_,famille) => printFamille(famille) })
     println("----------------------------------")
   }
 
-  def printCards(couleurAtout:Int)(implicit joueur:Joueur) {
+  def printCards(couleurAtout:Couleur)(implicit joueur:Joueur) {
     println("----------------------------------")
-    val listCartesParFamille = joueur.main.groupBy(_.famille)
+    val listCartesParFamille = joueur.main.groupBy(_.couleur)
     listCartesParFamille.foreach({case (_,famille) =>
-      if (famille.head.famille == couleurAtout) printFamille(famille.sortBy(-_.pointsAtout))
+      if (famille.head.couleur == couleurAtout) printFamille(famille.sortBy(-_.pointsAtout))
       else printFamille(famille)
     })
     println("----------------------------------")
@@ -46,21 +47,21 @@ class PrinterConsole() extends Printer{
   }
 
 
-  def printCards(jouables:List[Card],autres:List[Card])(implicit joueur:Joueur,couleurAtout:Int) {
+  def printCards(jouables:List[Card],autres:List[Card])(implicit joueur:Joueur,couleurAtout:Enchere.Couleur) {
     println("----------------------------------")
     println("Jouables : ")
     //TRES SALE
-    SortedMap(jouables.zipWithIndex.groupBy(_._1.famille).toSeq:_*).foreach(
+    SortedMap(jouables.zipWithIndex.groupBy(_._1.couleur).toSeq:_*).foreach(
       {case (cle,l) =>
-        if (l.head._1.famille == couleurAtout) print("(Atout) ") else print("        ")
+        if (l.head._1.couleur == couleurAtout) print("(Atout) ") else print("        ")
         l.foreach({case (card:Card,index:Int) => print(index+"/"+card+"; ")});println()
       })
     println()
     if (!autres.isEmpty){
       println("Non Jouables : ")
-      SortedMap(autres.groupBy(_.famille).toSeq:_*).foreach(
+      SortedMap(autres.groupBy(_.couleur).toSeq:_*).foreach(
       {case (cle,l) =>
-        if (l.head.famille == couleurAtout) print("(Atout) ") else print("        ")
+        if (l.head.couleur == couleurAtout) print("(Atout) ") else print("        ")
         l.foreach({case card:Card => print(card+"; ")});println()
       })
     }
@@ -136,7 +137,7 @@ class PrinterConsole() extends Printer{
     listJoueur.foreach(printCards(_))
   }
 
-  def printCardsToAll(couleurAtout: Int)(implicit listJoueur: List[Joueur]) {
+  def printCardsToAll(couleurAtout: Couleur)(implicit listJoueur: List[Joueur]) {
     listJoueur.foreach(printCards(couleurAtout)(_))
   }
 

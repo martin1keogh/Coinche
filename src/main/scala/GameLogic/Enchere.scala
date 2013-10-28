@@ -38,6 +38,14 @@ object Enchere {
   case object ToutAtout extends Couleur
   case object SansAtout extends Couleur
   case object Undef extends Couleur
+  
+  implicit val mainOrdering = Ordering.by{c:(Couleur,Int) => (couleurToInt(c._1),c._2)}
+
+  implicit object CouleurOrdering extends Ordering[Couleur] {
+    def compare(c1:Couleur,c2:Couleur) = {
+      (couleurToInt(c1)) compare (couleurToInt(c2))
+    }
+  }
 
   sealed trait Coinche
   case object Normal extends Coinche

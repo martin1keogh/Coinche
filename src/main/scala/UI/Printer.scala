@@ -2,12 +2,13 @@ package UI
 
 import GameLogic._
 import GameLogic.Joueur
+import Enchere.Couleur
 
 trait Printer {
 
   def printCards(implicit joueur:Joueur)
 
-  def printCards(couleurAtout:Int)(implicit joueur:Joueur)
+  def printCards(couleurAtout:Couleur)(implicit joueur:Joueur)
 
   def printEnchere(enchere:Option[Enchere])
 
@@ -21,7 +22,7 @@ trait Printer {
    */
   def printCardsToAll(implicit listJoueur:List[Joueur])
 
-  def printCardsToAll(couleurAtout:Int)(implicit listJoueur:List[Joueur])
+  def printCardsToAll(couleurAtout:Couleur)(implicit listJoueur:List[Joueur])
 
   /**
    * Affiche les scores (ou les met a jour pour une GUI).
@@ -45,7 +46,7 @@ trait Printer {
    * @param jouables cartes jouables en fonction des cartes deja jouees
    * @param autres cartes non jouables
    */
-  def printCards(jouables:List[Card],autres:List[Card])(implicit joueur:Joueur, couleurAtout:Int)
+  def printCards(jouables:List[Card],autres:List[Card])(implicit joueur:Joueur, couleurAtout:GameLogic.Enchere.Couleur)
 
   /**
    * Affiche "A X de parler"
