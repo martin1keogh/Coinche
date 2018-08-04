@@ -62,7 +62,8 @@ lazy val dependencies = Seq(
   "eu.timepit" %% "refined" % "0.9.2",
 
   "org.scalatest" %% "scalatest" % "3.0.5" % "test",
-  "org.scalacheck" %% "scalacheck" % "1.14.0" % "test"
+  "org.scalacheck" %% "scalacheck" % "1.14.0" % "test",
+  "com.github.alexarchambault" %% "scalacheck-shapeless_1.13" % "1.1.8"
 )
 
 lazy val root = (project in file("."))

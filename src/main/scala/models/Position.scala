@@ -24,4 +24,8 @@ object Position extends Enum[Position] {
       case East  => doubled.drop(3).take(4)
     }
   }
+
+  def after(p: Position): Sized[List[Position], _4] = {
+    startingFrom(p).tail :+ p
+  }
 }

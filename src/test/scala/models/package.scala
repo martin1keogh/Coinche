@@ -9,4 +9,8 @@ package object models {
   }
 
   implicit val deckArb: Arbitrary[Deck] = Arbitrary(deckGen)
+
+  implicit class RichRank(r: Rank) {
+    def of(s: Suit) = Card(s, r)
+  }
 }

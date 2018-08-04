@@ -15,5 +15,14 @@ class PositionSpecs extends FunSpec {
         assert(startingFrom(E).repr === E::N::W::S::Nil)
       }
     }
+
+    describe("#after") {
+      it("should return #startingFrom shifted by 1") {
+        assert(after(N) === startingFrom(W))
+        assert(after(W) === startingFrom(S))
+        assert(after(S) === startingFrom(E))
+        assert(after(E) === startingFrom(N))
+      }
+    }
   }
 }
