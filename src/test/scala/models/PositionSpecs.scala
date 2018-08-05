@@ -17,11 +17,11 @@ class PositionSpecs extends FunSpec {
     }
 
     describe("#after") {
-      it("should return #startingFrom shifted by 1") {
-        assert(after(N) === startingFrom(W))
-        assert(after(W) === startingFrom(S))
-        assert(after(S) === startingFrom(E))
-        assert(after(E) === startingFrom(N))
+      it("should return the next player") {
+        assert(after(N) === W)
+        assert(after(W) === S)
+        assert(after(S) === E)
+        assert(after(E) === N)
       }
     }
   }

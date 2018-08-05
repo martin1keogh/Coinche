@@ -25,7 +25,7 @@ object Position extends Enum[Position] {
     }
   }
 
-  def after(p: Position): Sized[List[Position], _4] = {
-    startingFrom(p).tail :+ p
+  def after(p: Position): Position = {
+    startingFrom(p).tail.head
   }
 }

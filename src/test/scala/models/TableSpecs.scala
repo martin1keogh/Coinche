@@ -37,7 +37,7 @@ class TableSpecs extends FunSpec with Matchers with Checkers {
       check { (p: Position) =>
         val dealer = p
         val newTable = t.dealCards(dealer = dealer, deck = d)
-        val afterDealer = Position.after(dealer).head
+        val afterDealer = Position.after(dealer)
 
         newTable.seat(afterDealer).hand.cards.take(3) == (List(
           Seven of Hearts, Eight of Hearts, Nine of Hearts

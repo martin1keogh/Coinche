@@ -12,7 +12,7 @@ case class Table(
   // ugh
   def dealCards(dealer: Position, deck: Deck): Table = {
     val hands = deck.splitIntoHands().toList
-    (after(dealer) zip hands).foldLeft(this) {
+    (startingFrom(after(dealer)) zip hands).foldLeft(this) {
       case (t, (North, h)) => t.copy(north = this.north.copy(hand = h))
       case (t, (West, h))  => t.copy(west  = this.west.copy(hand  = h))
       case (t, (South, h)) => t.copy(south = this.south.copy(hand = h))
