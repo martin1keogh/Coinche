@@ -54,12 +54,13 @@ resolvers ++= Seq(
   Resolver.sonatypeRepo("snapshots")
 )
 
+addCompilerPlugin("org.spire-math" %% "kind-projector" % "0.9.7")
+
 lazy val dependencies = Seq(
   "org.typelevel" %% "cats-core" % "1.2.0",
   "org.typelevel" %% "cats-effect" % "1.0.0-RC2",
   "com.beachape" %% "enumeratum" % "1.5.13",
   "com.chuusai" %% "shapeless" % "2.3.3",
-  "eu.timepit" %% "refined" % "0.9.2",
 
   "org.scalatest" %% "scalatest" % "3.0.5" % "test",
   "org.scalacheck" %% "scalacheck" % "1.14.0" % "test",
