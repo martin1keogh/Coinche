@@ -62,6 +62,9 @@ lazy val dependencies = Seq(
   "com.beachape" %% "enumeratum" % "1.5.13",
   "com.chuusai" %% "shapeless" % "2.3.3",
 
+  "com.typesafe.scala-logging" %% "scala-logging" % "3.9.0",
+  "ch.qos.logback" % "logback-classic" % "1.2.3",
+
   "org.scalatest" %% "scalatest" % "3.0.5" % "test",
   "org.scalacheck" %% "scalacheck" % "1.14.0" % "test",
   "com.github.alexarchambault" %% "scalacheck-shapeless_1.13" % "1.1.8"

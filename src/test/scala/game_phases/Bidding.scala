@@ -8,6 +8,7 @@ import ui._
 
 import cats.data.EitherT
 import cats.effect.IO
+import com.typesafe.scalalogging.Logger
 import scala.collection.mutable.Queue
 
 import org.scalatest._
@@ -16,7 +17,7 @@ class BiddingPhaseSpec extends FunSpec with Matchers {
   type I = Option[(BidSuit, Int)]
 
   case class BidReadFake(bids: Queue[Either[String, I]]) extends BidRead {
-    def userInputToBid(p: Position) = EitherT.fromEither[IO] {
+    def userInputToBid(p: Position)(implicit l: Logger) = EitherT.fromEither[IO] {
       val input = bids.dequeueFirst(_ => true).getOrElse(Right(None))
       input.left.map(s => ParseError(s))
     }
