@@ -76,7 +76,7 @@ class BiddingPhaseSpec extends FunSpec with Matchers {
       res should equal (List(Bid(North, H, 100)))
     }
 
-    it("accepts higher bids") {
+    it("accepts increasingly higher bids") {
       implicit val input = BidReadFake(
         Queue(Some(H -> 100), Some(Spades -> 110), Some(Hearts -> 120), None)
       )
@@ -85,6 +85,28 @@ class BiddingPhaseSpec extends FunSpec with Matchers {
       val res = bp.run.unsafeRunSync
 
       res should equal (List(Bid(South, H, 120), Bid(West, Spades, 110), Bid(North, H, 100)))
+    }
+
+    it("accepts capot/general bids") {
+      implicit val input = BidReadFake(
+        Queue(Some(H -> 100), Some(Spades -> 250), Some(Hearts -> 400), None)
+      )
+
+      val bp = BiddingPhase(Table.empty(Deck.sorted), North)
+      val res = bp.run.unsafeRunSync
+
+      res should equal (List(Bid(South, H, 400), Bid(West, Spades, 250), Bid(North, H, 100)))
+    }
+
+    it("accepts NoTrump/AllTrumps bids") {
+      implicit val input = BidReadFake(
+        Queue(Some(H -> 100), Some(NoTrumps -> 110), Some(AllTrumps -> 130), None)
+      )
+
+      val bp = BiddingPhase(Table.empty(Deck.sorted), North)
+      val res = bp.run.unsafeRunSync
+
+      res should equal (List(Bid(South, AllTrumps, 130), Bid(West, NoTrumps, 110), Bid(North, H, 100)))
     }
 
     describe("in case of an invalid user input") {
