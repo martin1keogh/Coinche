@@ -39,13 +39,13 @@ case class BiddingPhase(
   private val state: StateT[IO, (Position, List[BidType]), List[BidType]] = StateT.apply { case (bidder, previousBids) =>
     logger.trace(s"Going to read bid for position ${bidder}")
     for {
-      newBid  <- readBid(bidder, previousBids.collectFirst { case Bid(_, _, v) => v })
+      newBid  <- readBid(bidder, previousBids.collectFirst { case b: Bid => b })
       _       =  logger.debug(s"Read valid bid ${newBid} from ${bidder}")
       allBids =  newBid :: previousBids
     } yield ((after(bidder), allBids), allBids)
   }
 
-  private def readBid(position: Position, prevValue: Option[Int]): IO[BidType] = {
+  private def readBid(position: Position, prevValue: Option[Bid]): IO[BidType] = {
     for {
       userInput <- ui.getBid(position)
       bid       =  userInput match {
