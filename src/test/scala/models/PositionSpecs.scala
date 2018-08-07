@@ -25,4 +25,23 @@ class PositionSpecs extends FunSpec {
       }
     }
   }
+
+  describe("Teams") {
+    it("splits the positions into NS vs WE") {
+      assert(N sameTeamAs S)
+      assert(S sameTeamAs N)
+      assert(W sameTeamAs E)
+      assert(E sameTeamAs W)
+
+      assert(!(N sameTeamAs W))
+      assert(!(N sameTeamAs E))
+      assert(!(S sameTeamAs W))
+      assert(!(S sameTeamAs E))
+
+      assert(!(W sameTeamAs N))
+      assert(!(W sameTeamAs N))
+      assert(!(E sameTeamAs S))
+      assert(!(E sameTeamAs S))
+    }
+  }
 }

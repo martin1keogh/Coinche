@@ -3,15 +3,22 @@ package mk.coinche.models
 import enumeratum._
 import shapeless._, nat._
 
-sealed trait Position extends EnumEntry
+sealed trait Team
+case object NorthSouth extends Team
+case object WestEast extends Team
+
+sealed trait Position extends EnumEntry {
+  def team: Team
+  def sameTeamAs(other: Position) = team == other.team
+}
 
 object Position extends Enum[Position] {
   val values = findValues
 
-  case object North extends Position
-  case object West  extends Position
-  case object South extends Position
-  case object East  extends Position
+  case object North extends Position { val team = NorthSouth }
+  case object West  extends Position { val team = WestEast }
+  case object South extends Position { val team = NorthSouth }
+  case object East  extends Position { val team = WestEast }
 
   val list = Sized[List](North, West, South, East)
 
